@@ -252,6 +252,9 @@ export async function feed(getCode, params) {
       }
       params.cursor = nextPage;
     }
+    if(params.cursor == undefined) {
+      window.onscroll = null
+    }
   };
   return feed;
 }
