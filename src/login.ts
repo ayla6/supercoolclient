@@ -1,3 +1,4 @@
+//stole most stuff from here because idk how to do this... https://github.com/wesbos/blue-sky-cli
 import { AtpSessionData, XRPC, CredentialManager } from '@atcute/client';
 let savedSessionData: AtpSessionData;
 
