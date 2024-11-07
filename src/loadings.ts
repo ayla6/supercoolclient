@@ -71,8 +71,8 @@ class Image implements EmbedImage {
   constructor(image, did) {
     this.altText = image.alt;
     const ogsize = {
-      width: image.aspectRatio?.width || 1000,
-      height: image.aspectRatio?.height || 1000,
+      width: image.aspectRatio?.width || 1600,
+      height: image.aspectRatio?.height || 900,
     };
     this.did = did;
     let width: number;
