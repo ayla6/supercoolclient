@@ -148,6 +148,9 @@ profile .pfp-holder {
   float: left;
   margin-right: 8px;
 }
+.pfp-holder a {
+  display: block;
+}
 profile .pfp {
   width: 128px;
   height: 128px;

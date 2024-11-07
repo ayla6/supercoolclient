@@ -134,10 +134,12 @@ export function feedViewPost(post: AppBskyFeedDefs.FeedViewPost) {
   html.id = post.post.cid;
   const postDate = formatDate(new Date(post.post.record.createdAt || post.post.indexedAt));
   //if (!post.reply || post.reason?.$type == 'app.bsky.feed.defs#reasonRepost') {
-  const holderPfp = document.createElement('a');
+  const holderPfp = document.createElement('div');
   holderPfp.className = 'pfp-holder';
-  holderPfp.innerHTML = `<img class="pfp" src="${post.post.author.avatar}"></img>`;
-  holderPfp.href = '/profile/' + post.post.author.handle;
+  const linkPfp = document.createElement('a');
+  linkPfp.href = '/profile/' + post.post.author.handle;
+  linkPfp.innerHTML = `<img class="pfp" src="${post.post.author.avatar}"></img>`;
+  holderPfp.appendChild(linkPfp);
   html.appendChild(holderPfp);
   //} else {html.className = 'thread';}
   const contentDiv = document.createElement('div');
