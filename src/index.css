@@ -23,12 +23,6 @@ a {
   width: max-content;
 }
 
-feedpost .pfp,
-feedpost .content-div,
-profile,
-.profile-nav {
-  box-shadow: 0px 0px 2px #0007;
-}
 feedpost {
   display: table;
 }
@@ -53,14 +47,14 @@ feedpost .pfp-holder::after {
   height: 16px;
   display: block;
   position: relative;
-  left: 56px;
-  bottom: 38px;
+  left: 50px;
+  bottom: 32px;
 }
 feedpost .content-div {
   display: block;
   width: 500px;
   float: right;
-  margin-left: 12px;
+  margin-left: 8px;
   background-color: #fff;
   padding: 8px;
   border-radius: 4px;
@@ -69,32 +63,47 @@ feedpost .content-div {
 feedpost.thread .content-div {
   margin-left: 68px;
 }
-feedpost header {
+feedpost .header {
   display: block;
   font-size: 12px;
 }
-feedpost header .handle {
+feedpost .header svg {
+  width: 10px;
+  height: 10px;
+  color: #fff;
+  display: inline-block;
+  vertical-align: middle;
+  stroke-width: 3px;
+  background-color: #609928;
+  background-image: linear-gradient(#609928, #588d25);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+feedpost .header .handle {
   font-weight: 700;
 }
-feedpost header .time {
+feedpost .header .time {
   float: right;
   text-decoration: none;
   &:hover {
     text-decoration: underline;
   }
 }
-feedpost content {
+feedpost .content {
   display: block;
   margin-bottom: 4px;
   float: inline-start;
   width: 100%;
 }
-feedpost stats {
+feedpost .content {
+  word-wrap: break-word;
+}
+feedpost .stats {
   display: block;
   float: inline-start;
   font-size: 12px;
 }
-feedpost stats icon {
+feedpost .stats icon {
   margin-right: 4px;
 }
 a.interaction {
@@ -115,15 +124,15 @@ a.interaction svg {
 }
 .like:hover svg,
 .like.active svg {
-  fill: rgb(255, 220, 0);
+  fill: #f90;
 }
 .repost:hover svg,
 .repost.active svg {
-  stroke: rgb(60, 240, 0);
+  stroke: #609928;
 }
 .reply:hover svg,
 .reply.active svg {
-  fill: #aaa;
+  fill: #999;
 }
 
 profile {
@@ -145,6 +154,9 @@ profile .pfp {
   border-radius: 4px;
   object-fit: contain;
 }
+profile .header {
+  height: 28px;
+}
 profile .displayname {
   font-size: 26px;
   font-weight: 700;
@@ -158,29 +170,32 @@ profile .handle {
   color: #777;
   line-height: 24px;
 }
-profile bio {
+profile .bio {
   font-size: 13px;
   font-family: Georgia, serif;
   color: #777;
-  line-height: 15px;
+  line-height: 14px;
+  padding-right: 8px;
+  height: 100px;
+  overflow-y: scroll;
 }
-profile stats {
+profile .stats {
   display: block;
   width: max-content;
   max-width: 200px;
   float: right;
   font-size: 14px;
 }
-profile stats > * {
+profile .stats > * {
   display: block;
   margin-bottom: 4px;
 }
-profile stats span {
+profile .stats span {
   padding: 6px 12px 6px 0;
   line-height: 16px;
   border-top: 1px solid #e8e8e8;
 }
-profile stats span:first-of-type {
+profile .stats span:first-of-type {
   border-top: none;
 }
 button {
@@ -227,9 +242,9 @@ profile {
 .profile-nav {
   float: left;
   display: block;
-  background-color: #fafafa;
+  background-color: #f9f9f9;
   border-radius: 4px;
-  width: 220px;
+  width: 228px;
 }
 .profile-nav a {
   width: -moz-available;
@@ -240,19 +255,26 @@ profile {
 }
 .profile-nav a:first-of-type {
   border-radius: 4px 4px 0 0;
-  &.active {
-    box-shadow: 0px 4px 8px -8px #000;
-  }
 }
 .profile-nav a:last-of-type {
   border-bottom: none;
   border-radius: 0 0 4px 4px;
-  &.active {
-    box-shadow: 0px -4px 8px -8px #000;
-  }
+}
+.profile-nav a:hover {
+  background-color: #fff;
+  text-decoration: none;
 }
 .profile-nav a.active {
   background-color: #fff;
   font-weight: 700;
-  box-shadow: 0px 0px 8px -4px #000;
+}
+feedpost .pfp,
+feedpost .content-div,
+profile,
+.profile-nav {
+  box-shadow: 0px 0px 2px -0.3px #000;
+}
+
+profile, .profile-nav, feedpost .header, feedpost .stats {
+  text-shadow: 0 1px 0 #fff;
 }

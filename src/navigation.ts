@@ -1,6 +1,6 @@
 // stolen from https://github.com/char/rainbow!!!
 
-import {profilePage, profileFeed} from './loadings';
+import {profilePage, feed, urlEquivalents} from './loadings';
 const script = document.getElementById('script');
 
 /*document.addEventListener("click", e => {
@@ -40,7 +40,6 @@ function replaceScript(url, location) {
 
 export async function updatePage() {
   const currentURL = window.location.pathname.split('/');
-  console.log(currentURL.toString(), previousURL.toString());
   if (currentURL[2] != previousURL[2]) {
     document.body.setAttribute('style', '');
   }
@@ -51,7 +50,11 @@ export async function updatePage() {
         profilePage(currentURL[2]);
       } else if (previousURL[3] != 'post' && currentURL[3] != 'post') {
         document.getElementById('feed').innerHTML = '';
-        profileFeed(currentURL[3], sessionStorage.getItem('currentProfileDID'));
+        await feed('app.bsky.feed.getAuthorFeed', {
+          actor: sessionStorage.getItem('currentProfileDID'),
+          filter: urlEquivalents[currentURL[3]],
+          limit: 30,
+        })
         document.getElementById('profile-nav-' + (previousURL[3] || 'posts')).classList.remove('active');
         document.getElementById('profile-nav-' + (currentURL[3] || 'posts')).classList.add('active');
       }
