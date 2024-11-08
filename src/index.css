@@ -23,24 +23,25 @@ a {
   width: max-content;
 }
 
-feedpost {
+.feedpost,
+.feedprofile {
   display: table;
 }
-feedpost .pfp-holder,
-feedpost .pfp {
+#feed .pfp-holder,
+#feed .pfp-holder .pfp {
   width: 48px;
   height: 48px;
 }
-feedpost .pfp-holder {
+#feed .pfp-holder {
   margin: 4px;
   float: left;
   display: block;
   line-height: 0;
 }
-feedpost .pfp {
+#feed .pfp-holder .pfp {
   border-radius: 2px;
 }
-feedpost .pfp-holder::after {
+.feedpost .pfp-holder::after {
   content: '';
   background-image: url(bubble.svg);
   width: 12px;
@@ -50,7 +51,8 @@ feedpost .pfp-holder::after {
   left: 50px;
   bottom: 32px;
 }
-feedpost .content-div {
+.feedpost .content-div,
+.feedprofile .data {
   display: block;
   width: 500px;
   float: right;
@@ -60,14 +62,14 @@ feedpost .content-div {
   border-radius: 4px;
   margin-bottom: 8px;
 }
-feedpost.thread .content-div {
+.feedpost.thread .content-div {
   margin-left: 68px;
 }
-feedpost .header {
+.feedpost .header {
   display: block;
   font-size: 12px;
 }
-feedpost .header svg {
+.feedpost .header svg {
   width: 10px;
   height: 10px;
   color: #fff;
@@ -79,31 +81,31 @@ feedpost .header svg {
   padding: 1px 4px;
   border-radius: 2px;
 }
-feedpost .header .handle {
+.feedpost .header .handle {
   font-weight: 700;
 }
-feedpost .header .time {
+.feedpost .header .time {
   float: right;
   text-decoration: none;
   &:hover {
     text-decoration: underline;
   }
 }
-feedpost .content {
+.feedpost .content {
   display: block;
   margin-bottom: 4px;
   float: inline-start;
   width: 100%;
 }
-feedpost .content {
+.feedpost .content {
   word-wrap: break-word;
 }
-feedpost .stats {
+.feedpost .stats {
   display: block;
   float: inline-start;
   font-size: 12px;
 }
-feedpost .stats icon {
+.feedpost .stats icon {
   margin-right: 4px;
 }
 a.interaction {
@@ -191,7 +193,6 @@ profile .stats {
 }
 profile .stats > * {
   display: block;
-  margin-bottom: 4px;
 }
 profile .stats span {
   padding: 6px 12px 6px 0;
@@ -230,7 +231,7 @@ a.image img {
 }
 
 #page-container {
-  background-color: #fff9;
+  background-color: rgba(255, 255, 255, 0.3);
   width: min-content;
   padding: 16px;
   margin: 0 auto;
@@ -253,8 +254,22 @@ profile {
   width: -moz-available;
   width: -webkit-fill-available;
   display: block;
-  padding: 8px;
+  padding: 8px 12px;
   border-bottom: 1px solid #e8e8e8;
+}
+.profile-nav a::after {
+  content: '❯';
+  display: block;
+  float: right;
+  color: #ccc;
+  line-height: 1;
+  font-size: 20px;
+  position: relative;
+  bottom: 1px;
+}
+.profile-nav a:hover::after,
+.profile-nav a.active::after {
+  color: #666;
 }
 .profile-nav a:first-of-type {
   border-radius: 4px 4px 0 0;
@@ -271,13 +286,35 @@ profile {
   background-color: #fff;
   font-weight: 700;
 }
-feedpost .pfp,
-feedpost .content-div,
+.feedpost .pfp,
+.feedpost .content-div,
 profile,
 .profile-nav {
   box-shadow: 0px 0px 2px -0.3px #000;
 }
 
-profile, .profile-nav, feedpost .header, feedpost .stats {
+profile,
+.profile-nav,
+.feedpost .header,
+.feedpost .stats,
+.feedprofile {
   text-shadow: 0 1px 0 #fff;
+}
+
+.feedprofile .header {
+  font-size: 13px;
+  &:hover {
+    text-decoration: none;
+  }
+}
+.feedprofile .display {
+  margin-right: 4px;
+  font-weight: 700;
+}
+.feedprofile a:hover .handle {
+  text-decoration: underline;
+}
+.feedprofile .bio {
+  font-size: 12px;
+  line-height: 14px;
 }

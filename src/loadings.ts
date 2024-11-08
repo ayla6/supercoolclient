@@ -109,7 +109,7 @@ class Image implements EmbedImage {
       'https://cdn.bsky.app/img/feed_' + `${size}/plain/${did}/${image.image.ref.$link}@${this.thumbFileType}`;
     this.imgObj.title = image.alt;
     this.imgObj.alt = image.alt;
-    this.imgObj.loading = 'lazy'
+    this.imgObj.loading = 'lazy';
     let fullFileType = image.image.mimeType.split('/')[1];
     if (fullFileType == 'webp') fullFileType = 'png';
     this.holderObj.href =
@@ -129,16 +129,18 @@ class Image implements EmbedImage {
   }
 }
 
-export function feedViewPost(post: AppBskyFeedDefs.FeedViewPost) {
-  const html = document.createElement('feedpost');
-  html.id = post.post.cid;
-  const postDate = formatDate(new Date(post.post.record.createdAt || post.post.indexedAt));
-  //if (!post.reply || post.reason?.$type == 'app.bsky.feed.defs#reasonRepost') {
+export function feedViewPost(post) {
+  const html = document.createElement('div');
+  html.className = 'feedpost';
+  const actualPost = post.post || post;
+  html.id = actualPost.cid;
+  const postDate = formatDate(new Date(actualPost.record.createdAt || actualPost.indexedAt));
+  //if (!actualPost.reply || actualPost.reason?.$type == 'app.bsky.feed.defs#reasonRepost') {
   const holderPfp = document.createElement('div');
   holderPfp.className = 'pfp-holder';
   const linkPfp = document.createElement('a');
-  linkPfp.href = '/profile/' + post.post.author.handle;
-  linkPfp.innerHTML = `<img class="pfp" src="${post.post.author.avatar}"></img>`;
+  linkPfp.href = '/profile/' + actualPost.author.handle;
+  linkPfp.innerHTML = `<img class="pfp" src="${actualPost.author.avatar}"></img>`;
   holderPfp.appendChild(linkPfp);
   html.appendChild(holderPfp);
   //} else {html.className = 'thread';}
@@ -146,29 +148,31 @@ export function feedViewPost(post: AppBskyFeedDefs.FeedViewPost) {
   contentDiv.className = 'content-div';
   const header = document.createElement('div');
   header.className = 'header';
-  let headerHtml = `<a class="handle" href="/profile/${post.post.author.handle}">
-    ${post.post.author.handle}</a>
-    <a class="time" href="/profile/${post.post.author.handle}/post/${post.post.uri.split('/')[4]}">${postDate}</span>`;
-  if (post.reason?.$type == 'app.bsky.feed.defs#reasonRepost')
+  let headerHtml = `<a class="handle" href="/profile/${actualPost.author.handle}">
+    ${actualPost.author.handle}</a>
+    <a class="time" href="/profile/${actualPost.author.handle}/post/${
+    actualPost.uri.split('/')[4]
+  }">${postDate}</span>`;
+  if (actualPost.reason?.$type == 'app.bsky.feed.defs#reasonRepost')
     headerHtml =
-      `${interactionIcons.repost} <a class="handle" href="/profile/${post.reason.by?.handle}">
-      ${post.reason.by?.handle}</a> reposted ` + headerHtml;
+      `${interactionIcons.repost} <a class="handle" href="/profile/${actualPost.reason.by?.handle}">
+      ${actualPost.reason.by?.handle}</a> reposted ` + headerHtml;
   header.innerHTML = headerHtml;
   contentDiv.appendChild(header);
-  if (post.post.record.text) {
+  if (actualPost.record.text) {
     const content = document.createElement('div');
-    content.className = 'content'
-    content.innerText = post.post.record.text;
+    content.className = 'content';
+    content.innerText = actualPost.record.text;
     contentDiv.appendChild(content);
   }
-  if (post.post.record.embed) {
+  if (actualPost.record.embed) {
     const embeds = document.createElement('div');
     embeds.className = 'embeds';
-    const embed = post.post.record.embed;
+    const embed = actualPost.record.embed;
     switch (embed.$type) {
       case 'app.bsky.embed.images':
         for (const img of embed.images) {
-          embeds.appendChild(new Image(img, post.post.author.did).holderObj);
+          embeds.appendChild(new Image(img, actualPost.author.did).holderObj);
         }
         break;
       default:
@@ -177,10 +181,10 @@ export function feedViewPost(post: AppBskyFeedDefs.FeedViewPost) {
     contentDiv.appendChild(embeds);
   }
   const stats = document.createElement('div');
-  stats.className = 'stats'
-  stats.appendChild(interactionButton('like', post.post));
-  stats.appendChild(interactionButton('repost', post.post));
-  stats.appendChild(interactionButton('reply', post.post));
+  stats.className = 'stats';
+  stats.appendChild(interactionButton('like', actualPost));
+  stats.appendChild(interactionButton('repost', actualPost));
+  stats.appendChild(interactionButton('reply', actualPost));
   contentDiv.appendChild(stats);
   html.appendChild(contentDiv);
   return html;
@@ -198,7 +202,7 @@ export function profile(profile) {
   pfpDiv.innerHTML = `<img class="pfp" src="${profile.avatar}"></img>`;
   html.appendChild(pfpDiv);
   const accountStats = document.createElement('div');
-  accountStats.className = 'stats'
+  accountStats.className = 'stats';
   accountStats.innerHTML = `
   <button class="follow">+ Follow</button>
   <span><b>${profile.postsCount.toLocaleString()}</b> posts</span>
@@ -213,7 +217,7 @@ export function profile(profile) {
   html.appendChild(header);
   const bio = document.createElement('div');
   bio.className = 'bio';
-  bio.innerText = `${profile.description}`;
+  bio.innerText = profile.description || '';
   html.appendChild(bio);
   return html;
 }
@@ -230,35 +234,125 @@ function navButton(name, handle, text) {
   return button;
 }
 
-export async function feed(getCode, params) {
-  let feed = document.getElementById('feed')
+export async function feed(nsid, params) {
+  let feed = document.getElementById('feed');
   if (!feed) {
     feed = document.createElement('div');
     feed.id = 'feed';
     container.appendChild(feed);
   }
-  const {data} = await rpc.get(getCode, {params: params});
-  const {feed: postsArray, cursor: nextPage} = data;
-  const feedHtml = document.getElementById('feed');
-  for (const post of postsArray) {
-    feedHtml.appendChild(feedViewPost(post));
+  async function load() {
+    const {data} = await rpc.get(nsid, {params: params});
+    let {feed: postsArray, cursor: nextPage} = data;
+    if (postsArray == undefined) postsArray = data.posts;
+    const feedHtml = document.getElementById('feed');
+    for (const post of postsArray) {
+      feedHtml.appendChild(feedViewPost(post));
+    }
+    return nextPage;
   }
-  params.cursor = nextPage
-  window.onscroll = async function (ev) {
-    if (window.innerHeight + Math.round(window.scrollY) >= document.body.offsetHeight) {
-      const {data} = await rpc.get(getCode, {params: params});
-      const {feed: postsArray, cursor: nextPage} = data;
-      const feedHtml = document.getElementById('feed');
-      for (const post of postsArray) {
-        feedHtml.appendChild(feedViewPost(post));
+  params.cursor = await load();
+  if (params.cursor != undefined) {
+    window.onscroll = async function (ev) {
+      if (window.innerHeight + Math.round(window.scrollY) >= document.body.offsetHeight) {
+        params.cursor = await load();
       }
-      params.cursor = nextPage;
-    }
-    if(params.cursor == undefined) {
-      window.onscroll = null
-    }
-  };
+      if (params.cursor == undefined) {
+        window.onscroll = null;
+      }
+    };
+  } else window.onscroll = null;
   return feed;
+}
+
+export function feedProfile(profile) {
+  const html = document.createElement('div');
+  html.className = 'feedprofile';
+  const holderPfp = document.createElement('div');
+  holderPfp.className = 'pfp-holder';
+  const linkPfp = document.createElement('a');
+  linkPfp.href = '/profile/' + profile.handle;
+  linkPfp.innerHTML = `<img class="pfp" src="${profile.avatar}"></img>`;
+  holderPfp.appendChild(linkPfp);
+  html.appendChild(holderPfp);
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'data';
+  const header = document.createElement('a');
+  header.href = `/profile/${profile.handle}`;
+  header.className = 'header';
+  header.innerHTML = `<span class="display">${profile.displayName}</span><span class="handle">@${profile.handle}</span></a>`;
+  contentDiv.appendChild(header);
+  const bio = document.createElement('div');
+  bio.className = 'bio';
+  bio.innerText = profile.description || '';
+  contentDiv.appendChild(bio);
+  html.appendChild(contentDiv);
+  return html;
+}
+
+export async function userFeed(filter: string, did) {
+  filter = filter || '';
+  if (filter.split('-')[0] == 'hash') {
+    filter = filter.slice(5);
+    return await feed('app.bsky.feed.searchPosts', {
+      q: '#' + filter,
+      author: did,
+    });
+  } else {
+    let nsid;
+    switch (filter) {
+      case 'likes':
+        nsid = 'app.bsky.feed.getActorLikes';
+        break;
+      default:
+        nsid = 'app.bsky.feed.getAuthorFeed';
+        break;
+    }
+    return await feed(nsid, {
+      actor: did,
+      filter: urlEquivalents[filter],
+      limit: 30,
+    });
+  }
+}
+
+export async function profiles(nsid, params) {
+  let feed = document.getElementById('feed');
+  if (!feed) {
+    feed = document.createElement('div');
+    feed.id = 'feed';
+    container.appendChild(feed);
+  }
+  async function load() {
+    const {data} = await rpc.get(nsid, {params: params});
+    const profilesArray = data.follows || data.followers;
+    const {cursor: nextPage} = data;
+    console.log(profilesArray);
+    const feedHtml = document.getElementById('feed');
+    for (const profile of profilesArray) {
+      feedHtml.appendChild(feedProfile(profile));
+    }
+    return nextPage;
+  }
+  params.cursor = await load();
+  if (params.cursor != undefined) {
+    window.onscroll = async function (ev) {
+      if (window.innerHeight + Math.round(window.scrollY) >= document.body.offsetHeight) {
+        params.cursor = await load();
+      }
+      if (params.cursor == undefined) {
+        window.onscroll = null;
+      }
+    };
+  } else window.onscroll = null;
+  return feed;
+}
+
+export async function userProfiles(filter, did) {
+  return await profiles(filter, {
+    actor: did,
+    limit: 50,
+  });
 }
 
 export async function profilePage(handle) {
@@ -273,14 +367,19 @@ export async function profilePage(handle) {
   profileNav.appendChild(navButton('posts', handle, 'Posts'));
   profileNav.appendChild(navButton('replies', handle, 'Posts and replies'));
   profileNav.appendChild(navButton('media', handle, 'Media'));
+  profileNav.appendChild(navButton('likes', handle, 'Favourites'));
+  profileNav.appendChild(navButton('following', handle, 'Following'));
+  profileNav.appendChild(navButton('followers', handle, 'Followers'));
   container.appendChild(profileNav);
-  await container.appendChild(
-    await feed('app.bsky.feed.getAuthorFeed', {
-      actor: did,
-      filter: urlEquivalents[currentURL[3]],
-      limit: 30,
-    })
-  );
+  switch (currentURL[3]) {
+    case 'following':
+    case 'followers':
+      await container.appendChild(await userProfiles(urlEquivalents[currentURL[3]], did));
+      break;
+    default:
+      await container.appendChild(await userFeed(currentURL[3], did));
+      break;
+  }
 }
 
 export const urlEquivalents = {
@@ -288,4 +387,7 @@ export const urlEquivalents = {
   '': 'posts_no_replies',
   media: 'posts_with_media',
   replies: 'posts_with_replies',
+  likes: 'likes',
+  following: 'app.bsky.graph.getFollows',
+  followers: 'app.bsky.graph.getFollowers',
 };

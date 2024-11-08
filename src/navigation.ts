@@ -1,6 +1,6 @@
 // stolen from https://github.com/char/rainbow!!!
 
-import {profilePage, feed, urlEquivalents} from './loadings';
+import {profilePage, urlEquivalents, userFeed, userProfiles} from './loadings';
 const script = document.getElementById('script');
 
 /*document.addEventListener("click", e => {
@@ -28,14 +28,14 @@ history.pushState = function (state, title, url) {
 };
 
 function replaceScript(url, location) {
-  const oldScript = document.getElementById('pagescript')
+  const oldScript = document.getElementById('pagescript');
   const script = document.createElement('script');
-  script.type = 'module'
-  script.id = 'pagescript'
-  script.src = url
+  script.type = 'module';
+  script.id = 'pagescript';
+  script.src = url;
   script.setAttribute('location', location);
   document.body.appendChild(script);
-  oldScript.remove()
+  oldScript.remove();
 }
 
 export async function updatePage() {
@@ -44,22 +44,35 @@ export async function updatePage() {
     document.body.setAttribute('style', '');
   }
   if (currentURL[1] == 'profile') {
-    if (currentURL[3] != 'post') {
-      if (previousURL[1] != 'profile') replaceScript('/src/profile.ts', 'profile')
-      if (currentURL[2] != previousURL[2]) {
-        profilePage(currentURL[2]);
-      } else if (previousURL[3] != 'post' && currentURL[3] != 'post') {
+    const did = sessionStorage.getItem('currentProfileDID');
+    console.log(currentURL[3]);
+    switch (currentURL[3]) {
+      case 'post':
+        if (previousURL[1] != 'post ') replaceScript('/src/post.ts', 'post');
+        break;
+      default:
         document.getElementById('feed').innerHTML = '';
-        await feed('app.bsky.feed.getAuthorFeed', {
-          actor: sessionStorage.getItem('currentProfileDID'),
-          filter: urlEquivalents[currentURL[3]],
-          limit: 30,
-        })
         document.getElementById('profile-nav-' + (previousURL[3] || 'posts')).classList.remove('active');
         document.getElementById('profile-nav-' + (currentURL[3] || 'posts')).classList.add('active');
-      }
-    } else {
-      if (previousURL[1] != 'post ') replaceScript('/src/post.ts', 'post')
+        if (previousURL[1] != 'profile') replaceScript('/src/profile.ts', 'profile');
+        if (currentURL[2] != previousURL[2]) {
+          profilePage(currentURL[2]);
+        } else
+          switch (currentURL[3]) {
+            case 'following':
+            case 'followers':
+              if (currentURL[2] != previousURL[2]) {
+                userProfiles;
+              }
+              await userProfiles(urlEquivalents[currentURL[3]], did);
+              break;
+            default:
+              if (previousURL[3] != 'post' && currentURL[3] != 'post') {
+                await userFeed(currentURL[3], did);
+              }
+              break;
+          }
+        break;
     }
   }
   previousURL = window.location.pathname.split('/');
