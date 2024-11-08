@@ -304,9 +304,6 @@ a.image img {
 
 .feedprofile .header {
   font-size: 13px;
-  &:hover {
-    text-decoration: none;
-  }
 }
 .feedprofile .display {
   margin-right: 4px;
@@ -326,7 +323,7 @@ a.time {
   text-decoration: none;
   color: #999;
 }
-a.handle:hover, a.time:hover {
+a.header:hover, a.handle:hover, a.time:hover {
   text-decoration: underline;
   color: #269;
 }
