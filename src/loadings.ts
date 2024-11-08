@@ -159,12 +159,12 @@ export function feedViewPost(post) {
       ${post.reason.by?.handle}</a> reposted ` + headerHtml;
   header.innerHTML = headerHtml;
   contentDiv.appendChild(header);
+  const content = document.createElement('div');
+  content.className = 'content';
   if (actualPost.record.text) {
-    const content = document.createElement('div');
-    content.className = 'content';
     content.innerText = actualPost.record.text;
-    contentDiv.appendChild(content);
   }
+  contentDiv.appendChild(content);
   if (actualPost.record.embed) {
     const embeds = document.createElement('div');
     embeds.className = 'embeds';
@@ -191,7 +191,8 @@ export function feedViewPost(post) {
 }
 
 export function profile(profile) {
-  const html = document.createElement('profile');
+  const html = document.createElement('div');
+  html.className = 'profile'
   document.body.setAttribute(
     'style',
     `background-image:
@@ -205,14 +206,14 @@ export function profile(profile) {
   accountStats.className = 'stats';
   accountStats.innerHTML = `
   <button class="follow">+ Follow</button>
-  <span><b>${profile.postsCount.toLocaleString()}</b> posts</span>
-  <span><b>${profile.followsCount.toLocaleString()}</b> following</span>
-  <span><b>${profile.followersCount.toLocaleString()}</b> followers</span>
+  <a href="/profile/${profile.handle}"><b>${profile.postsCount.toLocaleString()}</b> Posts</a>
+  <a href="/profile/${profile.handle}/following"><b>${profile.followsCount.toLocaleString()}</b> Following</a>
+  <a href="/profile/${profile.handle}/followers"><b>${profile.followersCount.toLocaleString()}</b> followers</a>
   `;
   html.appendChild(accountStats);
   const header = document.createElement('div');
   header.className = 'header';
-  header.innerHTML = `<span class="displayname">${profile.displayName}</span>
+  header.innerHTML = `<span class="display">${profile.displayName}</span>
   <span class="handle">@${profile.handle}</span>`;
   html.appendChild(header);
   const bio = document.createElement('div');

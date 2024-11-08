@@ -86,10 +86,6 @@ a {
 }
 .feedpost .header .time {
   float: right;
-  text-decoration: none;
-  &:hover {
-    text-decoration: underline;
-  }
 }
 .feedpost .content {
   display: block;
@@ -137,7 +133,7 @@ a.interaction svg {
   fill: #999;
 }
 
-profile {
+.profile {
   display: block;
   width: 800px;
   background-color: #fff;
@@ -146,36 +142,36 @@ profile {
   height: 128px;
   padding: 8px;
 }
-profile .pfp-holder {
+.profile .pfp-holder {
   float: left;
   margin-right: 8px;
 }
 .pfp-holder a {
   display: block;
 }
-profile .pfp {
+.profile .pfp {
   width: 128px;
   height: 128px;
   border-radius: 4px;
   object-fit: contain;
 }
-profile .header {
+.profile .header {
   height: 28px;
 }
-profile .displayname {
+.profile .display {
   font-size: 26px;
   font-weight: 700;
   display: inline-block;
   line-height: 1;
 }
-profile .handle {
+.profile .handle {
   font-size: 18px;
   font-weight: 400;
   display: inline-block;
   color: #777;
   line-height: 24px;
 }
-profile .bio {
+.profile .bio {
   font-size: 13px;
   font-family: Georgia, serif;
   color: #777;
@@ -184,23 +180,29 @@ profile .bio {
   height: 100px;
   overflow-y: scroll;
 }
-profile .stats {
+.profile .stats {
   display: block;
   width: max-content;
   max-width: 200px;
   float: right;
-  font-size: 14px;
 }
-profile .stats > * {
+.profile .stats a, .profile .stats button {
   display: block;
 }
-profile .stats span {
+.profile .stats a {
   padding: 6px 12px 6px 0;
   line-height: 16px;
   border-top: 1px solid #e8e8e8;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: #999;
 }
-profile .stats span:first-of-type {
+.profile .stats a:first-of-type {
   border-top: none;
+}
+.profile .stats b {
+  font-size: 14px;
+  color: #333;
 }
 button {
   font-size: 13px;
@@ -238,7 +240,7 @@ a.image img {
   float: center;
   min-height: 100vh;
 }
-profile {
+.profile {
   margin-left: auto;
   margin-right: auto;
 }
@@ -278,22 +280,21 @@ profile {
   border-bottom: none;
   border-radius: 0 0 4px 4px;
 }
-.profile-nav a:hover {
+.profile-nav a.active, .profile-nav a:hover {
   background-color: #fff;
-  text-decoration: none;
+  color: #333;
 }
 .profile-nav a.active {
-  background-color: #fff;
   font-weight: 700;
 }
 .feedpost .pfp,
 .feedpost .content-div,
-profile,
+.profile,
 .profile-nav {
   box-shadow: 0px 0px 2px -0.3px #000;
 }
 
-profile,
+.profile,
 .profile-nav,
 .feedpost .header,
 .feedpost .stats,
@@ -311,10 +312,21 @@ profile,
   margin-right: 4px;
   font-weight: 700;
 }
-.feedprofile a:hover .handle {
-  text-decoration: underline;
-}
 .feedprofile .bio {
   font-size: 12px;
   line-height: 14px;
+}
+
+.profile .stats a:hover, .profile .stats a:hover b, .profile-nav a {
+  text-decoration: none;
+  /*accent color but we don't have those... so i'm using the 2016 twitter one idk*/
+  color: #269;
+}
+a.time {
+  text-decoration: none;
+  color: #999;
+}
+a.handle:hover, a.time:hover {
+  text-decoration: underline;
+  color: #269;
 }
