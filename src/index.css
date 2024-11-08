@@ -237,20 +237,24 @@ a.image img {
   width: min-content;
   padding: 16px;
   margin: 0 auto;
-  float: center;
-  min-height: 100vh;
+  display: table;
+  min-height: calc(100vh - 32px);
 }
 .profile {
   margin-left: auto;
   margin-right: auto;
 }
 
-.profile-nav {
-  float: left;
+.left-bar {
   display: block;
+  float: left;
+}
+
+.profile-nav {
   background-color: #f9f9f9;
   border-radius: 4px;
   width: 228px;
+  margin-bottom: 8px;
 }
 .profile-nav a {
   width: -moz-available;
@@ -279,6 +283,9 @@ a.image img {
 .profile-nav a:last-of-type {
   border-bottom: none;
   border-radius: 0 0 4px 4px;
+}
+.profile-nav a:only-of-type {
+  border-radius: 4px !important;
 }
 .profile-nav a.active, .profile-nav a:hover {
   background-color: #fff;

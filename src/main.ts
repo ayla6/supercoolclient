@@ -3,9 +3,10 @@ import './navigation.ts';
 
 await login();
 
-/*const record: AppSCCAccentColor.Record = {
+/*const record: AppSCCProfile.Record = {
   $type: 'app.scc.profile',
   accentColor: '#f58ea9',
+  pinnedSearches: ['#test']
 }
 rpc.call('com.atproto.repo.putRecord', {data: {record: record, collection: 'app.scc.profile',repo: sessionStorage.getItem('userdid'), rkey: 'self'}})*/
 

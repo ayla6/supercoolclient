@@ -133,9 +133,9 @@ export function feedViewPost(post) {
   const html = document.createElement('div');
   html.className = 'feedpost';
   const actualPost = post.post || post;
-  html.id = actualPost.cid;
+  //html.id = actualPost.cid;
   const postDate = formatDate(new Date(actualPost.record.createdAt || actualPost.indexedAt));
-  //if (!actualPost.reply || actualPost.reason?.$type == 'app.bsky.feed.defs#reasonRepost') {
+  //if (!actualPost.reply || actualPost.reason?.$type === 'app.bsky.feed.defs#reasonRepost') {
   const holderPfp = document.createElement('div');
   holderPfp.className = 'pfp-holder';
   const linkPfp = document.createElement('a');
@@ -153,7 +153,7 @@ export function feedViewPost(post) {
     <a class="time" href="/profile/${actualPost.author.handle}/post/${
     actualPost.uri.split('/')[4]
   }">${postDate}</span>`;
-  if (post.reason?.$type == 'app.bsky.feed.defs#reasonRepost')
+  if (post.reason?.$type === 'app.bsky.feed.defs#reasonRepost')
     headerHtml =
       `${interactionIcons.repost} <a class="handle" href="/profile/${post.reason.by?.handle}">
       ${post.reason.by?.handle}</a> reposted ` + headerHtml;
@@ -231,8 +231,10 @@ function navButton(name, handle, text) {
   const button = document.createElement('a');
   button.href = '/profile/' + handle + (name == 'posts' ? '' : '/' + name);
   button.innerText = text;
-  button.id = 'profile-nav-' + name;
-  if ((window.location.pathname.split('/')[3] || 'posts') == name) button.className = 'active';
+  button.setAttribute('value', name);
+  const currentURL = window.location.pathname.split('/')[3];
+  if ((currentURL || 'posts') + (currentURL == 'search' ? window.location.search : '') == name)
+    button.className = 'active';
   return button;
 }
 
@@ -294,10 +296,10 @@ export function feedProfile(profile) {
 
 export async function userFeed(filter: string, did) {
   filter = filter || '';
-  if (filter.split('-')[0] == 'hash') {
-    filter = filter.slice(5);
+  if (filter === 'search') {
+    const search = decodeURIComponent(window.location.search.slice(1));
     return await feed('app.bsky.feed.searchPosts', {
-      q: '#' + filter,
+      q: search,
       author: did,
     });
   } else {
@@ -363,12 +365,17 @@ export async function profilePage(handle) {
   const _profile = await rpc.get('app.bsky.actor.getProfile', {params: {actor: did}});
   let sccprofile;
   try {
-    sccprofile = await rpc.get('com.atproto.repo.getRecord', {
-      params: {collection: 'app.scc.profile', rkey: 'self', repo: _profile.data.did},
-    });
+    sccprofile = (
+      await rpc.get('com.atproto.repo.getRecord', {
+        params: {collection: 'app.scc.profile', rkey: 'self', repo: _profile.data.did},
+      })
+    )?.data.value;
   } catch (error) {}
   sessionStorage.setItem('currentProfileDID', _profile.data.did);
-  container.appendChild(profile(_profile.data, sccprofile?.data.value));
+  container.appendChild(profile(_profile.data, sccprofile));
+  const leftBar = document.createElement('div');
+  leftBar.className = 'left-bar';
+  container.appendChild(leftBar);
   const profileNav = document.createElement('div');
   profileNav.className = 'profile-nav';
   profileNav.appendChild(navButton('posts', handle, 'Posts'));
@@ -377,11 +384,22 @@ export async function profilePage(handle) {
   profileNav.appendChild(navButton('likes', handle, 'Favourites'));
   profileNav.appendChild(navButton('following', handle, 'Following'));
   profileNav.appendChild(navButton('followers', handle, 'Followers'));
-  container.appendChild(profileNav);
+  leftBar.appendChild(profileNav);
+  if (sccprofile?.pinnedSearches && sccprofile.pinnedSearches.length > 0) {
+    const profileSearches = document.createElement('div');
+    profileSearches.className = 'profile-nav';
+    for (const search of sccprofile.pinnedSearches) {
+      profileSearches.appendChild(navButton('search?' + encodeURIComponent(search), handle, search));
+    }
+    leftBar.appendChild(profileSearches);
+  }
   switch (currentURL[3]) {
     case 'following':
     case 'followers':
       await container.appendChild(await userProfiles(urlEquivalents[currentURL[3]], did));
+      break;
+    case 'search':
+      await container.appendChild(await userFeed('search', did));
       break;
     default:
       await container.appendChild(await userFeed(currentURL[3], did));

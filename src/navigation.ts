@@ -1,7 +1,12 @@
 // stolen from https://github.com/char/rainbow!!!
 
-import {profilePage, urlEquivalents, userFeed, userProfiles} from './loadings';
-const script = document.getElementById('script');
+import {
+  profilePage,
+  urlEquivalents,
+  userFeed,
+  userProfiles,
+} from "./loadings";
+const script = document.getElementById("script");
 
 /*document.addEventListener("click", e => {
   if (!(e.target instanceof Element)) return;
@@ -19,82 +24,91 @@ const script = document.getElementById('script');
   history.pushState(null, "", url);
 });*/
 
-let previousURL = window.location.pathname.split('/');
+let previousURL = window.location.pathname.split("/");
+if (window.location.search) previousURL.push(window.location.search);
 const originalPushState = history.pushState;
 history.pushState = function (state, title, url) {
-  previousURL = window.location.pathname.split('/');
+  previousURL = window.location.pathname.split("/");
+  if (window.location.search) previousURL.push(window.location.search);
   originalPushState.apply(history, arguments);
-  updatePage();
 };
 
-function replaceScript(url, location) {
-  const oldScript = document.getElementById('pagescript');
-  const script = document.createElement('script');
-  script.type = 'module';
-  script.id = 'pagescript';
+function replaceScript(url: string, location: string) {
+  const oldScript = document.getElementById("pagescript");
+  const script = document.createElement("script");
+  script.type = "module";
+  script.id = "pagescript";
   script.src = url;
-  script.setAttribute('location', location);
+  script.setAttribute("location", location);
   document.body.appendChild(script);
   oldScript.remove();
 }
 
 export async function updatePage() {
-  const currentURL = window.location.pathname.split('/');
+  const currentURL = window.location.pathname.split("/");
   if (currentURL[2] != previousURL[2]) {
-    document.body.setAttribute('style', '');
+    document.body.setAttribute("style", "");
   }
-  if (currentURL[1] == 'profile') {
-    const did = sessionStorage.getItem('currentProfileDID');
-    switch (currentURL[3]) {
-      case 'post':
-        if (previousURL[1] != 'post ') replaceScript('/src/post.ts', 'post');
+  if (currentURL[1] == "profile") {
+    const did = sessionStorage.getItem("currentProfileDID");
+    const urlarea = currentURL[3];
+    switch (urlarea) {
+      case "post":
+        if (previousURL[1] != "post ") replaceScript("/src/post.ts", "post");
         break;
       default:
-        document.getElementById('feed').innerHTML = '';
-        document.getElementById('profile-nav-' + (previousURL[3] || 'posts')).classList.remove('active');
-        document.getElementById('profile-nav-' + (currentURL[3] || 'posts')).classList.add('active');
-        if (previousURL[1] != 'profile') replaceScript('/src/profile.ts', 'profile');
+        if (previousURL[1] != "profile")
+          replaceScript("/src/profile.ts", "profile");
+        document.getElementById("feed").innerHTML = "";
+        const previousValue =
+          (previousURL[3] || "posts") +
+          (previousURL[3] == "search" ? previousURL[4] : "");
+        const currentValue =
+          (urlarea || "posts") +
+          (urlarea == "search" ? window.location.search : "");
+        document
+          .querySelector('[value="' + previousValue + '"]')
+          .classList.remove("active");
+        document
+          .querySelector('[value="' + currentValue + '"]')
+          .classList.add("active");
         if (currentURL[2] != previousURL[2]) {
           profilePage(currentURL[2]);
         } else
-          switch (currentURL[3]) {
-            case 'following':
-            case 'followers':
-              if (currentURL[2] != previousURL[2]) {
-                userProfiles;
-              }
-              await userProfiles(urlEquivalents[currentURL[3]], did);
+          switch (urlarea) {
+            case "following":
+            case "followers":
+              await userProfiles(urlEquivalents[urlarea], did);
               break;
             default:
-              if (previousURL[3] != 'post' && currentURL[3] != 'post') {
-                await userFeed(currentURL[3], did);
-              }
+              await userFeed(urlarea, did);
               break;
           }
         break;
     }
   }
-  previousURL = window.location.pathname.split('/');
+  previousURL = window.location.pathname.split("/");
+  if (window.location.search) previousURL.push(window.location.search);
 }
 
-document.addEventListener('click', (e) => {
+document.addEventListener("click", (e) => {
   if (!(e.target instanceof Element)) return;
-  const anchor = e.target.closest('a');
+  const anchor = e.target.closest("a");
   if (anchor === null) return;
 
   if (e.ctrlKey || e.button !== 0) return;
 
-  // TODO: make sure these open in a new tab
   const url = new URL(anchor.href);
-  if (window.location.origin !== url.origin) return; // open external links normally
+  if (window.location.origin !== url.origin) return;
 
   e.preventDefault();
 
-  const previousURL = window.location.pathname.split('/');
-  history.pushState(null, '', url);
+  previousURL = window.location.pathname.split("/");
+  if (window.location.search) previousURL.push(window.location.search);
+  history.pushState(null, "", url);
   updatePage();
 });
 
-addEventListener('popstate', () => {
+addEventListener("popstate", () => {
   updatePage();
 });
