@@ -45,7 +45,6 @@ export async function updatePage() {
   }
   if (currentURL[1] == 'profile') {
     const did = sessionStorage.getItem('currentProfileDID');
-    console.log(currentURL[3]);
     switch (currentURL[3]) {
       case 'post':
         if (previousURL[1] != 'post ') replaceScript('/src/post.ts', 'post');

@@ -190,14 +190,15 @@ export function feedViewPost(post) {
   return html;
 }
 
-export function profile(profile) {
+export function profile(profile, sccprofile?) {
   const html = document.createElement('div');
-  html.className = 'profile'
-  document.body.setAttribute(
-    'style',
-    `background-image:
-    url(${profile.banner?.toString().replace('img/banner', 'img/feed_fullsize')})`
-  );
+  html.className = 'profile';
+  let customCss = `background-image:
+    url(${profile.banner?.toString().replace('img/banner', 'img/feed_fullsize')});`;
+  if (sccprofile != undefined) {
+    if (sccprofile.accentColor) customCss += '--accent-color: ' + sccprofile.accentColor + ';';
+  }
+  document.body.style.cssText = customCss;
   const pfpDiv = document.createElement('a');
   pfpDiv.className = 'pfp-holder';
   pfpDiv.innerHTML = `<img class="pfp" src="${profile.avatar}"></img>`;
@@ -328,7 +329,6 @@ export async function profiles(nsid, params) {
     const {data} = await rpc.get(nsid, {params: params});
     const profilesArray = data.follows || data.followers;
     const {cursor: nextPage} = data;
-    console.log(profilesArray);
     const feedHtml = document.getElementById('feed');
     for (const profile of profilesArray) {
       feedHtml.appendChild(feedProfile(profile));
@@ -361,8 +361,14 @@ export async function profilePage(handle) {
   container.innerHTML = '';
   did = await resolveHandle(handle);
   const _profile = await rpc.get('app.bsky.actor.getProfile', {params: {actor: did}});
+  let sccprofile;
+  try {
+    sccprofile = await rpc.get('com.atproto.repo.getRecord', {
+      params: {collection: 'app.scc.profile', rkey: 'self', repo: _profile.data.did},
+    });
+  } catch (error) {}
   sessionStorage.setItem('currentProfileDID', _profile.data.did);
-  container.appendChild(profile(_profile.data));
+  container.appendChild(profile(_profile.data, sccprofile?.data.value));
   const profileNav = document.createElement('div');
   profileNav.className = 'profile-nav';
   profileNav.appendChild(navButton('posts', handle, 'Posts'));

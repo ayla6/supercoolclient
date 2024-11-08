@@ -314,10 +314,14 @@ a.image img {
   line-height: 14px;
 }
 
+:root {
+  --accent-color: #269;
+}
+
 .profile .stats a:hover, .profile .stats a:hover b, .profile-nav a {
   text-decoration: none;
   /*accent color but we don't have those... so i'm using the 2016 twitter one idk*/
-  color: #269;
+  color: var(--accent-color);
 }
 a.time {
   text-decoration: none;
@@ -325,5 +329,5 @@ a.time {
 }
 a.header:hover, a.handle:hover, a.time:hover {
   text-decoration: underline;
-  color: #269;
+  color: var(--accent-color);
 }

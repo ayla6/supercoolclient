@@ -1,6 +1,13 @@
 import {login} from './login.ts';
 import './navigation.ts';
-login();
+
+await login();
+
+/*const record: AppSCCAccentColor.Record = {
+  $type: 'app.scc.profile',
+  accentColor: '#f58ea9',
+}
+rpc.call('com.atproto.repo.putRecord', {data: {record: record, collection: 'app.scc.profile',repo: sessionStorage.getItem('userdid'), rkey: 'self'}})*/
 
 const path = window.location.pathname;
 const location = path.split('/')[1];

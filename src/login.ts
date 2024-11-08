@@ -30,5 +30,6 @@ export async function login() {
       password: password
     })
   }
+  sessionStorage.setItem('userdid', manager.session.did)
   return manager;
 }
