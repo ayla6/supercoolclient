@@ -1,13 +1,4 @@
 // stolen from https://github.com/char/rainbow!!!
-
-import {
-  profilePage,
-  urlEquivalents,
-  userFeed,
-  userProfiles,
-} from "./loadings";
-const script = document.getElementById("script");
-
 /*document.addEventListener("click", e => {
   if (!(e.target instanceof Element)) return;
   const anchor = e.target.closest("a");
@@ -23,6 +14,14 @@ const script = document.getElementById("script");
 
   history.pushState(null, "", url);
 });*/
+
+import {
+  profilePage,
+  urlEquivalents,
+  userFeed,
+  userProfiles,
+} from "./loadings";
+const script = document.getElementById("script");
 
 let previousURL = window.location.pathname.split("/");
 if (window.location.search) previousURL.push(window.location.search);
