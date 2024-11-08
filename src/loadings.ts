@@ -153,10 +153,10 @@ export function feedViewPost(post) {
     <a class="time" href="/profile/${actualPost.author.handle}/post/${
     actualPost.uri.split('/')[4]
   }">${postDate}</span>`;
-  if (actualPost.reason?.$type == 'app.bsky.feed.defs#reasonRepost')
+  if (post.reason?.$type == 'app.bsky.feed.defs#reasonRepost')
     headerHtml =
-      `${interactionIcons.repost} <a class="handle" href="/profile/${actualPost.reason.by?.handle}">
-      ${actualPost.reason.by?.handle}</a> reposted ` + headerHtml;
+      `${interactionIcons.repost} <a class="handle" href="/profile/${post.reason.by?.handle}">
+      ${post.reason.by?.handle}</a> reposted ` + headerHtml;
   header.innerHTML = headerHtml;
   contentDiv.appendChild(header);
   if (actualPost.record.text) {
