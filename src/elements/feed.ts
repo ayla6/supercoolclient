@@ -14,10 +14,13 @@ export const enum imageContainerSize {
   height = 250,
 }
 
-export function post(post) {
+export function post(
+  post: AppBskyFeedDefs.FeedViewPost | AppBskyFeedDefs.PostView,
+) {
   const html = document.createElement("div");
   html.className = "card post";
-  const actualPost: AppBskyFeedDefs.PostView = post.post || post;
+  const actualPost: AppBskyFeedDefs.PostView =
+    "post" in post ? post.post : post;
   const postRecord = actualPost.record as AppBskyFeedPost.Record;
   //html.id = actualPost.cid;
   const postDate = formatDate(
@@ -39,7 +42,10 @@ export function post(post) {
     <a class="timestamp" href="/profile/${actualPost.author.handle}/post/${
       actualPost.uri.split("/")[4]
     }">${postDate}</span>`;
-  if (post.reason?.$type === "app.bsky.feed.defs#reasonRepost")
+  if (
+    "reason" in post &&
+    post.reason.$type === "app.bsky.feed.defs#reasonRepost"
+  )
     headerHtml =
       `${interaction.icon.repost} <a class="handle" href="/profile/${post.reason.by?.handle}">
       ${post.reason.by?.handle}</a> reposted ` + headerHtml;

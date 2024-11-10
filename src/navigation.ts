@@ -99,9 +99,6 @@ addEventListener("popstate", () => {
 
 export function load() {
   const path = window.location.pathname.split("/");
-  const script = document.createElement("script");
-  script.type = "module";
-  script.id = "pagescript";
   switch (path[1]) {
     case "profile":
       if (path[4]) {
@@ -113,7 +110,6 @@ export function load() {
       const content = document.createElement("div");
       content.id = "content";
       document.getElementById("container").appendChild(content);
-      script.src = "/src/pages/home.ts";
       feed.feed("app.bsky.feed.getTimeline", {});
     default:
       break;

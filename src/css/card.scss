@@ -1,4 +1,5 @@
 @use "variables" as *;
+@use "sass:color";
 
 .card {
     display: table;
@@ -38,13 +39,17 @@
     .bio {
         font-size: 12px;
         line-height: 14px;
+        min-height: 42px;
+        max-height: 42px;
+        overflow-y: hidden;
+        text-overflow: ellipsis;
     }
 }
 
 .post {
     .pfp-holder::after {
         content: "";
-        background-image: url(bubble.svg);
+        background-image: url("../svg/bubble.svg");
         width: 12px;
         height: 16px;
         display: block;
@@ -85,12 +90,15 @@
     .stats {
         display: block;
         float: inline-start;
-        font-size: 12px;
         icon {
             margin-right: 4px;
         }
     }
-    .interaction {
+    button.interaction {
+        font-size: 12px;
+        background: none;
+        padding: 0;
+        border: none;
         cursor: pointer;
         display: inline-block;
         margin-right: 4px;
@@ -119,15 +127,27 @@
     }
 }
 
-.like:hover svg,
-.like.active svg {
-    fill: #f90;
+.like {
+    &:hover svg {
+        fill: color.mix($dark-grey, #f90, $weight: 15%, $method: rgb);
+    }
+    &.active svg {
+        fill: #f90;
+    }
 }
-.repost:hover svg,
-.repost.active svg {
-    stroke: #609928;
+.repost {
+    &:hover svg {
+        stroke: color.mix($dark-grey, #609928, $weight: 15%, $method: rgb);
+    }
+    &.active svg {
+        stroke: #609928;
+    }
 }
-.reply:hover svg,
-.reply.active svg {
-    fill: #999;
+.reply {
+    &:hover svg {
+        fill: color.mix($dark-grey, #999, $weight: 15%, $method: rgb);
+    }
+    &.active svg {
+        fill: #999;
+    }
 }

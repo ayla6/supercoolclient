@@ -31,7 +31,7 @@ a {
     width: max-content;
 }
 
-button {
+.button {
     font-size: 13px;
     padding: 4px 12px;
     cursor: pointer;
@@ -43,6 +43,9 @@ button {
         border-color: #c8c8c8;
         background: linear-gradient(#f8f8f8, #d8d8d8);
     }
+}
+button.active {
+    background: linear-gradient(var(--accent-color));
 }
 
 .card .pfp,

@@ -1,6 +1,7 @@
+import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { rpc } from "../login";
 
-export function profile(profile) {
+export function profile(profile: AppBskyActorDefs.ProfileView) {
   const html = document.createElement("div");
   html.className = "card profile";
   const holderPfp = document.createElement("div");
@@ -19,17 +20,20 @@ export function profile(profile) {
   contentDiv.appendChild(header);
   const bio = document.createElement("div");
   bio.className = "bio";
-  bio.innerText = profile.description || "";
+  bio.innerText = profile.description?.replaceAll("\n", " ") || "";
   contentDiv.appendChild(bio);
   html.appendChild(contentDiv);
   return html;
 }
 
-export async function profiles(nsid, params) {
+export async function profiles(
+  nsid: "app.bsky.graph.getFollows" | "app.bsky.graph.getFollowers",
+  params: any,
+) {
   const content = document.getElementById("content");
   async function load() {
     const { data } = await rpc.get(nsid, { params: params });
-    const profilesArray = data.follows || data.followers;
+    const profilesArray = "follows" in data ? data.follows : data.followers;
     const { cursor: nextPage } = data;
     for (const _profile of profilesArray) {
       content.appendChild(profile(_profile));

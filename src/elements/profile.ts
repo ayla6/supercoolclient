@@ -1,9 +1,12 @@
+import { AppBskyActorDefs, AppSCCProfile } from "@atcute/client/lexicons";
 import { rpc } from "../login";
 import * as feed from "./feed.ts";
 import * as list from "./list.ts";
-import { urlEquivalents } from "./utils.ts";
 
-export function header(profile, sccprofile?) {
+export function header(
+  profile: AppBskyActorDefs.ProfileViewDetailed,
+  sccprofile?: AppSCCProfile.Record,
+) {
   const html = document.createElement("div");
   html.className = "profile-header";
   let customCss = `background-image:
@@ -20,10 +23,10 @@ export function header(profile, sccprofile?) {
   const accountStats = document.createElement("div");
   accountStats.className = "stats";
   accountStats.innerHTML = `
-  <button class="follow">+ Follow</button>
-  <a href="/profile/${profile.handle}"><b>${profile.postsCount.toLocaleString()}</b> Posts</a>
-  <a href="/profile/${profile.handle}/following"><b>${profile.followsCount.toLocaleString()}</b> Following</a>
-  <a href="/profile/${profile.handle}/followers"><b>${profile.followersCount.toLocaleString()}</b> followers</a>
+  <button class="button follow">+ Follow</button>
+  <a href="/profile/${profile.handle}"><b>${profile.postsCount.toLocaleString("sv-SE")}</b> Posts</a>
+  <a href="/profile/${profile.handle}/following"><b>${profile.followsCount.toLocaleString("sv-SE")}</b> Following</a>
+  <a href="/profile/${profile.handle}/followers"><b>${profile.followersCount.toLocaleString("sv-SE")}</b> followers</a>
   `;
   html.appendChild(accountStats);
   const header = document.createElement("div");
@@ -106,8 +109,10 @@ export async function profilePage(handle: string) {
   container.appendChild(content);
   switch (currentURL[3]) {
     case "following":
+      await list.profiles("app.bsky.graph.getFollows", { actor: did });
+      break;
     case "followers":
-      await list.profiles(urlEquivalents[currentURL[3]], { actor: did });
+      await list.profiles("app.bsky.graph.getFollowers", { actor: did });
       break;
     case "search":
       await feed.userFeed("search", did);
