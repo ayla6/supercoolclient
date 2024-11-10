@@ -28,7 +28,7 @@ export function header(profile, sccprofile?) {
   html.appendChild(accountStats);
   const header = document.createElement("div");
   header.className = "header";
-  header.innerHTML = `<span class="display">${profile.displayName}</span>
+  header.innerHTML = `<span class="display-name">${profile.displayName}</span>
   <span class="handle">@${profile.handle}</span>`;
   html.appendChild(header);
   const bio = document.createElement("div");

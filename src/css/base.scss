@@ -63,5 +63,5 @@ a.header:hover,
 a.handle:hover,
 a.timestamp:hover {
     text-decoration: underline;
-    color: var(--accent-color);
+    color: var(--accent-color) !important;
 }
