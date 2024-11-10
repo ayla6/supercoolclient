@@ -1,0 +1,67 @@
+@use "variables" as *;
+
+body {
+    font-family: arial, sans-serif;
+    font-size: 15px;
+    height: 100%;
+    margin: 0;
+    background: #224 center/cover fixed repeat;
+    color: $dark-grey;
+}
+
+#container {
+    background-color: $container-color;
+    width: min-content;
+    padding: 16px;
+    margin: 0 auto;
+    display: table;
+    min-height: calc(100vh - 32px);
+}
+
+a {
+    color: unset;
+    text-decoration: none;
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+#content {
+    margin-left: auto;
+    width: max-content;
+}
+
+button {
+    font-size: 13px;
+    padding: 4px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid $light-grey;
+    background: linear-gradient(#fff, #ddd);
+    font-weight: 700;
+    &:hover {
+        border-color: #c8c8c8;
+        background: linear-gradient(#f8f8f8, #d8d8d8);
+    }
+}
+
+.card .pfp,
+.card .content,
+.profile-header,
+.profile-nav {
+    box-shadow: 0 0 2px -0.3px #000;
+}
+
+.profile-header .stats a:hover,
+.profile-header .stats a:hover b,
+.profile-nav a {
+    text-decoration: none;
+    color: var(--accent-color);
+}
+
+a.header:hover,
+a.handle:hover,
+a.timestamp:hover {
+    text-decoration: underline;
+    color: var(--accent-color);
+}

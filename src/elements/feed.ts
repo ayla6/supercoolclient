@@ -16,7 +16,7 @@ export const enum imageContainerSize {
 
 export function post(post) {
   const html = document.createElement("div");
-  html.className = "feedpost";
+  html.className = "card post";
   const actualPost: AppBskyFeedDefs.PostView = post.post || post;
   const postRecord = actualPost.record as AppBskyFeedPost.Record;
   //html.id = actualPost.cid;
@@ -30,13 +30,13 @@ export function post(post) {
   linkPfp.innerHTML = `<img class="pfp" src="${actualPost.author.avatar}"></img>`;
   holderPfp.appendChild(linkPfp);
   html.appendChild(holderPfp);
-  const contentDiv = document.createElement("div");
-  contentDiv.className = "content-div";
+  const content = document.createElement("div");
+  content.className = "content";
   const header = document.createElement("div");
   header.className = "header";
   let headerHtml = `<a class="handle" href="/profile/${actualPost.author.handle}">
     ${actualPost.author.handle}</a>
-    <a class="time" href="/profile/${actualPost.author.handle}/post/${
+    <a class="timestamp" href="/profile/${actualPost.author.handle}/post/${
       actualPost.uri.split("/")[4]
     }">${postDate}</span>`;
   if (post.reason?.$type === "app.bsky.feed.defs#reasonRepost")
@@ -44,13 +44,13 @@ export function post(post) {
       `${interaction.icon.repost} <a class="handle" href="/profile/${post.reason.by?.handle}">
       ${post.reason.by?.handle}</a> reposted ` + headerHtml;
   header.innerHTML = headerHtml;
-  contentDiv.appendChild(header);
-  const content = document.createElement("div");
-  content.className = "content";
+  content.appendChild(header);
+  const postContent = document.createElement("div");
+  postContent.className = "post-content";
   if (postRecord.text) {
-    content.innerText = postRecord.text;
+    postContent.innerText = postRecord.text;
   }
-  contentDiv.appendChild(content);
+  content.appendChild(postContent);
   if (postRecord.embed) {
     const embeds = document.createElement("div");
     embeds.className = "embeds";
@@ -63,15 +63,15 @@ export function post(post) {
       default:
         break;
     }
-    contentDiv.appendChild(embeds);
+    content.appendChild(embeds);
   }
   const stats = document.createElement("div");
   stats.className = "stats";
   stats.appendChild(interaction.button("like", actualPost));
   stats.appendChild(interaction.button("repost", actualPost));
   stats.appendChild(interaction.button("reply", actualPost));
-  contentDiv.appendChild(stats);
-  html.appendChild(contentDiv);
+  content.appendChild(stats);
+  html.appendChild(content);
   return html;
 }
 

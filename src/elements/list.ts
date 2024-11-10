@@ -2,7 +2,7 @@ import { rpc } from "../login";
 
 export function profile(profile) {
   const html = document.createElement("div");
-  html.className = "feedprofile";
+  html.className = "card profile";
   const holderPfp = document.createElement("div");
   holderPfp.className = "pfp-holder";
   const linkPfp = document.createElement("a");
@@ -11,11 +11,11 @@ export function profile(profile) {
   holderPfp.appendChild(linkPfp);
   html.appendChild(holderPfp);
   const contentDiv = document.createElement("div");
-  contentDiv.className = "data";
+  contentDiv.className = "content";
   const header = document.createElement("a");
   header.href = `/profile/${profile.handle}`;
   header.className = "header";
-  header.innerHTML = `<span class="display">${profile.displayName}</span><span class="handle">@${profile.handle}</span></a>`;
+  header.innerHTML = `<span class="display-name">${profile.displayName}</span><span class="handle">@${profile.handle}</span></a>`;
   contentDiv.appendChild(header);
   const bio = document.createElement("div");
   bio.className = "bio";

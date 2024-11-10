@@ -5,7 +5,7 @@ import { urlEquivalents } from "./utils.ts";
 
 export function header(profile, sccprofile?) {
   const html = document.createElement("div");
-  html.className = "profile";
+  html.className = "profile-header";
   let customCss = `background-image:
     url(${profile.banner?.toString().replace("img/banner", "img/feed_fullsize")});`;
   if (sccprofile != undefined) {

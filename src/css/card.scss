@@ -1,0 +1,134 @@
+@use "variables" as *;
+
+.card {
+    display: table;
+    .pfp-holder {
+        margin: 4px;
+        float: left;
+        display: block;
+        line-height: 0;
+        .pfp {
+            border-radius: 2px;
+        }
+    }
+    .pfp-holder,
+    .pfp-holder .pfp {
+        width: 48px;
+        height: 48px;
+    }
+    .content {
+        display: block;
+        width: 500px;
+        float: right;
+        margin: 0 0 8px 8px;
+        background: #fff;
+        padding: 8px;
+        border-radius: 4px;
+    }
+}
+
+.profile {
+    .header {
+        font-size: 13px;
+    }
+    .display-name {
+        margin-right: 4px;
+        font-weight: 700;
+    }
+    .bio {
+        font-size: 12px;
+        line-height: 14px;
+    }
+}
+
+.post {
+    .pfp-holder::after {
+        content: "";
+        background-image: url(bubble.svg);
+        width: 12px;
+        height: 16px;
+        display: block;
+        position: relative;
+        left: 50px;
+        bottom: 32px;
+    }
+    .header {
+        display: block;
+        font-size: 12px;
+
+        .handle {
+            font-weight: 700;
+        }
+        .timestamp {
+            float: right;
+            text-decoration: none;
+            color: #999;
+        }
+        svg {
+            width: 10px;
+            height: 10px;
+            color: #fff;
+            display: inline-block;
+            vertical-align: middle;
+            stroke-width: 3px;
+            background: linear-gradient(#609928, #588d25);
+            padding: 1px 4px;
+            border-radius: 2px;
+        }
+    }
+    .post-content {
+        display: block;
+        margin-bottom: 4px;
+        float: inline-start;
+        width: 100%;
+        word-wrap: break-word;
+    }
+    .stats {
+        display: block;
+        float: inline-start;
+        font-size: 12px;
+        icon {
+            margin-right: 4px;
+        }
+    }
+    .interaction {
+        cursor: pointer;
+        display: inline-block;
+        margin-right: 4px;
+        &:hover {
+            text-decoration: none;
+        }
+        svg {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            vertical-align: sub;
+            margin-right: 2px;
+            cursor: pointer;
+        }
+    }
+    .embeds {
+        display: block;
+        text-align: center;
+        .image {
+            display: inline-block;
+            line-height: 0;
+            img {
+                object-fit: contain;
+            }
+        }
+    }
+}
+
+.like:hover svg,
+.like.active svg {
+    fill: #f90;
+}
+.repost:hover svg,
+.repost.active svg {
+    stroke: #609928;
+}
+.reply:hover svg,
+.reply.active svg {
+    fill: #999;
+}
