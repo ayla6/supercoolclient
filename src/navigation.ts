@@ -110,6 +110,9 @@ export function load() {
       }
       break;
     case "":
+      const content = document.createElement("div");
+      content.id = "content";
+      document.getElementById("container").appendChild(content);
       script.src = "/src/pages/home.ts";
       feed.feed("app.bsky.feed.getTimeline", {});
     default:
