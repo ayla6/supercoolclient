@@ -1,10 +1,10 @@
 {
-	"compilerOptions": {
-    "module": "ES2022",
-    "target": "ES2023",
+  "compilerOptions": {
+    "module": "ESNext",
+    "target": "ESNext",
     "moduleResolution": "Bundler",
     "noEmit": true,
     "allowImportingTsExtensions": true,
-		"types": ["@atcute/bluesky/lexicons"],
-	},
+    "types": ["@atcute/bluesky/lexicons"]
+  }
 }

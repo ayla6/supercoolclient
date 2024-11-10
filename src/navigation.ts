@@ -15,13 +15,11 @@
   history.pushState(null, "", url);
 });*/
 
-import {
-  profilePage,
-  urlEquivalents,
-  userFeed,
-  userProfiles,
-} from "./loadings";
-const script = document.getElementById("script");
+import { login } from "./login.ts";
+import * as feed from "./elements/feed.ts";
+import * as list from "./elements/list.ts";
+import { profilePage } from "./elements/profile.ts";
+import { urlEquivalents } from "./elements/utils.ts";
 
 let previousURL = window.location.pathname.split("/");
 if (window.location.search) previousURL.push(window.location.search);
@@ -31,17 +29,6 @@ history.pushState = function (state, title, url) {
   if (window.location.search) previousURL.push(window.location.search);
   originalPushState.apply(history, arguments);
 };
-
-function replaceScript(url: string, location: string) {
-  const oldScript = document.getElementById("pagescript");
-  const script = document.createElement("script");
-  script.type = "module";
-  script.id = "pagescript";
-  script.src = url;
-  script.setAttribute("location", location);
-  document.body.appendChild(script);
-  oldScript.remove();
-}
 
 export async function updatePage() {
   const currentURL = window.location.pathname.split("/");
@@ -53,12 +40,10 @@ export async function updatePage() {
     const urlarea = currentURL[3];
     switch (urlarea) {
       case "post":
-        if (previousURL[1] != "post ") replaceScript("/src/post.ts", "post");
         break;
       default:
-        if (previousURL[1] != "profile")
-          replaceScript("/src/profile.ts", "profile");
-        document.getElementById("feed").innerHTML = "";
+        if (previousURL[1] != "profile") load();
+        document.getElementById("content").innerHTML = "";
         const previousValue =
           (previousURL[3] || "posts") +
           (previousURL[3] == "search" ? previousURL[4] : "");
@@ -77,10 +62,10 @@ export async function updatePage() {
           switch (urlarea) {
             case "following":
             case "followers":
-              await userProfiles(urlEquivalents[urlarea], did);
+              await list.profiles(urlEquivalents[urlarea], { actor: did });
               break;
             default:
-              await userFeed(urlarea, did);
+              await feed.userFeed(urlarea, did);
               break;
           }
         break;
@@ -111,3 +96,33 @@ document.addEventListener("click", (e) => {
 addEventListener("popstate", () => {
   updatePage();
 });
+
+export function load() {
+  const path = window.location.pathname.split("/");
+  const script = document.createElement("script");
+  script.type = "module";
+  script.id = "pagescript";
+  switch (path[1]) {
+    case "profile":
+      if (path[4]) {
+      } else {
+        profilePage(path[2]);
+      }
+      break;
+    case "":
+      script.src = "/src/pages/home.ts";
+      feed.feed("app.bsky.feed.getTimeline", {});
+    default:
+      break;
+  }
+}
+
+/*const record: AppSCCProfile.Record = {
+  $type: 'app.scc.profile',
+  accentColor: '#f58ea9',
+  pinnedSearches: ['#test']
+}
+rpc.call('com.atproto.repo.putRecord', {data: {record: record, collection: 'app.scc.profile',repo: sessionStorage.getItem('userdid'), rkey: 'self'}})*/
+
+await login();
+load();
