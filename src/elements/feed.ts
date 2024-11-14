@@ -2,13 +2,20 @@ import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { rpc } from "../login.ts";
 import * as interaction from "./interactionButton.ts";
 import * as embed from "./embed.ts";
-import { escapeHTML, formatDate, processText } from "./utils.ts";
+import {
+  elem,
+  escapeHTML,
+  formatDate,
+  idchoose,
+  processRichText,
+  processText,
+} from "./utils.ts";
 import { segmentize } from "@atcute/bluesky-richtext-segmenter";
 
-export const enum imageContainerSize {
-  width = 500,
-  height = 250,
-}
+export const imageContainerSize = {
+  width: 500,
+  height: 250,
+};
 
 type feedNSID =
   | "app.bsky.feed.getAuthorFeed"
@@ -20,92 +27,74 @@ type feedNSID =
 export function post(
   post: AppBskyFeedDefs.FeedViewPost | AppBskyFeedDefs.PostView,
 ) {
-  const html = document.createElement("div");
-  html.className = "card post";
   const actualPost: AppBskyFeedDefs.PostView =
     "post" in post ? post.post : post;
   const postRecord = actualPost.record as AppBskyFeedPost.Record;
-  //html.id = actualPost.cid;
-  const postDate = formatDate(
-    new Date(postRecord.createdAt || actualPost.indexedAt),
-  );
-  const holderPfp = document.createElement("div");
-  holderPfp.className = "pfp-holder";
-  const linkPfp = document.createElement("a");
-  linkPfp.href = "/profile/" + actualPost.author.handle;
-  linkPfp.innerHTML = `<img class="pfp" src="${actualPost.author.avatar}"></img>`;
-  holderPfp.appendChild(linkPfp);
-  html.appendChild(holderPfp);
-  const content = document.createElement("div");
-  content.className = "content";
-  const header = document.createElement("div");
-  header.className = "header";
-  let headerHtml = `<a class="handle" href="/profile/${actualPost.author.handle}">
-    ${actualPost.author.handle}</a>
-    <a class="timestamp" href="/profile/${actualPost.author.handle}/post/${
-      actualPost.uri.split("/")[4]
-    }">${postDate}</span>`;
+  const atid = idchoose(actualPost.author);
   if (
     "reason" in post &&
     post.reason.$type === "app.bsky.feed.defs#reasonRepost"
-  )
-    headerHtml =
-      `${interaction.icon.repost} <a class="handle" href="/profile/${post.reason.by?.handle}">
-      ${post.reason.by?.handle}</a> reposted ` + headerHtml;
-  header.innerHTML = headerHtml;
-  content.appendChild(header);
-  const postContent = document.createElement("div");
-  postContent.className = "post-content";
-  if (postRecord.text) {
-    const segmentText = segmentize(postRecord.text, postRecord.facets);
-    let resultText = "";
-    for (const segment of segmentText) {
-      const text = processText(segment.text);
-      console.log(segment);
-      if (segment.features)
-        for (const feat of segment.features) {
-          switch (feat.$type) {
-            case "app.bsky.richtext.facet#tag":
-              resultText += `<a href="/search/#${escapeHTML(feat.tag)}">${text}</a>`;
-              break;
-            case "app.bsky.richtext.facet#link":
-              resultText += `<a href="${escapeHTML(feat.uri)}">${text}</a>`;
-              break;
-            case "app.bsky.richtext.facet#mention":
-              resultText += `<a href="/profile/${escapeHTML(feat.did)}">${text}</a>`;
-              break;
-            default:
-              resultText += text;
-              break;
-          }
-        }
-      else resultText += text;
-    }
-    postContent.innerHTML = resultText;
+  ) {
+    var isRepost = true;
+    var repostAtid = idchoose(post.reason.by);
   }
-  content.appendChild(postContent);
-  if (postRecord.embed) {
-    const embeds = document.createElement("div");
-    embeds.className = "embeds";
-    switch (postRecord.embed.$type) {
-      case "app.bsky.embed.images":
-        for (const img of postRecord.embed.images) {
-          embeds.appendChild(embed.image(img, actualPost.author.did));
-        }
-        break;
-      default:
-        break;
-    }
-    content.appendChild(embeds);
-  }
-  const stats = document.createElement("div");
-  stats.className = "stats";
-  stats.appendChild(interaction.button("like", actualPost));
-  stats.appendChild(interaction.button("repost", actualPost));
-  stats.appendChild(interaction.button("reply", actualPost));
-  content.appendChild(stats);
-  html.appendChild(content);
-  return html;
+  return elem("div", { className: "card post" }, [
+    //profile picture
+    elem("div", { className: "pfp-holder" }, [
+      elem("a", {
+        href: "/profile/" + atid,
+        innerHTML: `<img class="pfp" src="${actualPost.author.avatar}"></img>`,
+      }),
+    ]),
+    //content
+    elem("div", { className: "content" }, [
+      // header
+      elem("div", { className: "header" }, [
+        elem("span", {
+          innerHTML: isRepost
+            ? `${interaction.icon.repost} <a class="handle" href="/profile/${repostAtid}">${repostAtid}</a> reposted <a class="handle" href="/profile/${atid}">${atid}</a>`
+            : `<a class="handle" href="/profile/${atid}">${atid}</a>`,
+        }),
+        elem("span", {
+          className: "timestamp",
+          innerHTML: formatDate(
+            new Date(postRecord.createdAt || actualPost.indexedAt),
+          ),
+        }),
+      ]),
+      // text content
+      elem(
+        "div",
+        {
+          className: "post-content",
+          innerHTML: postRecord.text
+            ? processRichText(postRecord.text, postRecord.facets)
+            : "",
+        },
+        undefined,
+      ),
+      // embeds
+      elem(
+        "div",
+        { className: "embeds" },
+        postRecord.embed
+          ? embed.load(postRecord.embed, actualPost.author.did)
+          : undefined,
+      ),
+      // likes repost and comments
+      elem(
+        "div",
+        { className: "stats" },
+        actualPost.viewer
+          ? [
+              interaction.button("like", actualPost),
+              interaction.button("repost", actualPost),
+              interaction.button("reply", actualPost),
+            ]
+          : undefined,
+      ),
+    ]),
+  ]);
 }
 
 export async function feed(nsid: feedNSID, params: any) {

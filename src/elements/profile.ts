@@ -1,11 +1,12 @@
 import { AppBskyActorDefs, AppSCCProfile } from "@atcute/client/lexicons";
 import { rpc } from "../login";
-import { processText } from "./utils";
+import { idchoose, processText } from "./utils";
 
 export function header(
   profile: AppBskyActorDefs.ProfileViewDetailed,
   sccprofile?: AppSCCProfile.Record,
 ) {
+  const atid = idchoose(profile);
   const html = document.createElement("div");
   html.className = "profile-header";
   let customCss = `background-image:
@@ -23,15 +24,15 @@ export function header(
   accountStats.className = "stats";
   accountStats.innerHTML = `
   <button class="button follow">+ Follow</button>
-  <a href="/profile/${profile.handle}"><b>${profile.postsCount.toLocaleString("sv-SE")}</b> Posts</a>
-  <a href="/profile/${profile.handle}/following"><b>${profile.followsCount.toLocaleString("sv-SE")}</b> Following</a>
-  <a href="/profile/${profile.handle}/followers"><b>${profile.followersCount.toLocaleString("sv-SE")}</b> followers</a>
+  <a href="/profile/${atid}"><b>${profile.postsCount}</b> Posts</a>
+  <a href="/profile/${atid}/following"><b>${profile.followsCount}</b> Following</a>
+  <a href="/profile/${atid}/followers"><b>${profile.followersCount}</b> followers</a>
   `;
   html.appendChild(accountStats);
   const header = document.createElement("div");
   header.className = "header";
   header.innerHTML = `<span class="display-name">${profile.displayName}</span>
-  <span class="handle">@${profile.handle}</span>`;
+  <span class="handle">@${atid}</span>`;
   html.appendChild(header);
   const bio = document.createElement("div");
   bio.className = "bio";
@@ -40,9 +41,9 @@ export function header(
   return html;
 }
 
-function navButton(name: string, handle: string, text: string, did?: string) {
+function navButton(name: string, atid: string, text: string, did?: string) {
   const button = document.createElement("a");
-  button.href = "/profile/" + handle + (name == "posts" ? "" : "/" + name);
+  button.href = "/profile/" + atid + (name == "posts" ? "" : "/" + name);
   button.innerText = text;
   button.setAttribute("value", name);
   return button;
@@ -50,12 +51,12 @@ function navButton(name: string, handle: string, text: string, did?: string) {
 
 async function mediaNavButton(
   name: string,
-  handle: string,
+  atid: string,
   text: string,
   did?: string,
 ) {
   const button = document.createElement("a");
-  button.href = "/profile/" + handle + (name == "posts" ? "" : "/" + name);
+  button.href = "/profile/" + atid + (name == "posts" ? "" : "/" + name);
   button.innerText = text;
   button.setAttribute("value", name);
   const images = document.createElement("div");
@@ -91,8 +92,7 @@ export async function profilePage(atid: string) {
   const profile = await rpc.get("app.bsky.actor.getProfile", {
     params: { actor: atid },
   });
-  const did = profile.data.did;
-  const handle = profile.data.handle;
+  atid = idchoose(profile.data);
   let sccprofile: any;
   try {
     sccprofile = (
@@ -111,19 +111,21 @@ export async function profilePage(atid: string) {
   container.appendChild(leftBar);
   const profileNav = document.createElement("div");
   profileNav.className = "side-nav";
-  profileNav.appendChild(navButton("posts", handle, "Posts"));
-  profileNav.appendChild(navButton("replies", handle, "Posts and replies"));
-  profileNav.appendChild(navButton("likes", handle, "Favourites"));
-  profileNav.appendChild(navButton("following", handle, "Following"));
-  profileNav.appendChild(navButton("followers", handle, "Followers"));
-  profileNav.appendChild(await mediaNavButton("media", handle, "Media", did));
+  profileNav.appendChild(navButton("posts", atid, "Posts"));
+  profileNav.appendChild(navButton("replies", atid, "Posts and replies"));
+  profileNav.appendChild(navButton("likes", atid, "Favourites"));
+  profileNav.appendChild(navButton("following", atid, "Following"));
+  profileNav.appendChild(navButton("followers", atid, "Followers"));
+  profileNav.appendChild(
+    await mediaNavButton("media", atid, "Media", profile.data.did),
+  );
   leftBar.appendChild(profileNav);
   if (sccprofile?.pinnedSearches && sccprofile.pinnedSearches.length > 0) {
     const profileSearches = document.createElement("div");
     profileSearches.className = "side-nav";
     for (const search of sccprofile.pinnedSearches) {
       profileSearches.appendChild(
-        navButton("search?" + encodeURIComponent(search), handle, search),
+        navButton("search?" + encodeURIComponent(search), atid, search),
       );
     }
     leftBar.appendChild(profileSearches);
@@ -131,5 +133,5 @@ export async function profilePage(atid: string) {
   const content = document.createElement("div");
   content.id = "content";
   container.appendChild(content);
-  return did;
+  return profile.data.did;
 }

@@ -1,4 +1,12 @@
-import { AppBskyEmbedImages } from "@atcute/client/lexicons";
+import {
+  AppBskyEmbedExternal,
+  AppBskyEmbedImages,
+  AppBskyEmbedRecord,
+  AppBskyEmbedRecordWithMedia,
+  AppBskyEmbedVideo,
+  AppBskyFeedPost,
+  Brand,
+} from "@atcute/client/lexicons";
 import { imageContainerSize } from "./feed";
 
 export function image(image: AppBskyEmbedImages.Image, did: string) {
@@ -40,7 +48,10 @@ export function image(image: AppBskyEmbedImages.Image, did: string) {
   if (ogsize.height <= 1000 && ogsize.width <= 1000) {
     thumbFileType = image.image.mimeType.split("/")[1];
     size = "fullsize";
-    if (ogsize.height < imageContainerSize.height) {
+    if (
+      ogsize.width <= imageContainerSize.width &&
+      ogsize.height <= imageContainerSize.height
+    ) {
       img.setAttribute("style", "image-rendering: pixelated;");
     }
   }
@@ -58,4 +69,28 @@ export function image(image: AppBskyEmbedImages.Image, did: string) {
   a.target = " ";
   a.className = "image";
   return a;
+}
+
+export function load(
+  embed: Brand.Union<
+    | AppBskyEmbedExternal.Main
+    | AppBskyEmbedImages.Main
+    | AppBskyEmbedRecord.Main
+    | AppBskyEmbedRecordWithMedia.Main
+    | AppBskyEmbedVideo.Main
+  >,
+  did: string,
+): Node[] {
+  let embeds = [];
+  if (embed)
+    switch (embed.$type) {
+      case "app.bsky.embed.images":
+        for (const img of embed.images) {
+          embeds.push(image(img, did));
+        }
+        break;
+      default:
+        break;
+    }
+  return embeds;
 }

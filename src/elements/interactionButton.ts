@@ -15,7 +15,7 @@ export function button(type: string, post: AppBskyFeedDefs.PostView) {
 
   const countSpan = document.createElement("span");
   let count = post[type + "Count"] || 0;
-  countSpan.innerText = count.toLocaleString("sv-SE");
+  countSpan.innerText = count;
   button.appendChild(countSpan);
 
   const updateInteraction = async (active: boolean) => {
@@ -24,7 +24,7 @@ export function button(type: string, post: AppBskyFeedDefs.PostView) {
       const collection = `app.bsky.feed.${type}`;
       if (active) {
         count++;
-        countSpan.innerText = count.toLocaleString("sv-SE");
+        countSpan.innerText = count;
         const { cid, uri } = post;
         const response = await rpc.call("com.atproto.repo.createRecord", {
           data: {
@@ -42,7 +42,7 @@ export function button(type: string, post: AppBskyFeedDefs.PostView) {
         post[type + "Count"] = count;
       } else {
         count--;
-        countSpan.innerText = count.toLocaleString("sv-SE");
+        countSpan.innerText = count;
         const recordUri = post.viewer[type];
         if (!recordUri) {
           throw new Error(`No ${type} record URI found on post.`);
@@ -64,7 +64,7 @@ export function button(type: string, post: AppBskyFeedDefs.PostView) {
       } else {
         count++;
       }
-      countSpan.innerText = count.toLocaleString("sv-SE");
+      countSpan.innerText = count;
     }
   };
 
