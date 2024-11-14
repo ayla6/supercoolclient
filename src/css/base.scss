@@ -121,8 +121,8 @@ a.timestamp:hover {
             display: block;
             float: right;
             color: $light-grey;
-            line-height: 1;
-            font-size: 20px;
+            line-height: 0.9;
+            font-size: 19px;
             position: absolute;
             right: 12px;
         }
@@ -152,7 +152,7 @@ a.timestamp:hover {
 }
 
 .mono {
-    font-family: cascadia, monospace;
+    font-family: monospace;
     background-color: #3331;
     padding: 0px 2px;
     border-radius: 4px;

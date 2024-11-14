@@ -18,7 +18,7 @@
 import { login } from "./login.ts";
 import { loadNavbar } from "./elements/navbar.ts";
 import { profileRoute } from "./routes/profile.ts";
-import { timelineRoute } from "./routes/timeline.ts";
+import { homeRoute } from "./routes/home.ts";
 
 let loadedState: Array<String> = [""];
 function saveLastLocation() {
@@ -32,7 +32,7 @@ history.pushState = function (state, title, url) {
 };
 
 const routes = {
-  "/": timelineRoute,
+  "/": homeRoute,
   "/profile/:handle": profileRoute,
   "/profile/:handle/:location": profileRoute,
   "/profile/:handle/post/:rkey": () => {},

@@ -71,7 +71,7 @@ async function mediaNavButton(
     });
     let imageCount = 0;
     for (const post of data.feed) {
-      if ("images" in post.post.embed)
+      if (post.post.embed && "images" in post.post.embed)
         for (const image of post.post.embed.images) {
           const img = document.createElement("img");
           img.src = image.thumb;
@@ -79,22 +79,20 @@ async function mediaNavButton(
           imageCount++;
           if (imageCount == 4) break;
         }
+      if (imageCount == 4) break;
     }
   }
   return button;
 }
 
-export async function profilePage(handle: string) {
+export async function profilePage(atid: string) {
   const container = document.getElementById("container");
   container.innerHTML = "";
-  const did = (
-    await rpc.get("com.atproto.identity.resolveHandle", {
-      params: { handle: handle },
-    })
-  ).data.did;
   const profile = await rpc.get("app.bsky.actor.getProfile", {
-    params: { actor: did },
+    params: { actor: atid },
   });
+  const did = profile.data.did;
+  const handle = profile.data.handle;
   let sccprofile: any;
   try {
     sccprofile = (

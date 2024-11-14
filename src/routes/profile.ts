@@ -2,21 +2,19 @@ import * as feed from "../elements/feed.ts";
 import * as list from "../elements/list.ts";
 import { profilePage } from "../elements/profile.ts";
 
+const urlEquivalents = {
+  posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
+  undefined: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
+  media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
+  replies: ["app.bsky.feed.getAuthorFeed", "posts_with_replies"],
+  likes: ["app.bsky.feed.getActorLikes"],
+};
+
 export async function profileRoute(
   url: Array<string>,
   loadedState: Array<string>,
 ) {
-  const urlEquivalents = {
-    posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
-    undefined: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
-    media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
-    replies: ["app.bsky.feed.getAuthorFeed", "posts_with_replies"],
-    search: [
-      "app.bsky.feed.searchPosts",
-      decodeURIComponent(window.location.search).slice(1),
-    ],
-    likes: ["app.bsky.feed.getActorLikes"],
-  };
+  document.title = url[2] + " — SuperCoolClient";
 
   let atid = url[2];
   if (loadedState[2] != atid) atid = await profilePage(atid);
@@ -39,6 +37,13 @@ export async function profileRoute(
       break;
     case "followers":
       await list.profiles("app.bsky.graph.getFollowers", { actor: atid });
+      break;
+    case "search":
+      await feed.userFeed(
+        "app.bsky.feed.searchPosts",
+        atid,
+        decodeURIComponent(window.location.search).slice(1),
+      );
       break;
     default:
       await feed.userFeed(

@@ -6,7 +6,7 @@ function navButton(text: string, feed: string) {
   button.innerText = text;
   return button;
 }
-export async function timelineRoute(
+export async function homeRoute(
   url: Array<string>,
   loadedState: Array<string>,
 ) {
@@ -28,13 +28,11 @@ export async function timelineRoute(
           for (const feed of feeds.slice(1)) {
             if (feed.pinned) pinned.push(feed.value);
           }
-          console.log(pinned);
           return pinned;
         })(),
       },
     })
   ).data.feeds;
-  console.log(feedGens);
   feedNav.appendChild(navButton("Following", ""));
   for (const feed of feedGens) {
     feedNav.appendChild(navButton(feed.displayName, feed.uri));
@@ -45,5 +43,6 @@ export async function timelineRoute(
   const content = document.createElement("div");
   content.id = "content";
   container.appendChild(content);
+  document.title = "Following — SuperCoolClient";
   feed.feed("app.bsky.feed.getTimeline", {});
 }

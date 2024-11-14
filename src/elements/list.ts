@@ -3,21 +3,24 @@ import { rpc } from "../login";
 import { processText } from "./utils";
 
 export function profile(profile: AppBskyActorDefs.ProfileView) {
+  const atid =
+    profile.handle === "handle.invalid" ? profile.did : profile.handle;
+  const userURL = "/profile/" + atid;
   const html = document.createElement("div");
   html.className = "card profile";
   const holderPfp = document.createElement("div");
   holderPfp.className = "pfp-holder";
   const linkPfp = document.createElement("a");
-  linkPfp.href = "/profile/" + profile.handle;
+  linkPfp.href = userURL;
   linkPfp.innerHTML = `<img class="pfp" src="${profile.avatar}"></img>`;
   holderPfp.appendChild(linkPfp);
   html.appendChild(holderPfp);
   const contentDiv = document.createElement("div");
   contentDiv.className = "content";
   const header = document.createElement("a");
-  header.href = `/profile/${profile.handle}`;
+  header.href = userURL;
   header.className = "header";
-  header.innerHTML = `<span class="handle">${profile.handle}</span></a>`;
+  header.innerHTML = `<span class="handle">${atid}</span></a>`;
   if (profile.displayName != "")
     header.innerHTML += ` <span class="display-name">${profile.displayName}</span>`;
   contentDiv.appendChild(header);

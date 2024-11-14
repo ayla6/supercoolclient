@@ -1,12 +1,9 @@
-import {
-  AppBskyFeedDefs,
-  AppBskyFeedPost,
-  Queries,
-} from "@atcute/client/lexicons";
+import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { rpc } from "../login.ts";
 import * as interaction from "./interactionButton.ts";
 import * as embed from "./embed.ts";
-import { formatDate, processText } from "./utils.ts";
+import { escapeHTML, formatDate, processText } from "./utils.ts";
+import { segmentize } from "@atcute/bluesky-richtext-segmenter";
 
 export const enum imageContainerSize {
   width = 500,
@@ -60,7 +57,31 @@ export function post(
   const postContent = document.createElement("div");
   postContent.className = "post-content";
   if (postRecord.text) {
-    postContent.innerHTML = processText(postRecord.text);
+    const segmentText = segmentize(postRecord.text, postRecord.facets);
+    let resultText = "";
+    for (const segment of segmentText) {
+      const text = processText(segment.text);
+      console.log(segment);
+      if (segment.features)
+        for (const feat of segment.features) {
+          switch (feat.$type) {
+            case "app.bsky.richtext.facet#tag":
+              resultText += `<a href="/search/#${escapeHTML(feat.tag)}">${text}</a>`;
+              break;
+            case "app.bsky.richtext.facet#link":
+              resultText += `<a href="${escapeHTML(feat.uri)}">${text}</a>`;
+              break;
+            case "app.bsky.richtext.facet#mention":
+              resultText += `<a href="/profile/${escapeHTML(feat.did)}">${text}</a>`;
+              break;
+            default:
+              resultText += text;
+              break;
+          }
+        }
+      else resultText += text;
+    }
+    postContent.innerHTML = resultText;
   }
   content.appendChild(postContent);
   if (postRecord.embed) {

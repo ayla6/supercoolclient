@@ -37,6 +37,7 @@ export function button(type: string, post: AppBskyFeedDefs.PostView) {
             repo: userDid,
           },
         });
+        console.log(response);
         post.viewer[type] = response.data.uri;
         post[type + "Count"] = count;
       } else {

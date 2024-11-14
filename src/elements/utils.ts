@@ -10,8 +10,6 @@ export function formatDate(date: Date) {
 }
 
 const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
-const urlRegex =
-  /\b((https?:\/\/)?(www\.)?([a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+)(\/[^\s]*)?\b)/g;
 const map = {
   "<": "&lt;",
   ">": "&gt;",
@@ -19,15 +17,13 @@ const map = {
   '"': "&quot;",
   "'": "&#39;",
 };
+export function escapeHTML(input: string): string {
+  return input.replaceAll(/[<>&"']/g, (m) => map[m]);
+}
 export function processText(input: string = ""): string {
-  let result = input
+  return input
     .replaceAll(/[<>&"']/g, (m) => map[m])
-    .replaceAll(urlRegex, (match, p1) => {
-      const url = p1.startsWith("http") ? p1 : `http://${p1}`;
-      return `<a href="${url}">${p1}</a>`;
-    })
     .replaceAll(emojiRegex, '<span class="emoji">$1</span>')
     .replaceAll(/`(.*?)`/g, '<span class="mono">$1</span>')
     .replaceAll(/\n/g, "<br/>");
-  return result;
 }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@atcute/bluesky": "^1.0.8",
+    "@atcute/bluesky-richtext-segmenter": "^1.0.4",
     "@atcute/client": "^2.0.4"
   }
 }
