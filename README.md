@@ -8,3 +8,5 @@ the looks aren't very original and the code sucks because i'm lazy and not a pro
 not really very serious in any way so don't expect much!!
 
 it uses atcute !! https://github.com/mary-ext/atcute
+
+the icons i used i got from https://tabler.io/icons
