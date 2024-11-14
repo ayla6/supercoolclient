@@ -41,7 +41,7 @@ export function image(image: AppBskyEmbedImages.Image, did: string) {
     thumbFileType = image.image.mimeType.split("/")[1];
     size = "fullsize";
     if (ogsize.height < imageContainerSize.height) {
-      img.setAttribute("style", "image-rendering: crisp-edges;");
+      img.setAttribute("style", "image-rendering: pixelated;");
     }
   }
   img.src =

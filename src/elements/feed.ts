@@ -1,18 +1,24 @@
 import {
   AppBskyFeedDefs,
-  AppBskyFeedGetTimeline,
   AppBskyFeedPost,
   Queries,
 } from "@atcute/client/lexicons";
 import { rpc } from "../login.ts";
 import * as interaction from "./interactionButton.ts";
 import * as embed from "./embed.ts";
-import { urlEquivalents, formatDate } from "./utils.ts";
+import { formatDate, processText } from "./utils.ts";
 
 export const enum imageContainerSize {
   width = 500,
   height = 250,
 }
+
+type feedNSID =
+  | "app.bsky.feed.getAuthorFeed"
+  | "app.bsky.feed.getFeed"
+  | "app.bsky.feed.getActorLikes"
+  | "app.bsky.feed.searchPosts"
+  | "app.bsky.feed.getTimeline";
 
 export function post(
   post: AppBskyFeedDefs.FeedViewPost | AppBskyFeedDefs.PostView,
@@ -54,7 +60,7 @@ export function post(
   const postContent = document.createElement("div");
   postContent.className = "post-content";
   if (postRecord.text) {
-    postContent.innerText = postRecord.text;
+    postContent.innerHTML = processText(postRecord.text);
   }
   content.appendChild(postContent);
   if (postRecord.embed) {
@@ -81,15 +87,7 @@ export function post(
   return html;
 }
 
-export async function feed(
-  nsid:
-    | "app.bsky.feed.getAuthorFeed"
-    | "app.bsky.feed.getFeed"
-    | "app.bsky.feed.getActorLikes"
-    | "app.bsky.feed.searchPosts"
-    | "app.bsky.feed.getTimeline",
-  params: any,
-) {
+export async function feed(nsid: feedNSID, params: any) {
   const content = document.getElementById("content");
   async function load() {
     const { data } = await rpc.get(nsid, { params: params });
@@ -116,23 +114,16 @@ export async function feed(
   } else window.onscroll = null;
 }
 
-export async function userFeed(filter: string, did: string) {
-  filter = filter || "";
-  if (filter === "search") {
-    const search = decodeURIComponent(window.location.search.slice(1));
+export async function userFeed(nsid: feedNSID, did: string, filter?: string) {
+  if (nsid === "app.bsky.feed.searchPosts") {
     return await feed("app.bsky.feed.searchPosts", {
-      q: search,
+      q: filter,
       author: did,
     });
   } else {
-    return await feed(
-      filter == "likes"
-        ? "app.bsky.feed.getActorLikes"
-        : "app.bsky.feed.getAuthorFeed",
-      {
-        actor: did,
-        filter: urlEquivalents[filter],
-      },
-    );
+    return await feed(nsid, {
+      actor: did,
+      filter: filter,
+    });
   }
 }

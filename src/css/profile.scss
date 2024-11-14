@@ -2,7 +2,7 @@
 
 .profile-header {
     display: block;
-    width: 800px;
+    width: 872px;
     background: #fff;
     border-radius: 4px;
     margin: 0 auto 8px;
@@ -22,16 +22,15 @@
         }
     }
     .header {
-        height: 28px;
         .display-name {
             font-size: 26px;
             font-weight: 700;
-            display: inline-block;
+            display: block;
             line-height: 1;
         }
         .handle {
             font-size: 18px;
-            display: inline-block;
+            display: block;
             color: #777;
             line-height: 24px;
         }
@@ -42,8 +41,9 @@
         color: #777;
         line-height: 14px;
         padding-right: 8px;
-        height: 100px;
+        height: 78px;
         overflow-y: scroll;
+        font-style: italic;
     }
     .stats {
         display: block;
@@ -68,58 +68,6 @@
                 font-size: 14px;
                 color: #333;
             }
-        }
-    }
-}
-
-.left-bar {
-    display: block;
-    float: left;
-}
-
-.profile-nav {
-    background: #f9f9f9;
-    border-radius: 4px;
-    width: 228px;
-    margin-bottom: 8px;
-    a {
-        text-shadow: 0 1px 0 #fff;
-        width: -moz-available;
-        width: -webkit-fill-available;
-        display: block;
-        padding: 8px 12px;
-        border-bottom: 1px solid #e8e8e8;
-        &::after {
-            content: "❯";
-            display: block;
-            float: right;
-            color: $light-grey;
-            line-height: 1;
-            font-size: 20px;
-            position: relative;
-            bottom: 1px;
-        }
-        &:hover::after,
-        &.active::after {
-            color: #666;
-        }
-        &:first-of-type {
-            border-radius: 4px 4px 0 0;
-        }
-        &:last-of-type {
-            border-bottom: none;
-            border-radius: 0 0 4px 4px;
-        }
-        &:only-of-type {
-            border-radius: 4px !important;
-        }
-        &.active,
-        &:hover {
-            background: #fff;
-            color: $dark-grey;
-        }
-        &.active {
-            font-weight: 700;
         }
     }
 }

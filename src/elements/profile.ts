@@ -1,7 +1,6 @@
 import { AppBskyActorDefs, AppSCCProfile } from "@atcute/client/lexicons";
 import { rpc } from "../login";
-import * as feed from "./feed.ts";
-import * as list from "./list.ts";
+import { processText } from "./utils";
 
 export function header(
   profile: AppBskyActorDefs.ProfileViewDetailed,
@@ -36,29 +35,57 @@ export function header(
   html.appendChild(header);
   const bio = document.createElement("div");
   bio.className = "bio";
-  bio.innerText = profile.description || "";
+  bio.innerHTML = processText(profile.description) || "";
   html.appendChild(bio);
   return html;
 }
 
-function navButton(name: string, handle: string, text: string) {
+function navButton(name: string, handle: string, text: string, did?: string) {
   const button = document.createElement("a");
   button.href = "/profile/" + handle + (name == "posts" ? "" : "/" + name);
   button.innerText = text;
   button.setAttribute("value", name);
-  const currentURL = window.location.pathname.split("/")[3];
-  if (
-    (currentURL || "posts") +
-      (currentURL == "search" ? window.location.search : "") ==
-    name
-  )
-    button.className = "active";
+  return button;
+}
+
+async function mediaNavButton(
+  name: string,
+  handle: string,
+  text: string,
+  did?: string,
+) {
+  const button = document.createElement("a");
+  button.href = "/profile/" + handle + (name == "posts" ? "" : "/" + name);
+  button.innerText = text;
+  button.setAttribute("value", name);
+  const images = document.createElement("div");
+  images.className = "images";
+  button.appendChild(images);
+  if (did) {
+    const { data } = await rpc.get("app.bsky.feed.getAuthorFeed", {
+      params: {
+        actor: did,
+        filter: "posts_with_media",
+        limit: 4,
+      },
+    });
+    let imageCount = 0;
+    for (const post of data.feed) {
+      if ("images" in post.post.embed)
+        for (const image of post.post.embed.images) {
+          const img = document.createElement("img");
+          img.src = image.thumb;
+          images.appendChild(img);
+          imageCount++;
+          if (imageCount == 4) break;
+        }
+    }
+  }
   return button;
 }
 
 export async function profilePage(handle: string) {
   const container = document.getElementById("container");
-  const currentURL = window.location.pathname.split("/");
   container.innerHTML = "";
   const did = (
     await rpc.get("com.atproto.identity.resolveHandle", {
@@ -80,23 +107,22 @@ export async function profilePage(handle: string) {
       })
     )?.data.value;
   } catch (error) {}
-  sessionStorage.setItem("currentProfileDID", profile.data.did);
   container.appendChild(header(profile.data, sccprofile));
   const leftBar = document.createElement("div");
   leftBar.className = "left-bar";
   container.appendChild(leftBar);
   const profileNav = document.createElement("div");
-  profileNav.className = "profile-nav";
+  profileNav.className = "side-nav";
   profileNav.appendChild(navButton("posts", handle, "Posts"));
   profileNav.appendChild(navButton("replies", handle, "Posts and replies"));
-  profileNav.appendChild(navButton("media", handle, "Media"));
   profileNav.appendChild(navButton("likes", handle, "Favourites"));
   profileNav.appendChild(navButton("following", handle, "Following"));
   profileNav.appendChild(navButton("followers", handle, "Followers"));
+  profileNav.appendChild(await mediaNavButton("media", handle, "Media", did));
   leftBar.appendChild(profileNav);
   if (sccprofile?.pinnedSearches && sccprofile.pinnedSearches.length > 0) {
     const profileSearches = document.createElement("div");
-    profileSearches.className = "profile-nav";
+    profileSearches.className = "side-nav";
     for (const search of sccprofile.pinnedSearches) {
       profileSearches.appendChild(
         navButton("search?" + encodeURIComponent(search), handle, search),
@@ -107,18 +133,5 @@ export async function profilePage(handle: string) {
   const content = document.createElement("div");
   content.id = "content";
   container.appendChild(content);
-  switch (currentURL[3]) {
-    case "following":
-      await list.profiles("app.bsky.graph.getFollows", { actor: did });
-      break;
-    case "followers":
-      await list.profiles("app.bsky.graph.getFollowers", { actor: did });
-      break;
-    case "search":
-      await feed.userFeed("search", did);
-      break;
-    default:
-      await feed.userFeed(currentURL[3], did);
-      break;
-  }
+  return did;
 }

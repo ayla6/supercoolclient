@@ -2,7 +2,7 @@
 
 body {
     font-family: arial, sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     height: 100%;
     margin: 0;
     background: #224 center/cover fixed repeat;
@@ -11,8 +11,8 @@ body {
 
 #container {
     background-color: $container-color;
-    width: min-content;
-    padding: 16px;
+    min-width: 888px;
+    padding: 64px 16px 16px 16px;
     margin: 0 auto;
     display: table;
     min-height: calc(100vh - 32px);
@@ -51,13 +51,13 @@ button.active {
 .card .pfp,
 .card .content,
 .profile-header,
-.profile-nav {
+.side-nav {
     box-shadow: 0 0 2px -0.3px #000;
 }
 
 .profile-header .stats a:hover,
 .profile-header .stats a:hover b,
-.profile-nav a {
+.side-nav a {
     text-decoration: none;
     color: var(--accent-color);
 }
@@ -67,4 +67,97 @@ a.handle:hover,
 a.timestamp:hover {
     text-decoration: underline;
     color: var(--accent-color) !important;
+}
+
+.bio a,
+.post-content a {
+    color: var(--accent-color) !important;
+}
+
+.button,
+.handle,
+.display-name,
+.bio,
+.timestamp,
+.interaction,
+.side-nav {
+    text-shadow: 0 1px 0 #fff;
+}
+
+.left-bar {
+    display: block;
+    float: left;
+    &.sticky {
+        position: fixed;
+    }
+}
+
+.side-nav {
+    $width: 300px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    width: $width;
+    margin-bottom: 8px;
+    position: relative;
+    a {
+        width: $width - 24px;
+        display: block;
+        padding: 8px 12px;
+        border-bottom: 1px solid #e8e8e8;
+        .images {
+            margin-top: 4px;
+            img {
+                width: 66px;
+                height: 66px;
+                object-fit: cover;
+                margin-right: 4px;
+                &:last-of-type {
+                    margin: 0;
+                }
+            }
+        }
+        &::before {
+            content: "❯";
+            display: block;
+            float: right;
+            color: $light-grey;
+            line-height: 1;
+            font-size: 20px;
+            position: absolute;
+            right: 12px;
+        }
+        &:hover::before,
+        &.active::before {
+            color: #666;
+        }
+        &:first-of-type {
+            border-radius: 4px 4px 0 0;
+        }
+        &:last-of-type {
+            border-bottom: none;
+            border-radius: 0 0 4px 4px;
+        }
+        &:only-of-type {
+            border-radius: 4px !important;
+        }
+        &.active,
+        &:hover {
+            background: #fff;
+            color: $dark-grey;
+        }
+        &.active {
+            font-weight: 700;
+        }
+    }
+}
+
+.mono {
+    font-family: cascadia, monospace;
+    background-color: #3331;
+    padding: 0px 2px;
+    border-radius: 4px;
+}
+
+.emoji {
+    font-style: normal;
 }

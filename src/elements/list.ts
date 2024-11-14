@@ -1,5 +1,6 @@
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { rpc } from "../login";
+import { processText } from "./utils";
 
 export function profile(profile: AppBskyActorDefs.ProfileView) {
   const html = document.createElement("div");
@@ -16,11 +17,14 @@ export function profile(profile: AppBskyActorDefs.ProfileView) {
   const header = document.createElement("a");
   header.href = `/profile/${profile.handle}`;
   header.className = "header";
-  header.innerHTML = `<span class="display-name">${profile.displayName}</span><span class="handle">@${profile.handle}</span></a>`;
+  header.innerHTML = `<span class="handle">${profile.handle}</span></a>`;
+  if (profile.displayName != "")
+    header.innerHTML += ` <span class="display-name">${profile.displayName}</span>`;
   contentDiv.appendChild(header);
   const bio = document.createElement("div");
   bio.className = "bio";
-  bio.innerText = profile.description?.replaceAll("\n", " ") || "";
+  bio.innerHTML =
+    processText(profile.description)?.replaceAll("<br/>", " ") || "";
   contentDiv.appendChild(bio);
   html.appendChild(contentDiv);
   return html;
