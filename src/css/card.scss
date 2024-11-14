@@ -81,7 +81,8 @@
     }
     .post-content {
         display: block;
-        margin-bottom: 4px;
+        margin-top: 2px;
+        margin-bottom: 2px;
         float: inline-start;
         width: 100%;
         word-wrap: break-word;
@@ -103,6 +104,9 @@
         margin-right: 4px;
         &:hover {
             text-decoration: none;
+        }
+        span {
+            vertical-align: middle;
         }
         svg {
             width: 12px;
