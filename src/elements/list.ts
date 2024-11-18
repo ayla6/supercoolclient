@@ -10,11 +10,9 @@ export async function profiles(
     const { data } = await rpc.get(nsid, { params: params });
     const profilesArray = "follows" in data ? data.follows : data.followers;
     const { cursor: nextPage } = data;
-    const fragment = document.createDocumentFragment();
     for (const _profile of profilesArray) {
-      fragment.append(profile(_profile));
+      content.append(profile(_profile));
     }
-    content.append(fragment);
     return nextPage;
   }
   params.cursor = await load();

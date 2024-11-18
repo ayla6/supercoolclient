@@ -62,26 +62,12 @@ export function image(
     "a",
     {
       className: "image",
-      href:
-        "https://cdn.bsky.app/img/feed_fullsize/plain/" +
-        did +
-        "/" +
-        image.image.ref.$link +
-        "@" +
-        fullFileType,
+      href: `https://cdn.bsky.app/img/feed_fullsize/plain/${did}/${image.image.ref.$link}@${fullFileType}`,
       target: "",
     },
     [
       elem("img", {
-        src:
-          "https://cdn.bsky.app/img/feed_" +
-          thumbSize +
-          "/plain/" +
-          did +
-          "/" +
-          image.image.ref.$link +
-          "@" +
-          thumbFileType,
+        src: `https://cdn.bsky.app/img/feed_${thumbSize}/plain/${did}/${image.image.ref.$link}@${thumbFileType}`,
         title: image.alt,
         alt: image.alt,
         loading: "lazy",

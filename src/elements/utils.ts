@@ -11,6 +11,19 @@ const dateOptions: Intl.DateTimeFormatOptions = {
 export function formatDate(date: Date) {
   return date.toLocaleString(undefined, dateOptions);
 }
+export function idchoose(profile: { did: string; handle: string }) {
+  return profile.handle === "handle.invalid" ? profile.did : profile.handle;
+}
+export function elem<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  params: Partial<HTMLElementTagNameMap[K]> = {},
+  children?: (Node | Text | string)[],
+) {
+  const e = document.createElement(tag);
+  Object.assign(e, params);
+  if (children) e.append(...children);
+  return e;
+}
 
 const emojiRegex = /([\p{Emoji}\u200d]+|\ud83c[\udde6-\uddff]{2})/gu;
 const map = {
@@ -27,21 +40,6 @@ export function processText(input: string = ""): string {
     .replaceAll(emojiRegex, '<span class="emoji">$1</span>')
     .replaceAll(/`(.*?)`/g, '<span class="mono">$1</span>')
     .replaceAll(/\n/g, "<br/>");
-}
-
-export function elem<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  params: Partial<HTMLElementTagNameMap[K]> = {},
-  children?: (Node | Text | string)[],
-) {
-  const e = document.createElement(tag);
-  Object.assign(e, params);
-  if (children) e.append(...children);
-  return e;
-}
-
-export function idchoose(profile: { did: string; handle: string }) {
-  return profile.handle === "handle.invalid" ? profile.did : profile.handle;
 }
 export function processRichText(text: string, facets: Facet[]) {
   let processed: string = "";
