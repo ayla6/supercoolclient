@@ -33,16 +33,16 @@ export async function homeRoute(
       },
     })
   ).data.feeds;
-  feedNav.appendChild(navButton("Following", ""));
+  feedNav.append(navButton("Following", ""));
   for (const feed of feedGens) {
-    feedNav.appendChild(navButton(feed.displayName, feed.uri));
+    feedNav.append(navButton(feed.displayName, feed.uri));
   }
-  leftBar.appendChild(feedNav);
-  container.appendChild(leftBar);
+  leftBar.append(feedNav);
+  container.append(leftBar);
 
   const content = document.createElement("div");
   content.id = "content";
-  container.appendChild(content);
+  container.append(content);
   document.title = "Following — SuperCoolClient";
   feed.feed("app.bsky.feed.getTimeline", {});
 }

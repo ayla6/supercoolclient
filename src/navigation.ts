@@ -59,6 +59,7 @@ function matchRoute(url: Array<String>) {
 }
 
 export async function updatePage() {
+  window.onscroll = null;
   const currentURL = window.location.pathname.split("/");
   if (currentURL[2] != loadedState[2]) {
     document.body.setAttribute("style", "");

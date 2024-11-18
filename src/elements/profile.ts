@@ -1,50 +1,57 @@
 import { AppBskyActorDefs, AppSCCProfile } from "@atcute/client/lexicons";
 import { rpc } from "../login";
-import { idchoose, processText } from "./utils";
+import { elem, idchoose, processText } from "./utils";
 
 export function header(
   profile: AppBskyActorDefs.ProfileViewDetailed,
   sccprofile?: AppSCCProfile.Record,
 ) {
   const atid = idchoose(profile);
-  const html = document.createElement("div");
-  html.className = "profile-header";
   let customCss = `background-image:
-    url(${profile.banner?.toString().replace("img/banner", "img/feed_fullsize")});`;
+    url(${profile.banner?.replace("img/banner", "img/feed_fullsize")});`;
   if (sccprofile != undefined) {
     if (sccprofile.accentColor)
       customCss += "--accent-color: " + sccprofile.accentColor + ";";
   }
   document.body.style.cssText = customCss;
-  const pfpDiv = document.createElement("a");
-  pfpDiv.className = "pfp-holder";
-  pfpDiv.innerHTML = `<img class="pfp" src="${profile.avatar}"></img>`;
-  html.appendChild(pfpDiv);
-  const accountStats = document.createElement("div");
-  accountStats.className = "stats";
-  accountStats.innerHTML = `
-  <button class="button follow">+ Follow</button>
-  <a href="/profile/${atid}"><b>${profile.postsCount}</b> Posts</a>
-  <a href="/profile/${atid}/following"><b>${profile.followsCount}</b> Following</a>
-  <a href="/profile/${atid}/followers"><b>${profile.followersCount}</b> followers</a>
-  `;
-  html.appendChild(accountStats);
-  const header = document.createElement("div");
-  header.className = "header";
-  header.innerHTML = `<span class="display-name">${profile.displayName}</span>
-  <span class="handle">@${atid}</span>`;
-  html.appendChild(header);
-  const bio = document.createElement("div");
-  bio.className = "bio";
-  bio.innerHTML = processText(profile.description) || "";
-  html.appendChild(bio);
-  return html;
+  return elem("div", { className: "profile-header" }, [
+    elem("a", { className: "pfp-holder" }, [
+      elem("img", { className: "pfp", src: profile.avatar }),
+    ]),
+    elem("div", { className: "stats" }, [
+      elem("button", { className: "button follow", innerHTML: "+ Follow" }),
+      elem("a", { href: "/profile/" + atid }, [
+        elem("b", { innerHTML: profile.postsCount.toLocaleString() }),
+        new Text(" Posts"),
+      ]),
+      elem("a", { href: "/profile/" + atid + "/following" }, [
+        elem("b", { innerHTML: profile.followsCount.toLocaleString() }),
+        new Text(" Following"),
+      ]),
+      elem("a", { href: "/profile/" + atid + "/followers" }, [
+        elem("b", { innerHTML: profile.followersCount.toLocaleString() }),
+        new Text(" Followers"),
+      ]),
+    ]),
+    elem("div", { className: "header" }, [
+      elem("span", {
+        className: "display-name",
+        innerHTML: profile.displayName,
+      }),
+      elem("span", { className: "handle", innerHTML: "@" + atid }),
+    ]),
+    elem("div", {
+      className: "bio",
+      innerHTML: profile.description ? processText(profile.description) : "",
+    }),
+  ]);
 }
 
 function navButton(name: string, atid: string, text: string, did?: string) {
-  const button = document.createElement("a");
-  button.href = "/profile/" + atid + (name == "posts" ? "" : "/" + name);
-  button.innerText = text;
+  const button = elem("a", {
+    href: "/profile/" + atid + (name == "posts" ? "" : "/" + name),
+    innerHTML: text,
+  });
   button.setAttribute("value", name);
   return button;
 }
@@ -55,13 +62,14 @@ async function mediaNavButton(
   text: string,
   did?: string,
 ) {
-  const button = document.createElement("a");
-  button.href = "/profile/" + atid + (name == "posts" ? "" : "/" + name);
-  button.innerText = text;
+  const button = elem("a", {
+    href: "/profile/" + atid + (name == "posts" ? "" : "/" + name),
+    innerHTML: text,
+  });
   button.setAttribute("value", name);
   const images = document.createElement("div");
   images.className = "images";
-  button.appendChild(images);
+  button.append(images);
   if (did) {
     const { data } = await rpc.get("app.bsky.feed.getAuthorFeed", {
       params: {
@@ -76,7 +84,7 @@ async function mediaNavButton(
         for (const image of post.post.embed.images) {
           const img = document.createElement("img");
           img.src = image.thumb;
-          images.appendChild(img);
+          images.append(img);
           imageCount++;
           if (imageCount == 4) break;
         }
@@ -105,33 +113,38 @@ export async function profilePage(atid: string) {
       })
     )?.data.value;
   } catch (error) {}
-  container.appendChild(header(profile.data, sccprofile));
-  const leftBar = document.createElement("div");
-  leftBar.className = "left-bar";
-  container.appendChild(leftBar);
-  const profileNav = document.createElement("div");
-  profileNav.className = "side-nav";
-  profileNav.appendChild(navButton("posts", atid, "Posts"));
-  profileNav.appendChild(navButton("replies", atid, "Posts and replies"));
-  profileNav.appendChild(navButton("likes", atid, "Favourites"));
-  profileNav.appendChild(navButton("following", atid, "Following"));
-  profileNav.appendChild(navButton("followers", atid, "Followers"));
-  profileNav.appendChild(
-    await mediaNavButton("media", atid, "Media", profile.data.did),
+  container.append(
+    header(profile.data, sccprofile),
+    elem("div", { className: "left-bar" }, [
+      elem("div", { className: "side-nav" }, [
+        navButton("posts", atid, "Posts"),
+        navButton("replies", atid, "Posts and replies"),
+        navButton("likes", atid, "Favourites"),
+        navButton("following", atid, "Following"),
+        navButton("followers", atid, "Followers"),
+        await mediaNavButton("media", atid, "Media", profile.data.did),
+      ]),
+      sccprofile?.pinnedSearches && sccprofile.pinnedSearches.length > 0
+        ? elem(
+            "div",
+            { className: "side-nav" },
+            ((): Node[] => {
+              let array: Node[] = [];
+              for (const search of sccprofile.pinnedSearches) {
+                array.push(
+                  navButton(
+                    "search?" + encodeURIComponent(search),
+                    atid,
+                    search,
+                  ),
+                );
+              }
+              return array;
+            })(),
+          )
+        : undefined,
+    ]),
+    elem("div", { id: "content" }),
   );
-  leftBar.appendChild(profileNav);
-  if (sccprofile?.pinnedSearches && sccprofile.pinnedSearches.length > 0) {
-    const profileSearches = document.createElement("div");
-    profileSearches.className = "side-nav";
-    for (const search of sccprofile.pinnedSearches) {
-      profileSearches.appendChild(
-        navButton("search?" + encodeURIComponent(search), atid, search),
-      );
-    }
-    leftBar.appendChild(profileSearches);
-  }
-  const content = document.createElement("div");
-  content.id = "content";
-  container.appendChild(content);
   return profile.data.did;
 }

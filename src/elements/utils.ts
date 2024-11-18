@@ -2,29 +2,28 @@ import { Facet, segmentize } from "@atcute/bluesky-richtext-segmenter";
 
 const dateOptions: Intl.DateTimeFormatOptions = {
   year: "numeric",
-  month: "numeric",
+  month: "short",
   day: "numeric",
   hour: "numeric",
   minute: "numeric",
+  hour12: false,
 };
 export function formatDate(date: Date) {
-  return date.toLocaleString("sv-SE", dateOptions);
+  return date.toLocaleString(undefined, dateOptions);
 }
 
-const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
+const emojiRegex = /([\p{Emoji}\u200d]+|\ud83c[\udde6-\uddff]{2})/gu;
 const map = {
   "<": "&lt;",
   ">": "&gt;",
   "&": "&amp;",
-  '"': "&quot;",
-  "'": "&#39;",
 };
 export function escapeHTML(input: string): string {
   return input.replaceAll(/[<>&"']/g, (m) => map[m]);
 }
 export function processText(input: string = ""): string {
   return input
-    .replaceAll(/[<>&"']/g, (m) => map[m])
+    .replaceAll(/[<>&]/g, (m) => map[m])
     .replaceAll(emojiRegex, '<span class="emoji">$1</span>')
     .replaceAll(/`(.*?)`/g, '<span class="mono">$1</span>')
     .replaceAll(/\n/g, "<br/>");
@@ -32,16 +31,12 @@ export function processText(input: string = ""): string {
 
 export function elem<K extends keyof HTMLElementTagNameMap>(
   tag: K,
-  params: Partial<HTMLElementTagNameMap[K]>,
+  params: Partial<HTMLElementTagNameMap[K]> = {},
   children?: (Node | Text)[],
 ) {
   const e = document.createElement(tag);
-  for (const key in params) e[key] = params[key];
-  if (children) {
-    for (const child of children) {
-      if (child) e.appendChild(child);
-    }
-  }
+  Object.assign(e, params);
+  if (children) e.append(...children);
   return e;
 }
 

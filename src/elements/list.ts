@@ -1,37 +1,5 @@
-import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { rpc } from "../login";
-import { processText } from "./utils";
-
-export function profile(profile: AppBskyActorDefs.ProfileView) {
-  const atid =
-    profile.handle === "handle.invalid" ? profile.did : profile.handle;
-  const userURL = "/profile/" + atid;
-  const html = document.createElement("div");
-  html.className = "card profile";
-  const holderPfp = document.createElement("div");
-  holderPfp.className = "pfp-holder";
-  const linkPfp = document.createElement("a");
-  linkPfp.href = userURL;
-  linkPfp.innerHTML = `<img class="pfp" src="${profile.avatar}"></img>`;
-  holderPfp.appendChild(linkPfp);
-  html.appendChild(holderPfp);
-  const contentDiv = document.createElement("div");
-  contentDiv.className = "content";
-  const header = document.createElement("a");
-  header.href = userURL;
-  header.className = "header";
-  header.innerHTML = `<span class="handle">${atid}</span></a>`;
-  if (profile.displayName != "")
-    header.innerHTML += ` <span class="display-name">${profile.displayName}</span>`;
-  contentDiv.appendChild(header);
-  const bio = document.createElement("div");
-  bio.className = "bio";
-  bio.innerHTML =
-    processText(profile.description)?.replaceAll("<br/>", " ") || "";
-  contentDiv.appendChild(bio);
-  html.appendChild(contentDiv);
-  return html;
-}
+import { profile } from "./card";
 
 export async function profiles(
   nsid: "app.bsky.graph.getFollows" | "app.bsky.graph.getFollowers",
@@ -42,9 +10,11 @@ export async function profiles(
     const { data } = await rpc.get(nsid, { params: params });
     const profilesArray = "follows" in data ? data.follows : data.followers;
     const { cursor: nextPage } = data;
+    const fragment = document.createDocumentFragment();
     for (const _profile of profilesArray) {
-      content.appendChild(profile(_profile));
+      fragment.append(profile(_profile));
     }
+    content.append(fragment);
     return nextPage;
   }
   params.cursor = await load();

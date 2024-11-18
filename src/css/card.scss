@@ -26,6 +26,9 @@
         padding: 8px;
         border-radius: 4px;
     }
+    .display-name::before {
+        content: " ";
+    }
 }
 
 .profile {
@@ -59,6 +62,14 @@
     .header {
         display: block;
         font-size: 12px;
+        height: 14px;
+        overflow: hidden;
+        white-space: nowrap;
+        .handle-area {
+            display: inline-block;
+            overflow: hidden;
+            max-width: 400px;
+        }
         .handle {
             font-weight: 700;
         }
@@ -66,11 +77,14 @@
             float: right;
             color: #999;
         }
+        .icon-holder {
+            display: inline-block;
+            margin-right: 2px;
+        }
         .repost-icon {
             width: 10px;
             height: 10px;
             color: #fff;
-            display: inline-block;
             vertical-align: middle;
             stroke-width: 3px;
             background: linear-gradient(#609928, #588d25);

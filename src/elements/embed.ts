@@ -9,36 +9,45 @@ import {
 } from "@atcute/client/lexicons";
 import { imageContainerSize } from "./feed";
 
-export function image(image: AppBskyEmbedImages.Image, did: string) {
+export function image(
+  image: AppBskyEmbedImages.Image,
+  did: string,
+  numberOfImages: number = 1,
+) {
   const a = document.createElement("a");
   const img = document.createElement("img");
-  a.appendChild(img);
+  a.append(img);
   const ogsize = {
-    width: image.aspectRatio?.width || 1000,
-    height: image.aspectRatio?.height || 5000,
+    width: image.aspectRatio?.width || imageContainerSize.width * 2,
+    height: image.aspectRatio?.height || imageContainerSize.height * 2,
   };
   let width: number;
   let height: number;
   if (
-    !(
-      ogsize.width <= imageContainerSize.width &&
-      ogsize.height <= imageContainerSize.height
-    )
+    ogsize.width <= imageContainerSize.width &&
+    ogsize.height <= imageContainerSize.height
   ) {
-    height = imageContainerSize.height;
-    width = ogsize.width * (height / ogsize.height);
-    if (width > imageContainerSize.width) {
-      width = imageContainerSize.width;
-      height = ogsize.height * (width / ogsize.width);
-    }
-  } else {
-    let n = Math.floor(imageContainerSize.height / ogsize.height);
+    let h = imageContainerSize.height;
+    if (numberOfImages >= 2 && ogsize.width == ogsize.height) h /= 2;
+    let n = Math.floor(h / ogsize.height);
     width = n * ogsize.width;
     height = n * ogsize.height;
     if (width > imageContainerSize.width) {
       n = Math.floor(imageContainerSize.width / ogsize.width);
       width = n * ogsize.width;
       height = n * ogsize.height;
+    }
+  } else {
+    if (numberOfImages >= 2 && ogsize.width == ogsize.height) {
+      width = imageContainerSize.width / 2;
+      height = imageContainerSize.width / 2;
+    } else {
+      height = imageContainerSize.height;
+      width = ogsize.width * (height / ogsize.height);
+      if (width > imageContainerSize.width) {
+        width = imageContainerSize.width;
+        height = ogsize.height * (width / ogsize.width);
+      }
     }
   }
   img.width = width;
@@ -86,7 +95,7 @@ export function load(
     switch (embed.$type) {
       case "app.bsky.embed.images":
         for (const img of embed.images) {
-          embeds.push(image(img, did));
+          embeds.push(image(img, did, embed.images.length));
         }
         break;
       default:
