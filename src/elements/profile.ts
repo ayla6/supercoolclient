@@ -49,7 +49,7 @@ export function header(
 
 function navButton(name: string, atid: string, text: string, did?: string) {
   const button = elem("a", {
-    href: "/profile/" + atid + (name == "posts" ? "" : "/" + name),
+    href: "/profile/" + atid + (name === "posts" ? "" : "/" + name),
     innerHTML: text,
   });
   button.setAttribute("value", name);
@@ -63,7 +63,7 @@ async function mediaNavButton(
   did?: string,
 ) {
   const button = elem("a", {
-    href: "/profile/" + atid + (name == "posts" ? "" : "/" + name),
+    href: "/profile/" + atid + (name === "posts" ? "" : "/" + name),
     innerHTML: text,
   });
   button.setAttribute("value", name);
@@ -86,9 +86,9 @@ async function mediaNavButton(
           img.src = image.thumb;
           images.append(img);
           imageCount++;
-          if (imageCount == 4) break;
+          if (imageCount === 4) break;
         }
-      if (imageCount == 4) break;
+      if (imageCount === 4) break;
     }
   }
   return button;

@@ -35,7 +35,7 @@ export async function feed(nsid: feedNSID, params: any) {
       ) {
         params.cursor = await load();
       }
-      if (params.cursor == undefined) {
+      if (params.cursor === undefined) {
         window.onscroll = null;
       }
     };

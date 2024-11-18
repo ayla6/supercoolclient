@@ -36,12 +36,14 @@ export function elem<K extends keyof HTMLElementTagNameMap>(
 ) {
   const e = document.createElement(tag);
   Object.assign(e, params);
-  if (children) e.append(...children);
+  if (children) {
+    e.append(...children);
+  }
   return e;
 }
 
 export function idchoose(profile: { did: string; handle: string }) {
-  return profile.handle == "handle.invalid" ? profile.did : profile.handle;
+  return profile.handle === "handle.invalid" ? profile.did : profile.handle;
 }
 export function processRichText(text: string, facets: Facet[]) {
   let processed: string = "";

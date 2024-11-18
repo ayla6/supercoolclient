@@ -26,7 +26,7 @@ export async function profiles(
       ) {
         params.cursor = await load();
       }
-      if (params.cursor == undefined) {
+      if (params.cursor === undefined) {
         window.onscroll = null;
       }
     };

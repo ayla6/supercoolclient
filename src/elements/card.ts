@@ -22,20 +22,20 @@ function interactionButton(type: string, post: AppBskyFeedDefs.PostView) {
   const button = document.createElement("button");
   button.innerHTML = icon[type];
   button.setAttribute("role", "button");
-  button.className = `interaction ${type}`;
+  button.className = "interaction " + type;
 
   const countSpan = document.createElement("span");
-  let count = post[type + "Count"] || 0;
-  countSpan.innerText = count;
+  let count: number = post[type + "Count"];
+  countSpan.innerText = count.toLocaleString();
   button.append(countSpan);
 
   const updateInteraction = async (active: boolean) => {
     try {
       const userDid = sessionStorage.getItem("userdid");
-      const collection = `app.bsky.feed.${type}`;
+      const collection = "app.bsky.feed." + type;
+      count += active ? 1 : -1;
+      countSpan.innerHTML = count.toLocaleString();
       if (active) {
-        count++;
-        countSpan.innerText = count;
         const { cid, uri } = post;
         const response = await rpc.call("com.atproto.repo.createRecord", {
           data: {
@@ -48,34 +48,23 @@ function interactionButton(type: string, post: AppBskyFeedDefs.PostView) {
             repo: userDid,
           },
         });
-        console.log(response);
         post.viewer[type] = response.data.uri;
-        post[type + "Count"] = count;
       } else {
-        count--;
-        countSpan.innerText = count;
         const recordUri = post.viewer[type];
-        if (!recordUri) {
-          throw new Error(`No ${type} record URI found on post.`);
-        }
+        if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
         const [, , did, , rkey] = recordUri.split("/");
         await rpc.call("com.atproto.repo.deleteRecord", {
           data: { rkey, collection, repo: did },
         });
         post.viewer[type] = null;
-        post[type + "Count"] = count;
       }
-
+      post[type + "Count"] = count;
       button.classList.toggle("active", active);
     } catch (err) {
       console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
       // revert count if the interaction failed
-      if (active) {
-        count--;
-      } else {
-        count++;
-      }
-      countSpan.innerText = count;
+      count += active ? -1 : 1;
+      countSpan.innerHTML = count.toLocaleString();
     }
   };
 

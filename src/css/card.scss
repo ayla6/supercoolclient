@@ -80,12 +80,14 @@
         .icon-holder {
             display: inline-block;
             margin-right: 3px;
+            vertical-align: middle;
+            height: 12px;
         }
         .repost-icon {
+            display: inline-block;
             width: 10px;
             height: 10px;
             color: #fff;
-            vertical-align: middle;
             stroke-width: 3px;
             background: linear-gradient(#609928, #588d25);
             padding: 1px 4px;

@@ -22,12 +22,12 @@ export async function profileRoute(
   const lastPlace = loadedState[3] || "posts";
   document
     .querySelector(
-      `[value="${(lastPlace || "posts") + (lastPlace == "search" ? loadedState[4] : "")}"]`,
+      `[value="${(lastPlace || "posts") + (lastPlace === "search" ? loadedState[4] : "")}"]`,
     )
     .classList.remove("active");
   document
     .querySelector(
-      `[value="${place + (place == "search" ? window.location.search : "")}"]`,
+      `[value="${place + (place === "search" ? window.location.search : "")}"]`,
     )
     .classList.add("active");
   document.getElementById("content").innerHTML = "";
