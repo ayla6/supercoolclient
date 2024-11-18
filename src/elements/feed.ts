@@ -19,11 +19,9 @@ export async function feed(nsid: feedNSID, params: any) {
     const { data } = await rpc.get(nsid, { params: params });
     let { cursor: nextPage } = data;
     const postsArray = "posts" in data ? data.posts : data.feed;
-    const fragment = document.createDocumentFragment();
     for (const _post of postsArray) {
-      fragment.append(post(_post));
+      content.append(post(_post));
     }
-    content.append(fragment);
     return nextPage;
   }
   params.cursor = await load();

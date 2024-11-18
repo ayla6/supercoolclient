@@ -19,15 +19,15 @@ export const icon = {
 };
 
 function interactionButton(type: string, post: AppBskyFeedDefs.PostView) {
-  const button = document.createElement("button");
-  button.innerHTML = icon[type];
-  button.setAttribute("role", "button");
-  button.className = "interaction " + type;
-
-  const countSpan = document.createElement("span");
   let count: number = post[type + "Count"];
-  countSpan.innerText = count.toLocaleString();
-  button.append(countSpan);
+
+  const countSpan = elem("span", { innerHTML: count.toLocaleString() });
+  const button = elem(
+    "button",
+    { innerHTML: icon[type], className: "interaction " + type },
+    [countSpan],
+  );
+  button.setAttribute("role", "button");
 
   const updateInteraction = async (active: boolean) => {
     try {
@@ -143,36 +143,28 @@ export function post(
         }),
       ]),
       // text content
-      elem(
-        "div",
-        {
-          className: "post-content",
-          innerHTML: postRecord.text
-            ? processRichText(postRecord.text, postRecord.facets)
-            : "",
-        },
-        undefined,
-      ),
+      postRecord.text
+        ? elem("div", {
+            className: "post-content",
+            innerHTML: processRichText(postRecord.text, postRecord.facets),
+          })
+        : "",
       // embeds
-      elem(
-        "div",
-        { className: "embeds" },
-        postRecord.embed
-          ? embed.load(postRecord.embed, actualPost.author.did)
-          : undefined,
-      ),
+      postRecord.embed
+        ? elem(
+            "div",
+            { className: "embeds" },
+            embed.load(postRecord.embed, actualPost.author.did),
+          )
+        : "",
       // likes repost and comments
-      elem(
-        "div",
-        { className: "stats" },
-        actualPost.viewer
-          ? [
-              interactionButton("like", actualPost),
-              interactionButton("repost", actualPost),
-              interactionButton("reply", actualPost),
-            ]
-          : undefined,
-      ),
+      actualPost.viewer
+        ? elem("div", { className: "stats" }, [
+            interactionButton("like", actualPost),
+            interactionButton("repost", actualPost),
+            interactionButton("reply", actualPost),
+          ])
+        : "",
     ]),
   ]);
 }
@@ -192,7 +184,7 @@ export function profile(profile: AppBskyActorDefs.ProfileView) {
               className: "display-name",
               innerHTML: profile.displayName,
             })
-          : undefined,
+          : "",
       ]),
       elem("div", {
         className: "bio",

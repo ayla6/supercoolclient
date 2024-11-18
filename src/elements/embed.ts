@@ -10,6 +10,7 @@ import {
 import { imageContainerSize } from "./feed";
 import { elem } from "./utils";
 
+const forcePngFileTypes = ["webp", "gif"];
 export function image(
   image: AppBskyEmbedImages.Image,
   did: string,
@@ -40,18 +41,21 @@ export function image(
   }
 
   const ogFileType = image.image.mimeType.split("/")[1];
-  const fullFileType = ogFileType === "webp" ? "png" : ogFileType;
+  const fullFileType = forcePngFileTypes.includes(ogFileType)
+    ? "png"
+    : ogFileType;
 
   let thumbFileType = "webp";
   let thumbSize = "thumbnail";
+  let imageRendering = "";
   if (ogsize.width <= 1000 && ogsize.height <= 1000) {
     thumbSize = "fullsize";
-    thumbFileType = ogFileType;
+    thumbFileType = fullFileType;
     if (
       ogsize.width <= imageContainerSize.width &&
       ogsize.height <= imageContainerSize.height
     )
-      img.style.imageRendering = "pixelated";
+      imageRendering = "pixelated";
   }
 
   return elem(
@@ -83,6 +87,9 @@ export function image(
         loading: "lazy",
         width: width,
         height: height,
+        style: {
+          imageRendering: imageRendering,
+        } as CSSStyleDeclaration,
       }),
     ],
   );

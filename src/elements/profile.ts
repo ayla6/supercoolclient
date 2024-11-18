@@ -142,7 +142,7 @@ export async function profilePage(atid: string) {
               return array;
             })(),
           )
-        : undefined,
+        : "",
     ]),
     elem("div", { id: "content" }),
   );

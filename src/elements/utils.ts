@@ -32,13 +32,11 @@ export function processText(input: string = ""): string {
 export function elem<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   params: Partial<HTMLElementTagNameMap[K]> = {},
-  children?: (Node | Text)[],
+  children?: (Node | Text | string)[],
 ) {
   const e = document.createElement(tag);
   Object.assign(e, params);
-  if (children) {
-    e.append(...children);
-  }
+  if (children) e.append(...children);
   return e;
 }
 
