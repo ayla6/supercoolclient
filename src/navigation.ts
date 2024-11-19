@@ -15,10 +15,10 @@
   history.pushState(null, "", url);
 });*/
 
-import { login } from "./login.ts";
-import { loadNavbar } from "./elements/navbar.ts";
-import { profileRoute } from "./routes/profile.ts";
-import { homeRoute } from "./routes/home.ts";
+import { login } from "./login";
+import { loadNavbar } from "./elements/ui/navbar";
+import { profileRoute } from "./routes/profile";
+import { homeRoute } from "./routes/home";
 
 let loadedState: Array<String> = [""];
 function saveLastLocation() {

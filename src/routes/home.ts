@@ -1,5 +1,5 @@
-import * as feed from "../elements/feed.ts";
-import { rpc } from "../login.ts";
+import * as feed from "../elements/content/feed";
+import { rpc } from "../login";
 
 function navButton(text: string, feed: string) {
   const button = document.createElement("a");

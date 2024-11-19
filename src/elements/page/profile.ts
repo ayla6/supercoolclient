@@ -1,6 +1,8 @@
 import { AppBskyActorDefs, AppSCCProfile } from "@atcute/client/lexicons";
-import { rpc } from "../login";
-import { elem, idchoose, processText } from "./utils";
+import { rpc } from "../../login";
+import { idchoose } from "../blocks/id";
+import { elem } from "../blocks/elem";
+import { processText } from "../blocks/textprocessing";
 
 export function header(
   profile: AppBskyActorDefs.ProfileViewDetailed,

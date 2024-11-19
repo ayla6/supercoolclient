@@ -7,8 +7,12 @@ import {
   AppBskyFeedPost,
   Brand,
 } from "@atcute/client/lexicons";
-import { imageContainerSize } from "./feed";
-import { elem } from "./utils";
+import { elem } from "../blocks/elem";
+
+const imageContainerSize = {
+  width: 500,
+  height: 500,
+};
 
 const forcePngFileTypes = ["webp", "gif"];
 export function image(

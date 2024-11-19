@@ -1,30 +1,5 @@
 import { Facet, segmentize } from "@atcute/bluesky-richtext-segmenter";
 
-const dateOptions: Intl.DateTimeFormatOptions = {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  hour: "numeric",
-  minute: "numeric",
-  hour12: false,
-};
-export function formatDate(date: Date) {
-  return date.toLocaleString(undefined, dateOptions);
-}
-export function idchoose(profile: { did: string; handle: string }) {
-  return profile.handle === "handle.invalid" ? profile.did : profile.handle;
-}
-export function elem<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  params: Partial<HTMLElementTagNameMap[K]> = {},
-  children?: (Node | Text | string)[],
-) {
-  const e = document.createElement(tag);
-  Object.assign(e, params);
-  if (children) e.append(...children);
-  return e;
-}
-
 const emojiRegex = /([\p{Emoji}\u200d]+|\ud83c[\udde6-\uddff]{2})/gu;
 const map = {
   "<": "&lt;",

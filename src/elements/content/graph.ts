@@ -1,29 +1,24 @@
-import { rpc } from "../login";
-import { profile } from "./card";
+import { profile } from "../ui/card";
+import { load } from "./load";
 
 export async function profiles(
   nsid: "app.bsky.graph.getFollows" | "app.bsky.graph.getFollowers",
   params: any,
 ) {
   const content = document.getElementById("content");
-  async function load() {
-    const { data } = await rpc.get(nsid, { params: params });
-    const profilesArray = "follows" in data ? data.follows : data.followers;
-    const { cursor: nextPage } = data;
-    for (const _profile of profilesArray) {
-      content.append(profile(_profile));
-    }
-    return nextPage;
+  const dataLocation =
+    nsid === "app.bsky.graph.getFollows" ? "follows" : "followers";
+  async function _load() {
+    return await load(nsid, params, dataLocation, content, profile);
   }
-  params.cursor = await load();
+  params.cursor = _load();
   if (params.cursor != undefined) {
     window.onscroll = async function (ev) {
       if (
         window.innerHeight + Math.round(window.scrollY) >=
         document.body.offsetHeight
-      ) {
-        params.cursor = await load();
-      }
+      )
+        params.cursor = _load();
       if (params.cursor === undefined) {
         window.onscroll = null;
       }
