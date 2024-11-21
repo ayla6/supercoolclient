@@ -15,7 +15,7 @@ export function processText(input: string = ""): string {
   return input
     .replaceAll(/[<>&]/g, (m) => map[m])
     .replaceAll(emojiRegex, '<span class="emoji">$1</span>')
-    .replaceAll(/`(.*?)`/g, '<span class="mono">$1</span>')
+    .replaceAll(/`(.*?)`/g, "<code>$1</code>")
     .replaceAll(/\n/g, "<br/>");
 }
 export function processRichText(text: string, facets: Facet[]) {

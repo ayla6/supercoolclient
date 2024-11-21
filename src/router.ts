@@ -34,19 +34,23 @@ history.pushState = function (state, title, url) {
   originalPushState.apply(history, arguments);
 };
 
-const routes: { [key: string]: Function } = {
-  "/": homeRoute,
-  "/profile/:handle": profileRoute,
-  "/profile/:handle/:location": profileRoute,
-  "/profile/:handle/post/:rkey": postRoute,
+const routes: { [key: string]: string } = {
+  "/": "home",
+  "/profile/:handle": "profile",
+  "/profile/:handle/:location": "profile",
+  "/profile/:handle/post/:rkey": "post",
 };
-const urlChangeRoutes: { [key: string]: Function } = {
-  "/": homeURLChange,
-  "/profile/:handle": profileURLChange,
-  "/profile/:handle/:location": profileURLChange,
-  "/profile/:handle/post/:rkey": (a, b) => {},
+const changeRoutes: { [key: string]: Function } = {
+  home: homeRoute,
+  profile: profileRoute,
+  post: postRoute,
 };
-function matchRoute(url: string, routes: { [key: string]: Function }) {
+const localRoutes: { [key: string]: Function } = {
+  home: homeURLChange,
+  profile: profileURLChange,
+  post: (a, b) => {},
+};
+function matchRoute(url: string) {
   const splitURL = url.split("/");
   for (const route of Object.keys(routes)) {
     const routeParts = route.split("/");
@@ -61,9 +65,7 @@ function matchRoute(url: string, routes: { [key: string]: Function }) {
       }
     }
 
-    if (match) {
-      return routes[route];
-    }
+    if (match) return routes[route];
   }
   return null;
 }
@@ -76,16 +78,14 @@ export async function updatePage() {
   if (splitURL[2] != splitLoaded[2]) {
     document.body.setAttribute("style", "");
   }
-  if (splitLoaded[1] == splitURL[1])
-    matchRoute(window.location.pathname, urlChangeRoutes)(
-      currentURL,
-      loadedState,
-    );
-  else {
+  const route = matchRoute(currentURL);
+  if (route === matchRoute(loadedState)) {
+    localRoutes[route](currentURL, loadedState);
+  } else {
     window.scrollTo({ top: 0 });
     document.body.removeChild(document.getElementById("container"));
     document.body.append(elem("div", { id: "container" }));
-    matchRoute(currentURL, routes)(currentURL, loadedState);
+    changeRoutes[route](currentURL, loadedState);
   }
   saveLastLocation();
 }

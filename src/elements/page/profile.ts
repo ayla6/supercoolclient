@@ -1,5 +1,5 @@
 import { AppBskyActorDefs, SCCProfile } from "@atcute/client/lexicons";
-import { rpc } from "../../login";
+import { manager, rpc } from "../../login";
 import { idchoose } from "../blocks/id";
 import { elem } from "../blocks/elem";
 import { processText } from "../blocks/textprocessing";
@@ -121,7 +121,9 @@ export async function profilePage(atid: string) {
       elem("div", { className: "side-nav" }, [
         navButton("posts", atid, "Posts"),
         navButton("replies", atid, "Posts and replies"),
-        navButton("likes", atid, "Favourites"),
+        manager.session.did === profile.data.did
+          ? navButton("likes", atid, "Favourites")
+          : "",
         navButton("following", atid, "Following"),
         navButton("followers", atid, "Followers"),
         await mediaNavButton("media", atid, "Media", profile.data.did),

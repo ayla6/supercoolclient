@@ -4,7 +4,7 @@ import { profilePage } from "../elements/page/profile";
 
 const urlEquivalents: { [key: string | undefined]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
-  undefined: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
+  "": ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
   media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
   replies: ["app.bsky.feed.getAuthorFeed", "posts_with_replies"],
   likes: ["app.bsky.feed.getActorLikes"],
@@ -13,7 +13,7 @@ const urlEquivalents: { [key: string | undefined]: [feedNSID, string?] } = {
 export async function profileRoute(url: string, loadedState: string) {
   const splitURL = url.split("/");
   const splitLoaded = loadedState.split("/");
-  document.title = url[2] + " — SuperCoolClient";
+  document.title = splitURL[2] + " — SuperCoolClient";
 
   let atid = splitURL[2];
   if (splitLoaded[2] != atid || splitLoaded[3] == "post")

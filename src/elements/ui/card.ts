@@ -2,7 +2,7 @@ import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import * as embed from "./embed";
 import { idchoose } from "../blocks/id";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
-import { rpc } from "../../login";
+import { manager, rpc } from "../../login";
 import { elem } from "../blocks/elem";
 import { processRichText, processText } from "../blocks/textprocessing";
 import { formatDate } from "../blocks/date";
@@ -31,7 +31,6 @@ function interactionButton(
 
   const updateInteraction = async (active: boolean) => {
     try {
-      const userDid = sessionStorage.getItem("userdid");
       const collection = "app.bsky.feed." + type;
       count += active ? 1 : -1;
       countSpan.innerHTML = count.toLocaleString();
@@ -45,7 +44,7 @@ function interactionButton(
               subject: { cid, uri },
             },
             collection,
-            repo: userDid,
+            repo: manager.session.did,
           },
         });
         post.viewer[type] = response.data.uri;
