@@ -48,7 +48,7 @@ const changeRoutes: { [key: string]: Function } = {
 const localRoutes: { [key: string]: Function } = {
   home: homeURLChange,
   profile: profileURLChange,
-  post: (a, b) => {},
+  post: postRoute,
 };
 function matchRoute(url: string) {
   const splitURL = url.split("/");

@@ -100,15 +100,17 @@ export function post(
     "div",
     {
       className: "card post " + addClass,
-      style: {
-        cssText: marginLeft ? `margin-left: ${marginLeft}px` : null,
-      } as CSSStyleDeclaration,
+      style: marginLeft ? `margin-left: ${marginLeft}px` : null,
     },
     [
       //profile picture
       elem("div", { className: "pfp-holder" }, [
         elem("a", { href: "/profile/" + atid }, [
-          elem("img", { className: "pfp", src: actualPost.author.avatar }),
+          elem("img", {
+            className: "pfp",
+            src: actualPost.author.avatar,
+            loading: "lazy",
+          }),
         ]),
       ]),
       //content
@@ -116,9 +118,7 @@ export function post(
         "div",
         {
           className: "content",
-          style: {
-            cssText: marginLeft ? `max-width: ${500 - marginLeft}px` : null,
-          } as CSSStyleDeclaration,
+          style: marginLeft ? `max-width: ${500 - marginLeft}px` : null,
         },
         [
           // header

@@ -53,7 +53,7 @@ export async function homeRoute(
   }
 }
 
-export async function homeURLChange(_url?: string, _loadedState?: string) {
+export async function homeURLChange(_url?: string, loadedState?: string) {
   const url = new URL(window.location.href);
   const params = url.searchParams;
   let feedgen = params.get("feedgen");
@@ -82,7 +82,7 @@ export async function homeURLChange(_url?: string, _loadedState?: string) {
     feedgen === "following"
       ? "app.bsky.feed.getTimeline"
       : "app.bsky.feed.getFeed";
-  if (lastFeed !== feedgen) {
+  if (lastFeed !== feedgen || loadedState?.split("/")[0] != "") {
     document.querySelector(".active")?.classList.remove("active");
     document
       .querySelector(`[href="?feedgen=${feedgen}&title=${title}"]`)
