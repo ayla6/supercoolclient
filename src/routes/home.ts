@@ -71,16 +71,18 @@ export async function homeURLChange(intheSamePage: boolean = false) {
     feedgen === "following"
       ? "app.bsky.feed.getTimeline"
       : "app.bsky.feed.getFeed";
-  //if (intheSamePage && currentFeed === "following" && currentFeed === feedgen) {
+  //if (intheSamePage && currentFeed === "following" && ) {
   //} else {
   const content = document.getElementById("content");
-  content.innerHTML = "";
-  document.querySelector(".active")?.classList.remove("active");
-  document
-    .querySelector(`[href="?feedgen=${feedgen}&title=${title}"]`)
-    ?.classList.add("active");
+  if (currentFeed !== feedgen) {
+    content.innerHTML = "";
+    document.querySelector(".active")?.classList.remove("active");
+    document
+      .querySelector(`[href="?feedgen=${feedgen}&title=${title}"]`)
+      ?.classList.add("active");
+  }
   const items = await feed(nsid, { feed: feedgen });
+  content.innerHTML = "";
   content.append(...items);
-  //}
   currentFeed = feedgen;
 }

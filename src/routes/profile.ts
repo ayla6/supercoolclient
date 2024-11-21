@@ -33,7 +33,7 @@ export async function profileRoute(
     )
     ?.classList.add("active");
   const content = document.getElementById("content");
-  content.innerHTML = "";
+  if (loadedState[3] != url[3]) content.innerHTML = "";
   let posts: HTMLElement[];
   switch (place) {
     case "following":
@@ -55,5 +55,6 @@ export async function profileRoute(
       });
       break;
   }
+  content.innerHTML = "";
   content.append(...posts);
 }
