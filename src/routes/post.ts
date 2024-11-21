@@ -2,17 +2,15 @@ import { elem } from "../elements/blocks/elem";
 import { post } from "../elements/ui/card";
 import { rpc } from "../login";
 
-export async function postRoute(
-  url: Array<string>,
-  loadedState: Array<string>,
-) {
+export async function postRoute(url: string, loadedState: string) {
+  const splitURL = url.split("/");
   const container = document.getElementById("container");
   container.innerHTML = "";
   const content = elem("div", { id: "content" });
   container.append(content);
   const thread = await rpc.get("app.bsky.feed.getPostThread", {
     params: {
-      uri: `at://${url[2]}/app.bsky.feed.post/${url[4]}`,
+      uri: `at://${splitURL[2]}/app.bsky.feed.post/${splitURL[4]}`,
     },
   });
   let currentThread = thread.data.thread;

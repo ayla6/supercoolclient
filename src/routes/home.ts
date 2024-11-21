@@ -53,7 +53,7 @@ export async function homeRoute(
   }
 }
 
-export async function homeURLChange() {
+export async function homeURLChange(_url?: string, _loadedState?: string) {
   const url = new URL(window.location.href);
   const params = url.searchParams;
   let feedgen = params.get("feedgen");
@@ -66,6 +66,9 @@ export async function homeURLChange() {
       title = "Following";
     }
   }
+  const lastFeed = currentFeed;
+  currentFeed = feedgen;
+  localStorage.setItem("last-feed", JSON.stringify([feedgen, title]));
 
   document.title = `${title} — SuperCoolClient`;
 
@@ -79,17 +82,17 @@ export async function homeURLChange() {
     feedgen === "following"
       ? "app.bsky.feed.getTimeline"
       : "app.bsky.feed.getFeed";
-  const content = document.getElementById("content");
-  if (currentFeed !== feedgen) {
-    content.innerHTML = "";
+  if (lastFeed !== feedgen) {
     document.querySelector(".active")?.classList.remove("active");
     document
       .querySelector(`[href="?feedgen=${feedgen}&title=${title}"]`)
       ?.classList.add("active");
   }
-  const items = await feed(nsid, { feed: feedgen });
-  content.innerHTML = "";
-  content.append(...items);
-  currentFeed = feedgen;
-  localStorage.setItem("last-feed", JSON.stringify([feedgen, title]));
+  const content = document.getElementById("content");
+  if (currentFeed !== lastFeed) content.innerHTML = "";
+  if (currentFeed === feedgen) {
+    const items = await feed(nsid, { feed: feedgen });
+    content.innerHTML = "";
+    content.append(...items);
+  }
 }

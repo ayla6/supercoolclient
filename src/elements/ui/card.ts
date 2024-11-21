@@ -101,7 +101,9 @@ export function post(
     "div",
     {
       className: "card post " + addClass,
-      style: marginLeft ? `margin-left: ${marginLeft}px` : null,
+      style: {
+        cssText: marginLeft ? `margin-left: ${marginLeft}px` : null,
+      } as CSSStyleDeclaration,
     },
     [
       //profile picture
@@ -115,7 +117,9 @@ export function post(
         "div",
         {
           className: "content",
-          style: marginLeft ? `max-width: ${500 - marginLeft}px` : null,
+          style: {
+            cssText: marginLeft ? `max-width: ${500 - marginLeft}px` : null,
+          } as CSSStyleDeclaration,
         },
         [
           // header

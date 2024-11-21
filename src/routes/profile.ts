@@ -10,21 +10,27 @@ const urlEquivalents: { [key: string | undefined]: [feedNSID, string?] } = {
   likes: ["app.bsky.feed.getActorLikes"],
 };
 
-export async function profileRoute(
-  url: Array<string>,
-  loadedState: Array<string>,
-) {
+export async function profileRoute(url: string, loadedState: string) {
+  const splitURL = url.split("/");
+  const splitLoaded = loadedState.split("/");
   document.title = url[2] + " — SuperCoolClient";
 
-  let atid = url[2];
-  console.log(loadedState);
-  if (loadedState[2] != atid || loadedState[3] == "post")
+  let atid = splitURL[2];
+  if (splitLoaded[2] != atid || splitLoaded[3] == "post")
     atid = await profilePage(atid);
-  const place = url[3] ?? "posts";
-  const lastPlace = loadedState[3] ?? "posts";
+  profileURLChange(url, loadedState);
+}
+
+export async function profileURLChange(url: string, loadedState: string) {
+  const splitURL = url.split("/");
+  const splitLoaded = loadedState.split("/");
+  const atid = splitURL[2];
+  const place = splitURL[3] ?? "posts";
+  const lastPlace = splitLoaded[3] ?? "posts";
+  const content = document.getElementById("content");
   document
     .querySelector(
-      `[value="${(lastPlace ?? "posts") + (lastPlace === "search" ? loadedState[4] : "")}"]`,
+      `[value="${(lastPlace ?? "posts") + (lastPlace === "search" ? splitLoaded[4] : "")}"]`,
     )
     ?.classList.remove("active");
   document
@@ -32,8 +38,7 @@ export async function profileRoute(
       `[value="${place + (place === "search" ? window.location.search : "")}"]`,
     )
     ?.classList.add("active");
-  const content = document.getElementById("content");
-  if (loadedState[3] != url[3]) content.innerHTML = "";
+  if (splitLoaded[3] != splitURL[3]) content.innerHTML = "";
   let posts: HTMLElement[];
   switch (place) {
     case "following":
