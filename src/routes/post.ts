@@ -1,3 +1,4 @@
+import { elem } from "../elements/blocks/elem";
 import { post } from "../elements/ui/card";
 import { rpc } from "../login";
 
@@ -7,7 +8,8 @@ export async function postRoute(
 ) {
   const container = document.getElementById("container");
   container.innerHTML = "";
-  console.log(`at://${url[2]}/app.bsky.feed.post/${url[4]}`);
+  const content = elem("div", { id: "content" });
+  container.append(content);
   const thread = await rpc.get("app.bsky.feed.getPostThread", {
     params: {
       uri: `at://${url[2]}/app.bsky.feed.post/${url[4]}`,
@@ -15,11 +17,11 @@ export async function postRoute(
   });
   let currentThread = thread.data.thread;
   while ("parent" in currentThread && "post" in currentThread.parent) {
-    container.prepend(post(currentThread.parent.post));
+    content.prepend(post(currentThread.parent.post));
     currentThread = currentThread.parent;
   }
   if ("post" in thread.data.thread) {
-    container.append(post(thread.data.thread.post, "full"));
+    content.append(post(thread.data.thread.post, "full"));
   }
   if ("replies" in thread.data.thread) {
     const appendReplies = (
@@ -40,7 +42,6 @@ export async function postRoute(
         frag.append(fragment);
       }
     };
-    appendReplies(thread.data.thread.replies, container, 0);
-    console.log(thread);
+    appendReplies(thread.data.thread.replies, content, 0);
   }
 }

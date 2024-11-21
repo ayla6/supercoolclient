@@ -17,19 +17,21 @@ export async function profileRoute(
   document.title = url[2] + " — SuperCoolClient";
 
   let atid = url[2];
-  if (loadedState[2] != atid) atid = await profilePage(atid);
+  console.log(loadedState);
+  if (loadedState[2] != atid || loadedState[3] == "post")
+    atid = await profilePage(atid);
   const place = url[3] ?? "posts";
   const lastPlace = loadedState[3] ?? "posts";
   document
     .querySelector(
       `[value="${(lastPlace ?? "posts") + (lastPlace === "search" ? loadedState[4] : "")}"]`,
     )
-    .classList.remove("active");
+    ?.classList.remove("active");
   document
     .querySelector(
       `[value="${place + (place === "search" ? window.location.search : "")}"]`,
     )
-    .classList.add("active");
+    ?.classList.add("active");
   const content = document.getElementById("content");
   content.innerHTML = "";
   let posts: HTMLElement[];
