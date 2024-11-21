@@ -3,6 +3,7 @@
 
 .card {
     display: table;
+    margin-bottom: 8px;
     .pfp-holder {
         margin: 4px;
         float: left;
@@ -19,12 +20,13 @@
     }
     .content {
         display: block;
-        width: 500px;
+        width: $content-width;
         float: right;
-        margin: 0 0 8px 8px;
+        margin-left: 8px;
         background: #fff;
         padding: 8px;
-        border-radius: 4px;
+        border-radius: $border-radius;
+        box-shadow: $box-shadow;
     }
     .display-name::before {
         content: " ";
@@ -65,6 +67,7 @@
         height: 14px;
         overflow: hidden;
         white-space: nowrap;
+        margin-bottom: 4px;
         .handle-area {
             display: inline-block;
             overflow: hidden;
@@ -96,8 +99,6 @@
     }
     .post-content {
         display: block;
-        margin-top: 2px;
-        margin-bottom: 2px;
         float: inline-start;
         width: 100%;
         word-wrap: break-word;
@@ -105,11 +106,13 @@
     .stats {
         display: block;
         float: inline-start;
+        margin-top: 4px;
         icon {
             margin-right: 4px;
         }
     }
     button.interaction {
+        color: $dark-grey;
         font-size: 12px;
         background: none;
         padding: 0;
@@ -143,9 +146,44 @@
             }
         }
     }
+    &.full {
+        background-color: white;
+        box-shadow: $box-shadow;
+        border-radius: $border-radius;
+        .pfp-holder::after {
+            display: none;
+        }
+        .pfp-holder {
+            margin: 8px;
+            margin-right: 0;
+        }
+        .pfp {
+            box-shadow: none;
+        }
+        .header {
+            font-size: 13px;
+        }
+        .content {
+            box-shadow: none;
+            margin-left: 0;
+            width: $content-width + 8px;
+        }
+        .post-content {
+            font-size: 18px;
+            font-family: $serif;
+        }
+    }
+    &.reply {
+        .embeds {
+            .image img {
+                max-width: 500px;
+                max-height: 200px;
+            }
+        }
+    }
 }
 
-.like {
+.like-button {
     &:hover svg {
         fill: color.mix($dark-grey, #f90, $weight: 15%, $method: rgb);
     }
@@ -153,7 +191,7 @@
         fill: #f90;
     }
 }
-.repost {
+.repost-button {
     &:hover svg {
         stroke: color.mix($dark-grey, #609928, $weight: 15%, $method: rgb);
     }
@@ -161,7 +199,7 @@
         stroke: #609928;
     }
 }
-.reply {
+.reply-button {
     &:hover svg {
         fill: color.mix($dark-grey, #999, $weight: 15%, $method: rgb);
     }

@@ -1,10 +1,12 @@
 import { Facet, segmentize } from "@atcute/bluesky-richtext-segmenter";
 
 const emojiRegex = /([\p{Emoji}\u200d]+|\ud83c[\udde6-\uddff]{2})/gu;
-const map = {
+const map: { [key: string]: string } = {
   "<": "&lt;",
   ">": "&gt;",
   "&": "&amp;",
+  "'": "&apos;",
+  '"': "&quot;",
 };
 export function escapeHTML(input: string): string {
   return input.replaceAll(/[<>&"']/g, (m) => map[m]);

@@ -49,10 +49,9 @@ button.active {
 }
 
 .card .pfp,
-.card .content,
 .profile-header,
 .side-nav {
-    box-shadow: 0 0 2px -0.3px #000;
+    box-shadow: $box-shadow;
 }
 
 .profile-header .stats a:hover,

@@ -1,48 +1,86 @@
-import * as feed from "../elements/content/feed";
+import { elem } from "../elements/blocks/elem";
+import { escapeHTML } from "../elements/blocks/textprocessing";
+import { feed } from "../elements/content/feed";
 import { rpc } from "../login";
 
-function navButton(text: string, feed: string) {
-  const button = document.createElement("a");
-  button.innerText = text;
-  return button;
+let currentFeed: string;
+
+function navButton(title: string, feed: string) {
+  return elem("a", {
+    innerHTML: escapeHTML(title),
+    href: `?feedgen=${feed}&title=${title}`,
+  });
 }
 export async function homeRoute(
   url: Array<string>,
   loadedState: Array<string>,
 ) {
-  const container = document.getElementById("container");
-  container.innerHTML = "";
-  const leftBar = document.createElement("div");
-  leftBar.className = "left-bar sticky";
-  const feedNav = document.createElement("div");
-  feedNav.className = "side-nav";
-  const prefs = await rpc.get("app.bsky.actor.getPreferences", {});
-  const feeds = prefs.data.preferences.find((e) => {
-    return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
-  }).items;
-  const feedGens = (
-    await rpc.get("app.bsky.feed.getFeedGenerators", {
-      params: {
-        feeds: (() => {
-          let pinned = [];
-          for (const feed of feeds.slice(1)) {
-            if (feed.pinned) pinned.push(feed.value);
-          }
-          return pinned;
-        })(),
-      },
-    })
-  ).data.feeds;
-  feedNav.append(navButton("Following", ""));
-  for (const feed of feedGens) {
-    feedNav.append(navButton(feed.displayName, feed.uri));
-  }
-  leftBar.append(feedNav);
-  container.append(leftBar);
+  if (loadedState[1] != "") {
+    const container = document.getElementById("container");
+    container.innerHTML = "";
+    const leftBar = document.createElement("div");
+    leftBar.className = "left-bar sticky";
+    const feedNav = document.createElement("div");
+    feedNav.className = "side-nav";
+    const prefs = await rpc.get("app.bsky.actor.getPreferences", {});
+    const feeds = prefs.data.preferences.find((e) => {
+      return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
+    }).items;
+    const feedGens = (
+      await rpc.get("app.bsky.feed.getFeedGenerators", {
+        params: {
+          feeds: (() => {
+            let pinned = [];
+            for (const feed of feeds.slice(1)) {
+              if (feed.pinned) pinned.push(feed.value);
+            }
+            return pinned;
+          })(),
+        },
+      })
+    ).data.feeds;
+    feedNav.append(navButton("Following", "following"));
+    for (const feed of feedGens) {
+      feedNav.append(navButton(feed.displayName, feed.uri));
+    }
+    leftBar.append(feedNav);
+    container.append(leftBar);
 
-  const content = document.createElement("div");
-  content.id = "content";
-  container.append(content);
-  document.title = "Following — SuperCoolClient";
-  feed.feed("app.bsky.feed.getTimeline", {});
+    const content = document.createElement("div");
+    content.id = "content";
+    container.append(content);
+    homeURLChange();
+  }
+}
+
+export async function homeURLChange(intheSamePage: boolean = false) {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  const feedgen = params.get("feedgen") ?? "following";
+  const title = params.get("title") ?? "Following";
+
+  document.title = `${title} — SuperCoolClient`;
+
+  params.delete("following");
+  params.delete("feedgen");
+  params.delete("title");
+  window.history.replaceState({}, "", url.toString());
+
+  window.scrollTo({ top: 0 });
+  const nsid =
+    feedgen === "following"
+      ? "app.bsky.feed.getTimeline"
+      : "app.bsky.feed.getFeed";
+  //if (intheSamePage && currentFeed === "following" && currentFeed === feedgen) {
+  //} else {
+  const content = document.getElementById("content");
+  content.innerHTML = "";
+  document.querySelector(".active")?.classList.remove("active");
+  document
+    .querySelector(`[href="?feedgen=${feedgen}&title=${title}"]`)
+    ?.classList.add("active");
+  const items = await feed(nsid, { feed: feedgen });
+  content.append(...items);
+  //}
+  currentFeed = feedgen;
 }

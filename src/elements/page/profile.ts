@@ -1,4 +1,4 @@
-import { AppBskyActorDefs, AppSCCProfile } from "@atcute/client/lexicons";
+import { AppBskyActorDefs, SCCProfile } from "@atcute/client/lexicons";
 import { rpc } from "../../login";
 import { idchoose } from "../blocks/id";
 import { elem } from "../blocks/elem";
@@ -6,7 +6,7 @@ import { processText } from "../blocks/textprocessing";
 
 export function header(
   profile: AppBskyActorDefs.ProfileViewDetailed,
-  sccprofile?: AppSCCProfile.Record,
+  sccprofile?: SCCProfile.Record,
 ) {
   const atid = idchoose(profile);
   let customCss = `background-image:
@@ -108,7 +108,7 @@ export async function profilePage(atid: string) {
     sccprofile = (
       await rpc.get("com.atproto.repo.getRecord", {
         params: {
-          collection: "app.scc.profile",
+          collection: "notasite.scc.profile",
           rkey: "self",
           repo: profile.data.did,
         },

@@ -1,14 +1,14 @@
 import "@atcute/client/lexicons";
 declare module "@atcute/client/lexicons" {
-  namespace AppSCCProfile {
+  namespace SCCProfile {
     interface Record {
-      $type: "app.scc.profile";
+      $type: "notasite.scc.profile";
       accentColor: string;
       pinnedSearches: string[];
     }
   }
   interface Records {
-    "app.scc.profile": AppSCCProfile.Record;
+    "notasite.scc.profile": SCCProfile.Record;
   }
 
   interface Queries {}

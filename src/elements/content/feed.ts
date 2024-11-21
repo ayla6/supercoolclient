@@ -1,31 +1,24 @@
 import { post } from "../ui/card";
-import { load } from "./load";
+import { load, loadOnscroll } from "./load";
+
+export type feedNSID =
+  | "app.bsky.feed.getAuthorFeed"
+  | "app.bsky.feed.getFeed"
+  | "app.bsky.feed.getActorLikes"
+  | "app.bsky.feed.searchPosts"
+  | "app.bsky.feed.getTimeline";
 
 export async function feed(
-  nsid:
-    | "app.bsky.feed.getAuthorFeed"
-    | "app.bsky.feed.getFeed"
-    | "app.bsky.feed.getActorLikes"
-    | "app.bsky.feed.searchPosts"
-    | "app.bsky.feed.getTimeline",
+  nsid: feedNSID,
   params: any,
-) {
-  const content = document.getElementById("content");
+): Promise<HTMLElement[]> {
   const dataLocation = nsid === "app.bsky.feed.searchPosts" ? "posts" : "feed";
   async function _load() {
-    return await load(nsid, params, dataLocation, content, post);
+    return await load(nsid, params, dataLocation, post);
   }
-  params.cursor = await _load();
-  if (params.cursor != undefined) {
-    window.onscroll = async function (ev) {
-      if (
-        window.innerHeight + Math.round(window.scrollY) >=
-        document.body.offsetHeight
-      )
-        params.cursor = await _load();
-      if (params.cursor === undefined) {
-        window.onscroll = null;
-      }
-    };
-  } else window.onscroll = null;
+  const { items, nextPage } = await _load();
+  if (nextPage != undefined)
+    window.onscroll = await loadOnscroll(_load, nextPage);
+  else window.onscroll = null;
+  return items;
 }

@@ -1,8 +1,8 @@
-import { feed } from "../elements/content/feed";
+import { feed, feedNSID } from "../elements/content/feed";
 import { profiles } from "../elements/content/graph";
 import { profilePage } from "../elements/page/profile";
 
-const urlEquivalents = {
+const urlEquivalents: { [key: string | undefined]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
   undefined: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
   media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
@@ -18,11 +18,11 @@ export async function profileRoute(
 
   let atid = url[2];
   if (loadedState[2] != atid) atid = await profilePage(atid);
-  const place = url[3] || "posts";
-  const lastPlace = loadedState[3] || "posts";
+  const place = url[3] ?? "posts";
+  const lastPlace = loadedState[3] ?? "posts";
   document
     .querySelector(
-      `[value="${(lastPlace || "posts") + (lastPlace === "search" ? loadedState[4] : "")}"]`,
+      `[value="${(lastPlace ?? "posts") + (lastPlace === "search" ? loadedState[4] : "")}"]`,
     )
     .classList.remove("active");
   document
@@ -30,25 +30,28 @@ export async function profileRoute(
       `[value="${place + (place === "search" ? window.location.search : "")}"]`,
     )
     .classList.add("active");
-  document.getElementById("content").innerHTML = "";
+  const content = document.getElementById("content");
+  content.innerHTML = "";
+  let posts: HTMLElement[];
   switch (place) {
     case "following":
-      await profiles("app.bsky.graph.getFollows", { actor: atid });
+      posts = await profiles("app.bsky.graph.getFollows", { actor: atid });
       break;
     case "followers":
-      await profiles("app.bsky.graph.getFollowers", { actor: atid });
+      posts = await profiles("app.bsky.graph.getFollowers", { actor: atid });
       break;
     case "search":
-      await feed("app.bsky.feed.searchPosts", {
+      posts = await feed("app.bsky.feed.searchPosts", {
         author: atid,
         q: decodeURIComponent(window.location.search).slice(1),
       });
       break;
     default:
-      await feed(urlEquivalents[place][0], {
+      posts = await feed(urlEquivalents[place][0], {
         actor: atid,
         filter: urlEquivalents[place][1],
       });
       break;
   }
+  content.append(...posts);
 }

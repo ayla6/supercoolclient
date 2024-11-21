@@ -13,14 +13,31 @@ export async function load(
   nsid: QueryWithCursor,
   params: any,
   dataLocation: string,
-  content: HTMLElement,
   func: Function,
-) {
+): Promise<{ items: HTMLElement[]; nextPage: string }> {
+  let items = [];
   const { data } = await rpc.get(nsid, { params: params });
   const array = data[dataLocation];
   const { cursor: nextPage } = data;
   for (const item of array) {
-    content.append(func(item));
+    items.push(func(item));
   }
-  return nextPage;
+  return { items, nextPage };
+}
+
+export async function loadOnscroll(load: Function, cursor: string) {
+  return async function (ev) {
+    const content = document.getElementById("content");
+    if (
+      window.innerHeight + Math.round(window.scrollY) >=
+      document.body.offsetHeight
+    ) {
+      const { items, nextPage } = await load();
+      content.append(...items);
+      cursor = nextPage;
+    }
+    if (cursor === undefined) {
+      window.onscroll = null;
+    }
+  };
 }

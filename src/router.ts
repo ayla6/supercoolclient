@@ -18,7 +18,8 @@
 import { login } from "./login";
 import { loadNavbar } from "./elements/ui/navbar";
 import { profileRoute } from "./routes/profile";
-import { homeRoute } from "./routes/home";
+import { homeRoute, homeURLChange } from "./routes/home";
+import { postRoute } from "./routes/post";
 
 let loadedState: Array<String> = [""];
 function saveLastLocation() {
@@ -35,7 +36,7 @@ const routes = {
   "/": homeRoute,
   "/profile/:handle": profileRoute,
   "/profile/:handle/:location": profileRoute,
-  "/profile/:handle/post/:rkey": () => {},
+  "/profile/:handle/post/:rkey": postRoute,
 };
 function matchRoute(url: Array<String>) {
   for (const route of Object.keys(routes)) {
@@ -64,7 +65,8 @@ export async function updatePage() {
   if (currentURL[2] != loadedState[2]) {
     document.body.setAttribute("style", "");
   }
-  matchRoute(currentURL)(currentURL, loadedState);
+  if (loadedState[1] === "" && currentURL[1] === "") homeURLChange(true);
+  else matchRoute(currentURL)(currentURL, loadedState);
   saveLastLocation();
 }
 
