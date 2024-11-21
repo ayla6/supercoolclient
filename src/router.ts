@@ -65,7 +65,7 @@ export async function updatePage() {
   if (currentURL[2] != loadedState[2]) {
     document.body.setAttribute("style", "");
   }
-  if (loadedState[1] === "" && currentURL[1] === "") homeURLChange(true);
+  if (loadedState[1] === "" && currentURL[1] === "") homeURLChange();
   else matchRoute(currentURL)(currentURL, loadedState);
   saveLastLocation();
 }

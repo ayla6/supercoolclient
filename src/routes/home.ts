@@ -53,11 +53,19 @@ export async function homeRoute(
   }
 }
 
-export async function homeURLChange(intheSamePage: boolean = false) {
+export async function homeURLChange() {
   const url = new URL(window.location.href);
   const params = url.searchParams;
-  const feedgen = params.get("feedgen") ?? "following";
-  const title = params.get("title") ?? "Following";
+  let feedgen = params.get("feedgen");
+  let title = params.get("title");
+  if (!feedgen) {
+    if (localStorage.getItem("last-feed"))
+      [feedgen, title] = JSON.parse(localStorage.getItem("last-feed"));
+    else {
+      feedgen = "following";
+      title = "Following";
+    }
+  }
 
   document.title = `${title} — SuperCoolClient`;
 
@@ -71,8 +79,6 @@ export async function homeURLChange(intheSamePage: boolean = false) {
     feedgen === "following"
       ? "app.bsky.feed.getTimeline"
       : "app.bsky.feed.getFeed";
-  //if (intheSamePage && currentFeed === "following" && ) {
-  //} else {
   const content = document.getElementById("content");
   if (currentFeed !== feedgen) {
     content.innerHTML = "";
@@ -85,4 +91,5 @@ export async function homeURLChange(intheSamePage: boolean = false) {
   content.innerHTML = "";
   content.append(...items);
   currentFeed = feedgen;
+  localStorage.setItem("last-feed", JSON.stringify([feedgen, title]));
 }
