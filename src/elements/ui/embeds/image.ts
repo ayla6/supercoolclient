@@ -29,11 +29,23 @@ export function image(
     height = imageContainerSize.width / 2;
   } else {
     const ratio = ogsize.width / ogsize.height;
-    width = Math.min(
-      imageContainerSize.width,
-      imageContainerSize.height * ratio,
-    );
-    height = width / ratio;
+    if (
+      ogsize.width < imageContainerSize.width &&
+      ogsize.height < imageContainerSize.height
+    ) {
+      const scale = Math.min(
+        Math.floor(imageContainerSize.width / ogsize.width),
+        Math.floor(imageContainerSize.height / ogsize.height),
+      );
+      width = ogsize.width * scale;
+      height = ogsize.height * scale;
+    } else {
+      width = Math.min(
+        imageContainerSize.width,
+        imageContainerSize.height * ratio,
+      );
+      height = width / ratio;
+    }
   }
 
   const ogFileType = image.image.mimeType.split("/")[1];
