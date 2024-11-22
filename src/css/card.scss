@@ -71,7 +71,7 @@
         .handle-area {
             display: inline-block;
             overflow: hidden;
-            max-width: 400px;
+            max-width: $content-width - 110px;
         }
         .handle {
             font-weight: 700;
@@ -180,7 +180,7 @@
     &.reply {
         .embeds {
             .image img {
-                max-width: 500px;
+                max-width: $content-width;
                 max-height: 200px;
             }
         }
