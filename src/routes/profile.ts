@@ -2,9 +2,8 @@ import { feed, feedNSID } from "../elements/content/feed";
 import { profiles } from "../elements/content/graph";
 import { profilePage } from "../elements/page/profile";
 
-const urlEquivalents: { [key: string | undefined]: [feedNSID, string?] } = {
+const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
-  "": ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
   media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
   replies: ["app.bsky.feed.getAuthorFeed", "posts_with_replies"],
   likes: ["app.bsky.feed.getActorLikes"],
@@ -82,4 +81,8 @@ export async function profileURLChange(
   }
   content.innerHTML = "";
   content.append(...posts);
+}
+
+export async function profileRedirect(currentURL: string, loadedState: string) {
+  window.location.href = currentURL.slice(0, -1);
 }

@@ -17,7 +17,11 @@
 
 import { login } from "./login";
 import { loadNavbar } from "./elements/ui/navbar";
-import { profileRoute, profileURLChange } from "./routes/profile";
+import {
+  profileRedirect,
+  profileRoute,
+  profileURLChange,
+} from "./routes/profile";
 import { homeRoute, homeURLChange } from "./routes/home";
 import { postRoute } from "./routes/post";
 import { elem } from "./elements/blocks/elem";
@@ -36,6 +40,7 @@ history.pushState = function (state, title, url) {
 
 const routes: { [key: string]: string } = {
   "/": "home",
+  "/profile/:handle/": "profileRedirect",
   "/profile/:handle": "profile",
   "/profile/:handle/:location": "profile",
   "/profile/:handle/post/:rkey": "post",
@@ -44,6 +49,7 @@ const changeRoutes: { [key: string]: Function } = {
   home: homeRoute,
   profile: profileRoute,
   post: postRoute,
+  profileRedirect: profileRedirect,
 };
 const localRoutes: { [key: string]: Function } = {
   home: homeURLChange,
