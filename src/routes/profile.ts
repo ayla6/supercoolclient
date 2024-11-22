@@ -10,22 +10,25 @@ const urlEquivalents: { [key: string | undefined]: [feedNSID, string?] } = {
   likes: ["app.bsky.feed.getActorLikes"],
 };
 
-export async function profileRoute(url: string, loadedState: string) {
-  const splitURL = url.split("/");
+export async function profileRoute(currentURL: string, loadedState: string) {
+  const splitURL = currentURL.split("/");
   const splitLoaded = loadedState.split("/");
   document.title = splitURL[2] + " — SuperCoolClient";
 
   let atid = splitURL[2];
   if (splitLoaded[2] != atid || splitLoaded[3] == "post")
     atid = await profilePage(atid);
-  profileURLChange(url, loadedState);
+  profileURLChange(currentURL, loadedState);
 }
 
-export async function profileURLChange(url: string, loadedState: string) {
-  const splitURL = url.split("/");
+export async function profileURLChange(
+  currentURL: string,
+  loadedState: string,
+) {
+  const splitURL = currentURL.split("/");
   const splitLoaded = loadedState.split("/");
   const atid = splitURL[2];
-  const place = splitURL[3] ?? "posts";
+  const currentPlace = splitURL[3] ?? "posts";
   const lastPlace = splitLoaded[3] ?? "posts";
   const content = document.getElementById("content");
   document
@@ -35,29 +38,46 @@ export async function profileURLChange(url: string, loadedState: string) {
     ?.classList.remove("active");
   document
     .querySelector(
-      `[value="${place + (place === "search" ? window.location.search : "")}"]`,
+      `[value="${currentPlace + (currentPlace === "search" ? window.location.search : "")}"]`,
     )
     ?.classList.add("active");
   if (splitLoaded[3] != splitURL[3]) content.innerHTML = "";
   let posts: HTMLElement[];
-  switch (place) {
+  let forcereload = currentPlace === lastPlace && splitLoaded[1] === "profile";
+  switch (currentPlace) {
     case "following":
-      posts = await profiles("app.bsky.graph.getFollows", { actor: atid });
+      posts = await profiles(
+        "app.bsky.graph.getFollows",
+        { actor: atid },
+        forcereload,
+      );
       break;
     case "followers":
-      posts = await profiles("app.bsky.graph.getFollowers", { actor: atid });
+      posts = await profiles(
+        "app.bsky.graph.getFollowers",
+        { actor: atid },
+        forcereload,
+      );
       break;
     case "search":
-      posts = await feed("app.bsky.feed.searchPosts", {
-        author: atid,
-        q: decodeURIComponent(window.location.search).slice(1),
-      });
+      posts = await feed(
+        "app.bsky.feed.searchPosts",
+        {
+          author: atid,
+          q: decodeURIComponent(window.location.search).slice(1),
+        },
+        forcereload,
+      );
       break;
     default:
-      posts = await feed(urlEquivalents[place][0], {
-        actor: atid,
-        filter: urlEquivalents[place][1],
-      });
+      posts = await feed(
+        urlEquivalents[currentPlace][0],
+        {
+          actor: atid,
+          filter: urlEquivalents[currentPlace][1],
+        },
+        forcereload,
+      );
       break;
   }
   content.innerHTML = "";

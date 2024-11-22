@@ -55,7 +55,7 @@ function interactionButton(
         await rpc.call("com.atproto.repo.deleteRecord", {
           data: { rkey, collection, repo: did },
         });
-        post.viewer[type] = null;
+        delete post.viewer[type];
       }
       post[type + "Count"] = count;
       button.classList.toggle("active", active);

@@ -1,4 +1,4 @@
-import { rpc } from "../../login";
+import { get } from "../blocks/cache";
 
 type QueryWithCursor =
   | "app.bsky.graph.getFollows"
@@ -14,30 +14,29 @@ export async function load(
   params: any,
   dataLocation: string,
   func: Function,
-): Promise<{ items: HTMLElement[]; nextPage: string }> {
+  forcereload: boolean = false,
+): Promise<{ items: HTMLElement[]; cursor: string }> {
   let items = [];
-  const { data } = await rpc.get(nsid, { params: params });
+  const { data } = await get(nsid, { params: params }, forcereload);
   const array = data[dataLocation];
-  const { cursor: nextPage } = data;
+  const cursor = data.cursor;
   for (const item of array) {
     items.push(func(item));
   }
-  return { items, nextPage };
+  return { items, cursor };
 }
 
-export async function loadOnscroll(load: Function, cursor: string) {
+export async function loadOnscroll(load: Function, params: any) {
   return async function (ev) {
-    const content = document.getElementById("content");
     if (
       window.innerHeight + Math.round(window.scrollY) >=
       document.body.offsetHeight
     ) {
-      const { items, nextPage } = await load();
+      const content = document.getElementById("content");
+      const { items, cursor } = await load();
       content.append(...items);
-      cursor = nextPage;
-    }
-    if (cursor === undefined) {
-      window.onscroll = null;
+      params.cursor = cursor;
+      if (cursor === undefined) window.onscroll = null;
     }
   };
 }

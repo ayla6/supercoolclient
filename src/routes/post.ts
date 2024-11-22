@@ -1,14 +1,14 @@
+import { get } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
 import { post } from "../elements/ui/card";
-import { rpc } from "../login";
 
-export async function postRoute(url: string, loadedState: string) {
-  const splitURL = url.split("/");
+export async function postRoute(currentURL: string, loadedState: string) {
+  const splitURL = currentURL.split("/");
   const container = document.getElementById("container");
   container.innerHTML = "";
   const content = elem("div", { id: "content" });
   container.append(content);
-  const thread = await rpc.get("app.bsky.feed.getPostThread", {
+  const thread = await get("app.bsky.feed.getPostThread", {
     params: {
       uri: `at://${splitURL[2]}/app.bsky.feed.post/${splitURL[4]}`,
     },
@@ -31,7 +31,7 @@ export async function postRoute(url: string, loadedState: string) {
         const fragment = document.createDocumentFragment();
         for (const reply of replies) {
           if ("post" in reply) {
-            fragment.append(post(reply.post, "reply", 16 * levels));
+            fragment.append(post(reply.post, "reply", 8 * levels));
             if ("replies" in reply) {
               appendReplies(reply.replies, fragment, levels + 1);
             }

@@ -1,7 +1,7 @@
+import { get } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
 import { escapeHTML } from "../elements/blocks/textprocessing";
 import { feed } from "../elements/content/feed";
-import { rpc } from "../login";
 
 let currentFeed: string;
 
@@ -12,7 +12,7 @@ function navButton(title: string, feed: string) {
   });
 }
 export async function homeRoute(
-  url: Array<string>,
+  currentURL: Array<string>,
   loadedState: Array<string>,
 ) {
   if (loadedState[1] != "") {
@@ -22,12 +22,12 @@ export async function homeRoute(
     leftBar.className = "left-bar sticky";
     const feedNav = document.createElement("div");
     feedNav.className = "side-nav";
-    const prefs = await rpc.get("app.bsky.actor.getPreferences", {});
+    const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
     const feeds = prefs.data.preferences.find((e) => {
       return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
     }).items;
     const feedGens = (
-      await rpc.get("app.bsky.feed.getFeedGenerators", {
+      await get("app.bsky.feed.getFeedGenerators", {
         params: {
           feeds: (() => {
             let pinned = [];
@@ -53,7 +53,7 @@ export async function homeRoute(
   }
 }
 
-export async function homeURLChange(_url?: string, loadedState?: string) {
+export async function homeURLChange(currentURL?: string, loadedState?: string) {
   const url = new URL(window.location.href);
   const params = url.searchParams;
   let feedgen = params.get("feedgen");
@@ -66,6 +66,7 @@ export async function homeURLChange(_url?: string, loadedState?: string) {
       title = "Following";
     }
   }
+  const wasAtHome = loadedState?.split("/")[1] === "";
   const lastFeed = currentFeed;
   currentFeed = feedgen;
   localStorage.setItem("last-feed", JSON.stringify([feedgen, title]));
@@ -82,7 +83,7 @@ export async function homeURLChange(_url?: string, loadedState?: string) {
     feedgen === "following"
       ? "app.bsky.feed.getTimeline"
       : "app.bsky.feed.getFeed";
-  if (lastFeed !== feedgen || loadedState?.split("/")[0] != "") {
+  if (lastFeed !== feedgen || !wasAtHome) {
     document.querySelector(".active")?.classList.remove("active");
     document
       .querySelector(`[href="?feedgen=${feedgen}&title=${title}"]`)
@@ -91,7 +92,11 @@ export async function homeURLChange(_url?: string, loadedState?: string) {
   const content = document.getElementById("content");
   if (currentFeed !== lastFeed) content.innerHTML = "";
   if (currentFeed === feedgen) {
-    const items = await feed(nsid, { feed: feedgen });
+    const items = await feed(
+      nsid,
+      { feed: feedgen },
+      currentFeed === lastFeed && wasAtHome,
+    );
     content.innerHTML = "";
     content.append(...items);
   }

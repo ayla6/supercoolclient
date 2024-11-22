@@ -3,6 +3,7 @@ import { manager, rpc } from "../../login";
 import { idchoose } from "../blocks/id";
 import { elem } from "../blocks/elem";
 import { processText } from "../blocks/textprocessing";
+import { get } from "../blocks/cache";
 
 export function header(
   profile: AppBskyActorDefs.ProfileViewDetailed,
@@ -73,7 +74,7 @@ async function mediaNavButton(
   images.className = "images";
   button.append(images);
   if (did) {
-    const { data } = await rpc.get("app.bsky.feed.getAuthorFeed", {
+    const { data } = await get("app.bsky.feed.getAuthorFeed", {
       params: {
         actor: did,
         filter: "posts_with_media",
@@ -99,14 +100,14 @@ async function mediaNavButton(
 export async function profilePage(atid: string) {
   const container = document.getElementById("container");
   container.innerHTML = "";
-  const profile = await rpc.get("app.bsky.actor.getProfile", {
+  const profile = await get("app.bsky.actor.getProfile", {
     params: { actor: atid },
   });
   atid = idchoose(profile.data);
   let sccprofile: any;
-  try {
+  /*try {
     sccprofile = (
-      await rpc.get("com.atproto.repo.getRecord", {
+      await get("com.atproto.repo.getRecord", {
         params: {
           collection: "notasite.scc.profile",
           rkey: "self",
@@ -114,7 +115,7 @@ export async function profilePage(atid: string) {
         },
       })
     )?.data.value;
-  } catch (error) {}
+    } catch (error) {}*/
   container.append(
     header(profile.data, sccprofile),
     elem("div", { className: "left-bar" }, [

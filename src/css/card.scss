@@ -26,7 +26,7 @@
         background: #fff;
         padding: 8px;
         border-radius: $border-radius;
-        box-shadow: $box-shadow;
+        border: $border;
     }
     .display-name::before {
         content: " ";
@@ -105,6 +105,7 @@
         line-height: 1.25em;
     }
     .stats {
+        width: 100%;
         display: block;
         float: inline-start;
         margin-top: 4px;
@@ -137,7 +138,9 @@
         }
     }
     .embeds {
-        display: block;
+        margin-top: 4px;
+        width: 100%;
+        display: inline-block;
         text-align: center;
         .image {
             display: inline-block;
@@ -149,7 +152,7 @@
     }
     &.full {
         background-color: white;
-        box-shadow: $box-shadow;
+        border: $border;
         border-radius: $border-radius;
         .pfp-holder::after {
             display: none;
@@ -159,13 +162,13 @@
             margin-right: 0;
         }
         .pfp {
-            box-shadow: none;
+            border: none;
         }
         .header {
             font-size: 13px;
         }
         .content {
-            box-shadow: none;
+            border: none;
             margin-left: 0;
             width: $content-width + 8px;
         }
