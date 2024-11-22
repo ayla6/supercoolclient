@@ -43,7 +43,7 @@ export function image(
 
   let thumbFileType = "webp";
   let thumbSize = "thumbnail";
-  let imageRendering = "";
+  let imageRendering: string;
   if (ogsize.width <= 1000 && ogsize.height <= 1000) {
     thumbSize = "fullsize";
     thumbFileType = fullFileType;
@@ -51,7 +51,7 @@ export function image(
       ogsize.width <= imageContainerSize.width &&
       ogsize.height <= imageContainerSize.height
     )
-      imageRendering = "pixelated";
+      imageRendering = "image-rendering: pixelated";
   }
 
   return elem(
@@ -69,9 +69,7 @@ export function image(
         loading: "lazy",
         width: width,
         height: height,
-        style: {
-          imageRendering: imageRendering,
-        } as CSSStyleDeclaration,
+        style: imageRendering,
       }),
     ],
   );
