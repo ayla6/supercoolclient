@@ -78,33 +78,19 @@ export function header(
     elem("a", { className: "pfp-holder" }, [
       elem("img", { className: "pfp", src: profile.avatar }),
     ]),
-    elem("div", { className: "stats" }, [
-      elem("button", { className: "button follow", innerHTML: "+ Follow" }),
-      elem("a", { href: did }, [
-        elem("b", { innerHTML: profile.postsCount.toLocaleString() }),
-        new Text(" Posts"),
-      ]),
-      elem("a", { href: did + "/following" }, [
-        elem("b", { innerHTML: profile.followsCount.toLocaleString() }),
-        new Text(" Following"),
-      ]),
-      elem("a", { href: did + "/followers" }, [
-        elem("b", { innerHTML: profile.followersCount.toLocaleString() }),
-        new Text(" Followers"),
-      ]),
-    ]),
     elem("div", { className: "header" }, [
       elem("span", {
         className: "display-name",
         innerHTML: profile.displayName,
       }),
       elem("span", { className: "handle", innerHTML: "@" + handle }),
+      elem("div", {
+        className: "bio",
+        innerHTML: profile.description ? processText(profile.description) : "",
+      }),
     ]),
-    elem("div", {
-      className: "bio",
-      innerHTML: profile.description ? processText(profile.description) : "",
-    }),
-    elem("div", { className: "mobile-stats" }, [
+
+    elem("div", { className: "stats" }, [
       elem("button", { className: "button follow", innerHTML: "+ Follow" }),
       elem("a", { href: did }, [
         elem("b", { innerHTML: profile.postsCount.toLocaleString() }),

@@ -19,7 +19,8 @@
         background: #fff;
         border: $border;
         border-radius: $border-radius;
-        display: block;
+        display: flex;
+        flex-flow: column;
         flex-grow: 1;
         margin-left: 8px;
         padding: 8px;
@@ -111,7 +112,7 @@
 
 .post {
     .embeds {
-        border: 1px solid $lighter-grey;
+        //border: 1px solid $lighter-grey;
         border-radius: $border-radius;
         display: block;
         line-height: 0;
@@ -126,6 +127,12 @@
             max-width: 100%;
             display: inline-block;
             line-height: 14px;
+        }
+
+        .record-link {
+            max-width: 100%;
+            display: block;
+            width: 70px;
         }
 
         .external {
@@ -164,16 +171,29 @@
             top: 0;
         }
 
+        .images {
+            width: 100%;
+            overflow-x: scroll;
+        }
+
         .image {
             line-height: 0;
 
             img {
                 object-fit: cover;
-                max-height: 100%;
                 max-width: 100%;
+                height: 100%;
                 border-radius: $border-radius;
                 position: relative;
             }
+        }
+
+        video {
+            object-fit: cover;
+            max-width: 100%;
+            height: 100%;
+            border-radius: $border-radius;
+            position: relative;
         }
     }
 
@@ -194,12 +214,14 @@
 
         .handle {
             font-weight: 700;
+            max-width: 300px;
+            display: inline-block;
         }
 
         .handle-area {
-            display: inline-block;
-            max-width: 80%;
+            max-width: 95%;
             overflow: hidden;
+            display: inline-block;
         }
 
         .icon {
@@ -278,6 +300,10 @@
         width: 100%;
         word-wrap: break-word;
         //line-height: 1.25em;
+    }
+
+    .translate {
+        font-size: 12px;
     }
 
     .post-data {
@@ -416,26 +442,6 @@
     }
 
     .post {
-        .content {
-            max-width: 80%;
-        }
-
-        .embeds {
-            .image {
-                max-width: 100% !important;
-                max-height: 100% !important;
-                img {
-                    max-width: 100% !important;
-                    max-height: 100% !important;
-                }
-            }
-
-            a {
-                max-width: 100%;
-                overflow: hidden;
-            }
-        }
-
         .interaction {
             font-size: 14px;
             margin: 0;

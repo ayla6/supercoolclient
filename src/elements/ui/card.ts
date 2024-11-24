@@ -199,9 +199,9 @@ export function post(
         // likes repost and comments
         fullViewStats ? fullViewStats : "",
         elem("div", { className: "stats-buttons" }, [
-          interactionButton("like", post),
-          interactionButton("repost", post),
           interactionButton("reply", post),
+          interactionButton("repost", post),
+          interactionButton("like", post),
           interactionButton("quote", post),
         ]),
       ]),

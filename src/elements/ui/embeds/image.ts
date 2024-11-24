@@ -1,14 +1,9 @@
 import { AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { elem } from "../../blocks/elem";
-import { embedContainer, getProperSize } from "../../blocks/sizing";
 
-const imageSizes: { [key: number]: { width: number; height: number } } = {
-  2: { width: 250, height: 250 },
-  3: { width: 250, height: 125 },
-  4: {
-    width: embedContainer.width / 2,
-    height: embedContainer.width / 3,
-  },
+export const embedContainer = {
+  width: 500,
+  height: 1000,
 };
 
 const forcePngFileTypes = ["webp", "gif"];
@@ -21,8 +16,7 @@ export function image(
         aspectRatio?: { width: number; height: number } | null;
         alt: string;
       },
-  did?: string,
-  numberOfImages: number = 1,
+  did: string,
 ) {
   const inBluesky = !("offBluesky" in image);
   const originalSize = image.aspectRatio
@@ -32,36 +26,11 @@ export function image(
         height: 900,
       };
 
-  let holderSize: { width: number; height: number };
-  let isInteger = false;
-  if (numberOfImages > 1) {
-    holderSize = imageSizes[numberOfImages];
-  } else {
-    holderSize = getProperSize(originalSize);
-  }
-
   const img = elem("img", {
     title: image.alt,
     alt: image.alt,
     loading: "lazy",
   });
-  if (
-    originalSize.width < holderSize.width &&
-    originalSize.height < holderSize.height
-  ) {
-    const scale = Math.min(
-      Math.floor(holderSize.width / originalSize.width),
-      Math.floor(holderSize.height / originalSize.height),
-    );
-    img.width = originalSize.width * scale;
-    img.height = originalSize.height * scale;
-    img.style.top = `${(holderSize.height - img.height) / 2}px`;
-    isInteger = true;
-  } else {
-    img.width = holderSize.width;
-    img.height = holderSize.height;
-  }
-
   const imageHolder = elem(
     "a",
     {
@@ -70,7 +39,20 @@ export function image(
     },
     [img],
   );
-  imageHolder.style.cssText = `width: ${holderSize.width}px; height: ${holderSize.height}px`;
+
+  let isInteger: boolean;
+  const ratio = originalSize.width / originalSize.height;
+  if (
+    originalSize.width < embedContainer.width * 0.5 &&
+    originalSize.height < embedContainer.height * 0.5
+  ) {
+    const scale = Math.min(
+      Math.floor((embedContainer.width * 0.5) / originalSize.width),
+      Math.floor((embedContainer.height * 0.5) / originalSize.height),
+    );
+    img.width = originalSize.width * scale;
+    img.height = originalSize.height * scale;
+  }
 
   const ogFileType = inBluesky ? image.image.mimeType.split("/")[1] : "";
   const fullFileType =
@@ -83,8 +65,8 @@ export function image(
     thumbFileType = fullFileType;
     if (
       isInteger ||
-      (originalSize.width <= holderSize.width &&
-        originalSize.height <= holderSize.height)
+      (originalSize.width <= embedContainer.width &&
+        originalSize.height <= embedContainer.height)
     ) {
       img.style.imageRendering = "pixelated";
     }
@@ -101,25 +83,7 @@ export function image(
 }
 
 export function loadImages(images: AppBskyEmbedImages.Image[], did: string) {
-  let numberOfImages = images.length;
-  if (
-    numberOfImages === 2 &&
-    images[0].aspectRatio &&
-    images[1].aspectRatio &&
-    images[0].aspectRatio.height * 2 <= embedContainer.height &&
-    images[0].aspectRatio.width === images[1].aspectRatio.width &&
-    images[0].aspectRatio.height === images[1].aspectRatio.height
-  ) {
-    numberOfImages = 0;
-  }
   return images.map((img, index) => {
-    let imgElement: HTMLElement;
-    if (numberOfImages === 3 && index === 0) {
-      imgElement = image(img, did, 2);
-      imgElement.style.float = "left";
-    } else {
-      imgElement = image(img, did, numberOfImages);
-    }
-    return imgElement;
+    return image(img, did);
   });
 }

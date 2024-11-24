@@ -1,16 +1,16 @@
 @use "variables" as *;
 
 .profile-header {
-    display: inline-block;
+    display: flex;
     width: 100%;
     box-sizing: border-box;
     background: #fff;
     border-radius: 4px;
     margin: 0 auto 8px;
-    height: 128px + 16px;
     padding: 8px;
+    height: min-content;
     .pfp-holder {
-        float: left;
+        display: flex;
         margin-right: 8px;
         a {
             display: block;
@@ -23,35 +23,36 @@
         }
     }
     .header {
+        display: flex;
+        flex-flow: column;
+        //flex-grow: 1;
+        width: 100%;
         .display-name {
             font-size: 26px;
             font-weight: 700;
-            display: block;
-            line-height: 1;
+            line-break: anywhere;
         }
         .handle {
             font-size: 18px;
             display: block;
             color: #777;
-            line-height: 24px;
+            line-break: anywhere;
+        }
+        .bio {
+            font-size: 13px;
+            font-family: $serif;
+            color: #777;
+            line-height: 14px;
+            padding-right: 8px;
+            font-style: italic;
+            flex-grow: 1;
         }
     }
-    .bio {
-        font-size: 13px;
-        font-family: $serif;
-        color: #777;
-        line-height: 14px;
-        padding-right: 8px;
-        height: 78px;
-        overflow-y: scroll;
-        font-style: italic;
-    }
-    .stats,
-    .mobile-stats {
-        display: block;
-        width: max-content;
-        max-width: 200px;
-        float: right;
+    .stats {
+        display: flex;
+        flex-flow: column;
+        flex-shrink: 0;
+        margin-left: 8px;
         a,
         button {
             display: block;
@@ -72,20 +73,15 @@
             }
         }
     }
-    .mobile-stats {
-        display: none;
-    }
 }
 
 @media (max-width: 920px) {
     .profile-header {
-        height: 100%;
         .pfp-holder .pfp {
             width: 72px;
             height: 72px;
         }
         .header {
-            max-width: 100%;
             .display-name,
             .handle {
                 font-size: 18px;
@@ -93,19 +89,10 @@
         }
         .bio {
             display: block;
-            overflow: hidden;
             max-width: 100%;
             height: 100%;
         }
         .stats {
-            display: none;
-        }
-        .mobile-stats {
-            display: flex;
-            float: left;
-            justify-content: space-between;
-            max-width: 100%;
-            width: 100%;
             a,
             button {
                 display: inline-block;

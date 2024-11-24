@@ -13,7 +13,6 @@ import { post } from "./card";
 import { elem } from "../blocks/elem";
 import { escapeHTML } from "../blocks/textProcessing";
 import { external } from "./embeds/external";
-import { getProperSize } from "../blocks/sizing";
 
 export function load(
   embed: Brand.Union<
@@ -30,17 +29,15 @@ export function load(
     case "app.bsky.embed.recordWithMedia":
       {
         embeds.push(...load(embed.media, did));
-        const uri = embed.record.record.uri.split("/");
         embeds.push(
-          elem("a", {
-            href: `/${uri[2]}/post/${uri[4]}`,
-            innerHTML: escapeHTML(embed.record.record.uri),
-          }),
+          ...load({ ...embed.record, $type: "app.bsky.embed.record" }, did),
         );
       }
       break;
     case "app.bsky.embed.images":
-      embeds.push(...loadImages(embed.images, did));
+      embeds.push(
+        elem("div", { className: "images" }, loadImages(embed.images, did)),
+      );
       break;
     case "app.bsky.embed.record":
       {
@@ -49,6 +46,7 @@ export function load(
           elem("a", {
             href: `/${uri[2]}/post/${uri[4]}`,
             innerHTML: escapeHTML(embed.record.uri),
+            className: "record-link",
           }),
         );
       }
@@ -57,10 +55,10 @@ export function load(
       const url = new URL(embed.external.uri);
       if (url.hostname === "media.tenor.com") {
         const urlParams = new URLSearchParams(url.search);
-        const { width, height } = getProperSize({
+        const { width, height } = {
           width: Number(urlParams.get("ww")),
           height: Number(urlParams.get("hh")),
-        });
+        };
         const splitPathname = url.pathname.split("/");
         const newURL = `https://t.gifs.bsky.app/${splitPathname[1].slice(0, -2)}P3/${splitPathname[2]}`;
         embeds.push(
