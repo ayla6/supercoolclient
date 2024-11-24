@@ -1,5 +1,4 @@
 import { get } from "../elements/blocks/cache";
-import { feed } from "../elements/content/feed";
 
 export async function notificationsRoute(
   currentURL: Array<string>,

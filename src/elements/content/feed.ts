@@ -1,22 +1,36 @@
-import { inCache } from "../blocks/cache";
-import { post } from "../ui/card";
-import { load, loadOnscroll } from "./load";
+import { get, inCache } from "../blocks/cache";
+import { post, profile } from "../ui/card";
 
 export type feedNSID =
   | "app.bsky.feed.getAuthorFeed"
   | "app.bsky.feed.getFeed"
   | "app.bsky.feed.getActorLikes"
   | "app.bsky.feed.searchPosts"
-  | "app.bsky.feed.getTimeline";
+  | "app.bsky.feed.getTimeline"
+  | "app.bsky.graph.getFollows"
+  | "app.bsky.graph.getFollowers";
 
-export async function feed(
+export async function hydrateFeed(
   nsid: feedNSID,
   params: any,
   forceReload: boolean = false,
 ): Promise<HTMLElement[]> {
-  const dataLocation = nsid === "app.bsky.feed.searchPosts" ? "posts" : "feed";
+  const type = nsid.split(".")[2] === "feed";
+  const dataLocation = type
+    ? nsid === "app.bsky.feed.searchPosts"
+      ? "posts"
+      : "feed"
+    : nsid === "app.bsky.graph.getFollows"
+      ? "follows"
+      : "followers";
   async function _load(forceReload: boolean = false) {
-    return await load(nsid, params, dataLocation, post, forceReload);
+    return await load(
+      nsid,
+      params,
+      dataLocation,
+      type ? post : profile,
+      forceReload,
+    );
   }
   let { items, cursor } = await _load(forceReload);
   params.cursor = cursor;
@@ -33,30 +47,43 @@ export async function feed(
   return items;
 }
 
-export async function timeline(
+type QueryWithCursor =
+  | "app.bsky.graph.getFollows"
+  | "app.bsky.graph.getFollowers"
+  | "app.bsky.feed.getAuthorFeed"
+  | "app.bsky.feed.getFeed"
+  | "app.bsky.feed.getActorLikes"
+  | "app.bsky.feed.searchPosts"
+  | "app.bsky.feed.getTimeline";
+
+export async function load(
+  nsid: QueryWithCursor,
+  params: any,
+  dataLocation: string,
+  func: Function,
   forceReload: boolean = false,
-): Promise<HTMLElement[]> {
-  let params = { cursor: undefined };
-  async function _load(forceReload: boolean = false) {
-    return await load(
-      "app.bsky.feed.getTimeline",
-      params,
-      "feed",
-      post,
-      forceReload,
-    );
+): Promise<{ items: HTMLElement[]; cursor: string }> {
+  let items = [];
+  const { data } = await get(nsid, { params: params }, forceReload);
+  const array = data[dataLocation];
+  const cursor = data.cursor;
+  for (const item of array) {
+    items.push(func(item));
   }
-  let { items, cursor } = await _load(forceReload);
-  params.cursor = cursor;
-  if (inCache("app.bsky.feed.getTimeline", params)) {
-    while (inCache("app.bsky.feed.getTimeline", params)) {
-      const { items: newItems, cursor } = await _load();
+  return { items, cursor };
+}
+
+export async function loadOnscroll(load: Function, params: any) {
+  return async function (ev) {
+    if (
+      window.innerHeight + Math.round(window.scrollY) >=
+      document.body.offsetHeight
+    ) {
+      const content = document.getElementById("content");
+      const { items, cursor } = await load();
+      content.append(...items);
       params.cursor = cursor;
-      items.push(...newItems);
+      if (cursor === undefined) window.onscroll = null;
     }
-  }
-  if (params.cursor != undefined)
-    window.onscroll = await loadOnscroll(_load, params);
-  else window.onscroll = null;
-  return items;
+  };
 }

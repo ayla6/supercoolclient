@@ -39,7 +39,8 @@ export async function get<K extends keyof Queries>(
     } else {
       const result = await rpc.get(nsid, params);
       if (!cache[nsid]) cache[nsid] = {};
-      if (!cache[nsid][noCursorParams]) cache[nsid][noCursorParams] = {};
+      if (!cache[nsid][noCursorParams])
+        cache[String(nsid)][noCursorParams] = {};
       cache[nsid][noCursorParams][paramsKey] = result;
       return result;
     }

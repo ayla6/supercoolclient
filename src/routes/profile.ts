@@ -1,8 +1,6 @@
 import { get } from "../elements/blocks/cache";
 import { profileRedirect } from "../router";
-import { feed, feedNSID } from "../elements/content/feed";
-import { profiles } from "../elements/content/graph";
-import { load } from "../elements/content/load";
+import { feedNSID, hydrateFeed } from "../elements/content/feed";
 import { profilePage } from "../elements/page/profile";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
@@ -57,21 +55,21 @@ export async function profileURLChange(
     currentPlace === lastPlace && splitLoaded[1]?.slice(0, 3) === "did:";
   switch (currentPlace) {
     case "following":
-      posts = await profiles(
+      posts = await hydrateFeed(
         "app.bsky.graph.getFollows",
         { actor: atid },
         forcereload,
       );
       break;
     case "followers":
-      posts = await profiles(
+      posts = await hydrateFeed(
         "app.bsky.graph.getFollowers",
         { actor: atid },
         forcereload,
       );
       break;
     case "search":
-      posts = await feed(
+      posts = await hydrateFeed(
         "app.bsky.feed.searchPosts",
         {
           author: atid,
@@ -81,7 +79,7 @@ export async function profileURLChange(
       );
       break;
     default:
-      posts = await feed(
+      posts = await hydrateFeed(
         urlEquivalents[currentPlace][0],
         {
           actor: atid,

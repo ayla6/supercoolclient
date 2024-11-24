@@ -1,7 +1,7 @@
 import { get, inCache } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
 import { escapeHTML } from "../elements/blocks/textProcessing";
-import { feed, timeline } from "../elements/content/feed";
+import { hydrateFeed } from "../elements/content/feed";
 
 let currentFeed: string;
 
@@ -28,7 +28,7 @@ export async function homeRoute(
     leftBar.className = "side-bar sticky";
     const feedNav = document.createElement("div");
     feedNav.className = "side-nav";
-    const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
+    const prefs = await get("app.bsky.actor.getPreferences", {});
     const feeds = prefs.data.preferences.find((e) => {
       return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
     }).items;
@@ -89,10 +89,11 @@ async function loadFeed(
   if (currentFeed !== lastFeed) content.innerHTML = "";
   if (currentFeed === feedgen) {
     const forceReload = currentFeed === lastFeed && wasAtHome;
-    const items =
-      feedgen === "following"
-        ? await timeline(forceReload)
-        : await feed("app.bsky.feed.getFeed", { feed: feedgen }, forceReload);
+    const items = await hydrateFeed(
+      "app.bsky.feed.getFeed",
+      feedgen === "following" ? {} : { feed: feedgen },
+      forceReload,
+    );
     content.innerHTML = "";
     content.append(...items);
   }
