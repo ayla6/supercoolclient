@@ -60,6 +60,7 @@ export function thread(
           if (loadNonThread || isThreadContinuation) {
             const replyPost = post(reply.post);
             replyPost.style.paddingLeft = level * 24 + "px";
+            replyPost.style.width = `calc(100% - ${replyPost.style.paddingLeft})`;
 
             if (isThreadContinuation) {
               mainThreadPosts.push(replyPost);

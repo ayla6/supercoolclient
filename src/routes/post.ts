@@ -25,7 +25,6 @@ export async function postRoute(currentURL: string, loadedState: string) {
     mainPost.classList.add("full");
     content.append(mainPost);
     //scrollTo({ top: -63 });
-    preloadedPost = null;
   }
   const postThread = (
     await rpc.get("app.bsky.feed.getPostThread", {
@@ -34,6 +33,10 @@ export async function postRoute(currentURL: string, loadedState: string) {
       },
     })
   ).data;
+  if (preloadedPost && "post" in postThread.thread) {
+    Object.assign(preloadedPost, postThread.thread.post);
+  }
+  preloadedPost = null;
 
   if (
     postThread.thread.$type === "app.bsky.feed.defs#threadViewPost" &&

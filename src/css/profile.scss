@@ -37,13 +37,13 @@
             display: block;
             color: #777;
             line-break: anywhere;
+            margin-bottom: 4px;
         }
         .bio {
             font-size: 13px;
             font-family: $serif;
             color: #777;
             line-height: 14px;
-            padding-right: 8px;
             font-style: italic;
             flex-grow: 1;
         }

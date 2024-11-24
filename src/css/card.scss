@@ -132,7 +132,7 @@
         .record-link {
             max-width: 100%;
             display: block;
-            width: 70px;
+            line-break: anywhere;
         }
 
         .external {
@@ -198,9 +198,9 @@
     }
 
     .footer {
-        display: block;
-        margin-top: 4px;
-        width: 100%;
+        display: flex;
+        flex-flow: column;
+        margin-top: 2px;
     }
 
     .header {
@@ -208,7 +208,7 @@
         font-size: 12px;
         height: 12px;
         line-height: 12px;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
         overflow: hidden;
         white-space: nowrap;
 
@@ -299,6 +299,7 @@
         display: block;
         width: 100%;
         word-wrap: break-word;
+        word-break: break-word;
         //line-height: 1.25em;
     }
 
@@ -307,9 +308,10 @@
     }
 
     .post-data {
+        display: flex;
+        flex-flow: row;
         font-size: 12px;
         vertical-align: middle;
-
         > * {
             margin-right: 3px;
         }
