@@ -27,6 +27,18 @@ export function load(
 ): Node[] {
   let embeds = [];
   switch (embed.$type) {
+    case "app.bsky.embed.recordWithMedia":
+      {
+        embeds.push(...load(embed.media, did));
+        const uri = embed.record.record.uri.split("/");
+        embeds.push(
+          elem("a", {
+            href: `/${uri[2]}/post/${uri[4]}`,
+            innerHTML: escapeHTML(embed.record.record.uri),
+          }),
+        );
+      }
+      break;
     case "app.bsky.embed.images":
       embeds.push(...loadImages(embed.images, did));
       break;
@@ -37,18 +49,6 @@ export function load(
           elem("a", {
             href: `/${uri[2]}/post/${uri[4]}`,
             innerHTML: escapeHTML(embed.record.uri),
-          }),
-        );
-      }
-      break;
-    case "app.bsky.embed.recordWithMedia":
-      {
-        embeds.push(...load(embed.media, did));
-        const uri = embed.record.record.uri.split("/");
-        embeds.push(
-          elem("a", {
-            href: `/${uri[2]}/post/${uri[4]}`,
-            innerHTML: escapeHTML(embed.record.record.uri),
           }),
         );
       }
@@ -74,6 +74,9 @@ export function load(
           }),
         );
       } else embeds.push(external(embed, did));
+      break;
+    case "app.bsky.embed.video":
+      console.log(embed.video);
       break;
     default:
       break;

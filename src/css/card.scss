@@ -23,6 +23,7 @@
         flex-grow: 1;
         margin-left: 8px;
         padding: 8px;
+        max-width: 100%;
     }
 
     .display-name::before {
@@ -115,12 +116,14 @@
         display: block;
         line-height: 0;
         width: 100%;
+        max-width: 100%;
         overflow: hidden;
         position: relative;
         text-align: center;
         margin-top: 4px;
 
         a {
+            max-width: 100%;
             display: inline-block;
             line-height: 14px;
         }
@@ -163,14 +166,12 @@
 
         .image {
             line-height: 0;
-            max-width: 100% !important;
-            max-height: 100% !important;
 
             img {
+                object-fit: cover;
+                max-height: 100%;
+                max-width: 100%;
                 border-radius: $border-radius;
-                object-fit: contain;
-                max-width: 100% !important;
-                max-height: 100% !important;
                 position: relative;
             }
         }
@@ -420,9 +421,13 @@
         }
 
         .embeds {
-            img {
-                height: 100%;
-                max-width: 100%;
+            .image {
+                max-width: 100% !important;
+                max-height: 100% !important;
+                img {
+                    max-width: 100% !important;
+                    max-height: 100% !important;
+                }
             }
 
             a {

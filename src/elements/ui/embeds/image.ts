@@ -57,6 +57,9 @@ export function image(
     img.height = originalSize.height * scale;
     img.style.top = `${(holderSize.height - img.height) / 2}px`;
     isInteger = true;
+  } else {
+    img.width = holderSize.width;
+    img.height = holderSize.height;
   }
 
   const imageHolder = elem(
@@ -67,9 +70,7 @@ export function image(
     },
     [img],
   );
-  imageHolder.style.cssText = `width: ${holderSize.width}px; max-height: ${holderSize.height}px`;
-  img.style.maxWidth = holderSize.width + "px";
-  img.style.maxHeight = holderSize.height + "px";
+  imageHolder.style.cssText = `width: ${holderSize.width}px; height: ${holderSize.height}px`;
 
   const ogFileType = inBluesky ? image.image.mimeType.split("/")[1] : "";
   const fullFileType =
@@ -103,6 +104,8 @@ export function loadImages(images: AppBskyEmbedImages.Image[], did: string) {
   let numberOfImages = images.length;
   if (
     numberOfImages === 2 &&
+    images[0].aspectRatio &&
+    images[1].aspectRatio &&
     images[0].aspectRatio.height * 2 <= embedContainer.height &&
     images[0].aspectRatio.width === images[1].aspectRatio.width &&
     images[0].aspectRatio.height === images[1].aspectRatio.height

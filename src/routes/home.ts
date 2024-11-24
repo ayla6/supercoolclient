@@ -89,13 +89,14 @@ async function loadFeed(
   if (currentFeed !== lastFeed) content.innerHTML = "";
   if (currentFeed === feedgen) {
     const forceReload = currentFeed === lastFeed && wasAtHome;
-    const items = await hydrateFeed(
+    const items =
       feedgen === "following"
-        ? "app.bsky.feed.getTimeline"
-        : "app.bsky.feed.getFeed",
-      feedgen === "following" ? {} : { feed: feedgen },
-      forceReload,
-    );
+        ? await hydrateFeed(
+            "app.bsky.feed.getTimeline",
+            { feed: feedgen },
+            forceReload,
+          )
+        : await hydrateFeed("app.bsky.feed.getFeed", {}, forceReload);
     content.innerHTML = "";
     content.append(...items);
   }

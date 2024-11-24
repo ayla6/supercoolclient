@@ -10,15 +10,13 @@ export function getProperSize(size: { width: number; height: number }) {
     size.height >= embedContainer.height
   ) {
     if (ratio > embedContainer.width / embedContainer.height) {
-      const height = size.height / (size.width / embedContainer.width);
       return {
         width: embedContainer.width,
-        height: Math.min(height, embedContainer.height),
+        height: embedContainer.width / ratio,
       };
     } else {
-      const width = size.width / (size.height / embedContainer.height);
       return {
-        width: Math.min(width, embedContainer.width),
+        width: embedContainer.height * ratio,
         height: embedContainer.height,
       };
     }
