@@ -28,7 +28,7 @@ export async function homeRoute(
     leftBar.className = "side-bar sticky";
     const feedNav = document.createElement("div");
     feedNav.className = "side-nav";
-    const prefs = await get("app.bsky.actor.getPreferences", {});
+    const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
     const feeds = prefs.data.preferences.find((e) => {
       return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
     }).items;
