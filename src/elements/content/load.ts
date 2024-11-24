@@ -14,10 +14,10 @@ export async function load(
   params: any,
   dataLocation: string,
   func: Function,
-  forcereload: boolean = false,
+  forceReload: boolean = false,
 ): Promise<{ items: HTMLElement[]; cursor: string }> {
   let items = [];
-  const { data } = await get(nsid, { params: params }, forcereload);
+  const { data } = await get(nsid, { params: params }, forceReload);
   const array = data[dataLocation];
   const cursor = data.cursor;
   for (const item of array) {

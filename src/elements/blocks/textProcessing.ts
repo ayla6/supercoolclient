@@ -33,7 +33,7 @@ export function processRichText(text: string, facets: Facet[]) {
             processed += `<a href="${escapeHTML(feat.uri)}">${text}</a>`;
             break;
           case "app.bsky.richtext.facet#mention":
-            processed += `<a href="/profile/${escapeHTML(feat.did)}">${text}</a>`;
+            processed += `<a href="/${escapeHTML(feat.did)}">${text}</a>`;
             break;
           default:
             processed += text;

@@ -1,12 +1,13 @@
 @use "variables" as *;
 
 .profile-header {
-    display: block;
-    width: 872px;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
     background: #fff;
     border-radius: 4px;
     margin: 0 auto 8px;
-    height: 128px;
+    height: 128px + 16px;
     padding: 8px;
     .pfp-holder {
         float: left;
@@ -45,7 +46,8 @@
         overflow-y: scroll;
         font-style: italic;
     }
-    .stats {
+    .stats,
+    .mobile-stats {
         display: block;
         width: max-content;
         max-width: 200px;
@@ -60,13 +62,56 @@
             border-top: 1px solid #e8e8e8;
             text-transform: uppercase;
             font-size: 10px;
-            color: #999;
+            color: $medium-grey;
             &:first-of-type {
                 border-top: none;
             }
             b {
                 font-size: 14px;
                 color: #333;
+            }
+        }
+    }
+    .mobile-stats {
+        display: none;
+    }
+}
+
+@media (max-width: 920px) {
+    .profile-header {
+        height: 100%;
+        .pfp-holder .pfp {
+            width: 72px;
+            height: 72px;
+        }
+        .header {
+            max-width: 100%;
+            .display-name,
+            .handle {
+                font-size: 18px;
+            }
+        }
+        .bio {
+            display: block;
+            overflow: hidden;
+            max-width: 100%;
+            height: 100%;
+        }
+        .stats {
+            display: none;
+        }
+        .mobile-stats {
+            display: flex;
+            float: left;
+            justify-content: space-between;
+            max-width: 100%;
+            width: 100%;
+            a,
+            button {
+                display: inline-block;
+            }
+            a {
+                border: none;
             }
         }
     }

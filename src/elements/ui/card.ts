@@ -4,20 +4,244 @@ import { idchoose } from "../blocks/id";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { manager, rpc } from "../../login";
 import { elem } from "../blocks/elem";
-import { processRichText, processText } from "../blocks/textprocessing";
-import { formatDate } from "../blocks/date";
-import { translate } from "../../../node_modules/google-translate-api-browser";
+import { processRichText, processText } from "../blocks/textProcessing";
+import { formatDate, formatTimeDifference } from "../blocks/date";
+import { setPreloaded } from "../../routes/post";
+import { navigateTo } from "../../router";
 
-export const icon = {
-  like: '<svg class="like-icon" width="24" height="24" fill="currentColor" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m8.243 7.34-6.38 0.925-0.113 0.023a1 1 0 0 0-0.44 1.684l4.622 4.499-1.09 6.355-0.013 0.11a1 1 0 0 0 1.464 0.944l5.706-3 5.693 3 0.1 0.046a1 1 0 0 0 1.352-1.1l-1.091-6.355 4.624-4.5 0.078-0.085a1 1 0 0 0-0.633-1.62l-6.38-0.926-2.852-5.78a1 1 0 0 0-1.794 0l-2.853 5.78z"/></svg>',
-  reply:
-    '<svg class="reply-icon" width="24" height="24" version="1.1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m18 3c2.2091 0 4 1.7909 4 4v8c0 2.2091-1.7909 4-4 4h-4.724l-4.762 2.857c-0.62331 0.37406-1.4248-0.020842-1.508-0.743l-6e-3 -0.114v-2h-1c-2.1314 2e-6 -3.8884-1.6713-3.995-3.8l-5e-3 -0.2v-8c0-2.2091 1.7909-4 4-4z"/></svg>',
-  repost:
-    '<svg class="repost-icon" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4 12v-3a3 3 0 0 1 3-3h13m-3-3 3 3-3 3"/><path d="m20 12v3a3 3 0 0 1-3 3h-13m3 3-3-3 3-3"/></svg>',
+export function profile(profile: AppBskyActorDefs.ProfileView) {
+  const atid =
+    profile.handle === "handle.invalid" ? profile.did : profile.handle;
+  return elem("div", { className: "card profile" }, [
+    elem("div", { className: "pfp-holder" }, [
+      elem("a", { href: "/" + profile.did }, [
+        elem("img", {
+          className: "pfp",
+          src: profile.avatar,
+          loading: "lazy",
+        }),
+      ]),
+    ]),
+    elem("div", { className: "content" }, [
+      elem("a", { className: "header", href: "/" + profile.did }, [
+        elem("span", { className: "handle", innerHTML: atid }),
+        profile.displayName
+          ? elem("span", {
+              className: "display-name",
+              innerHTML: profile.displayName,
+            })
+          : "",
+      ]),
+      elem("div", {
+        className: "bio",
+        innerHTML: profile.description
+          ? processText(profile.description)?.replaceAll("<br/>", " ")
+          : "",
+      }),
+    ]),
+  ]);
+}
+
+export function post(
+  postHousing:
+    | AppBskyFeedDefs.FeedViewPost
+    | AppBskyFeedDefs.PostView
+    | AppBskyFeedDefs.ThreadViewPost,
+  fullView = false,
+) {
+  const post: AppBskyFeedDefs.PostView =
+    "post" in postHousing ? postHousing.post : postHousing;
+  const record = post.record as AppBskyFeedPost.Record;
+  const atid = idchoose(post.author);
+  const authorURL = "/" + post.author.did;
+  const postURL = `${authorURL}/post/${post.uri.split("/")[4]}`;
+
+  const isRepost =
+    "reason" in postHousing &&
+    postHousing.reason.$type === "app.bsky.feed.defs#reasonRepost";
+  const reposter =
+    isRepost && "by" in postHousing.reason
+      ? {
+          handle: idchoose(postHousing.reason.by),
+          did: postHousing.reason.by.did,
+        }
+      : null;
+
+  let translateButton: Node | "" = "";
+  if (record.text && "langs" in record && record.langs[0] != "en") {
+    translateButton = elem("a", {
+      className: "translate",
+      innerHTML: "Translate",
+      onclick: () =>
+        window.open(
+          "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
+        ),
+    });
+  }
+
+  let warnings = [];
+
+  const indexedAt = new Date(post.indexedAt);
+  const createdAt = new Date(record.createdAt);
+  let postDate: string;
+  if (fullView) {
+    postDate = formatDate(indexedAt || createdAt);
+    if (
+      post.indexedAt &&
+      Math.abs(indexedAt.getTime() - createdAt.getTime()) > 50000
+    ) {
+      warnings.push(
+        elem("div", {
+          className: "warning",
+          innerText: `Archived from ${formatDate(createdAt)}`,
+        }),
+      );
+    }
+  } else {
+    postDate = formatTimeDifference(new Date(), indexedAt || createdAt);
+  }
+
+  let fullViewStats: HTMLElement;
+  if (fullView) {
+    const items = [
+      stat("like", post, postURL),
+      stat("repost", post, postURL),
+      stat("quote", post, postURL),
+    ];
+    if (items[0]) fullViewStats = elem("div", { className: "stats" }, items);
+  }
+
+  const postElem = elem("div", { className: "card post" }, [
+    //profile picture
+    elem("div", {}, [
+      elem("div", { className: "pfp-holder" }, [
+        elem("a", { href: authorURL }, [
+          elem("img", {
+            className: "pfp",
+            src: post.author.avatar,
+            loading: "lazy",
+          }),
+        ]),
+      ]),
+    ]),
+    //content
+    elem("div", { className: "content" }, [
+      // header
+      elem("div", { className: "header" }, [
+        elem(
+          "span",
+          {
+            className: "handle-area",
+          },
+          isRepost
+            ? [
+                elem("div", { className: "repost" }, [
+                  elem("div", {
+                    className: "icon",
+                  }),
+                ]),
+                elem("a", {
+                  className: "handle",
+                  href: "/" + reposter.did,
+                  innerHTML: reposter.handle,
+                }),
+                new Text(" reposted "),
+                elem("a", {
+                  className: "handle",
+                  href: authorURL,
+                  innerHTML: atid,
+                }),
+              ]
+            : [
+                elem("a", {
+                  className: "handle",
+                  href: authorURL,
+                  innerHTML: atid,
+                }),
+              ],
+        ),
+        fullView
+          ? ""
+          : elem("a", {
+              className: "timestamp",
+              href: postURL,
+              innerHTML: postDate,
+              onclick: () => setPreloaded(post),
+            }),
+      ]),
+      // text content
+      record.text
+        ? elem("div", {
+            className: "post-content",
+            innerHTML: processRichText(record.text, record.facets),
+          })
+        : "",
+      // embeds
+      record.embed
+        ? elem(
+            "div",
+            { className: "embeds" },
+            embed.load(record.embed, post.author.did),
+          )
+        : "",
+      ...warnings,
+      elem("div", { className: "footer" }, [
+        fullView
+          ? elem("div", { className: "post-data" }, [
+              elem("span", {
+                className: "timestamp",
+                innerHTML: postDate,
+                onclick: () => setPreloaded(post),
+              }),
+              translateButton,
+            ])
+          : translateButton,
+        // likes repost and comments
+        fullViewStats ? fullViewStats : "",
+        elem("div", { className: "stats-buttons" }, [
+          interactionButton("like", post),
+          interactionButton("repost", post),
+          interactionButton("reply", post),
+          interactionButton("quote", post),
+        ]),
+      ]),
+    ]),
+  ]);
+  return postElem;
+}
+
+const plural = {
+  reply: "replies",
+  like: "likes",
+  repost: "reposts",
+  quote: "quotes",
 };
 
+function stat(
+  type: "reply" | "like" | "repost" | "quote",
+  post: AppBskyFeedDefs.PostView,
+  postURL: string,
+) {
+  const count: number = post[type + "Count"];
+  if (count === 0) return "";
+  return elem(
+    "a",
+    {
+      className: "stat",
+      href: `${postURL}/${plural[type]}`,
+    },
+    [
+      elem("span", { innerHTML: String(count) }),
+      elem("span", {
+        className: "stat-name",
+        innerHTML: " " + String(count === 1 ? type : plural[type]),
+      }),
+    ],
+  );
+}
+
 function interactionButton(
-  type: "reply" | "like" | "repost",
+  type: "reply" | "like" | "repost" | "quote",
   post: AppBskyFeedDefs.PostView,
 ) {
   let count: number = post[type + "Count"];
@@ -25,8 +249,8 @@ function interactionButton(
   const countSpan = elem("span", { innerHTML: count.toLocaleString() });
   const button = elem(
     "button",
-    { innerHTML: icon[type], className: "interaction " + type + "-button" },
-    [countSpan],
+    { className: "interaction " + type + "-button" },
+    [elem("div", { className: "icon" }), countSpan],
   );
   button.setAttribute("role", "button");
 
@@ -79,159 +303,4 @@ function interactionButton(
   }
 
   return button;
-}
-
-export function post(
-  post:
-    | AppBskyFeedDefs.FeedViewPost
-    | AppBskyFeedDefs.PostView
-    | AppBskyFeedDefs.ThreadViewPost,
-  addClass?: string,
-  marginLeft?: number,
-) {
-  const actualPost: AppBskyFeedDefs.PostView =
-    "post" in post ? post.post : post;
-  const postRecord = actualPost.record as AppBskyFeedPost.Record;
-  const atid = idchoose(actualPost.author);
-  const isRepost =
-    "reason" in post && post.reason.$type === "app.bsky.feed.defs#reasonRepost";
-  const repostAtid =
-    isRepost && "by" in post.reason ? idchoose(post.reason.by) : undefined;
-  let translateButton: Node | "" = "";
-  if (postRecord.text && postRecord.langs[0] != "en") {
-    translateButton = elem("a", {
-      className: "translate",
-      innerHTML: "Translate",
-      onclick: () =>
-        window.open(
-          "https://translate.google.com/?sl=auto&tl=en&text=" + postRecord.text,
-        ),
-    });
-  }
-
-  return elem(
-    "div",
-    {
-      className: "card post " + addClass,
-      style: marginLeft ? `margin-left: ${marginLeft}px` : null,
-    },
-    [
-      //profile picture
-      elem("div", { className: "pfp-holder" }, [
-        elem("a", { href: "/profile/" + atid }, [
-          elem("img", {
-            className: "pfp",
-            src: actualPost.author.avatar,
-            loading: "lazy",
-          }),
-        ]),
-      ]),
-      //content
-      elem(
-        "div",
-        {
-          className: "content",
-          style: marginLeft ? `max-width: ${500 - marginLeft}px` : null,
-        },
-        [
-          // header
-          elem("div", { className: "header" }, [
-            elem(
-              "span",
-              {
-                className: "handle-area",
-              },
-              isRepost
-                ? [
-                    elem("span", {
-                      className: "icon-holder",
-                      innerHTML: icon.repost,
-                    }),
-                    elem("a", {
-                      className: "handle",
-                      href: "/profile/" + repostAtid,
-                      innerHTML: repostAtid,
-                    }),
-                    new Text(" reposted "),
-                    elem("a", {
-                      className: "handle",
-                      href: "/profile/" + atid,
-                      innerHTML: atid,
-                    }),
-                  ]
-                : [
-                    elem("a", {
-                      className: "handle",
-                      href: "/profile/" + atid,
-                      innerHTML: atid,
-                    }),
-                  ],
-            ),
-            elem("a", {
-              className: "timestamp",
-              href: `/profile/${atid}/post/${actualPost.uri.split("/")[4]}`,
-              innerHTML: formatDate(
-                new Date(postRecord.createdAt || actualPost.indexedAt),
-              ),
-            }),
-          ]),
-          // text content
-          postRecord.text
-            ? elem("div", {
-                className: "post-content",
-                innerHTML: processRichText(postRecord.text, postRecord.facets),
-              })
-            : "",
-          // embeds
-          postRecord.embed
-            ? elem(
-                "div",
-                { className: "embeds" },
-                embed.load(postRecord.embed, actualPost.author.did),
-              )
-            : "",
-          // likes repost and comments
-          elem("div", { className: "stats" }, [
-            interactionButton("like", actualPost),
-            interactionButton("repost", actualPost),
-            interactionButton("reply", actualPost),
-            translateButton,
-          ]),
-        ],
-      ),
-    ],
-  );
-}
-
-export function profile(profile: AppBskyActorDefs.ProfileView) {
-  const atid =
-    profile.handle === "handle.invalid" ? profile.did : profile.handle;
-  return elem("div", { className: "card profile" }, [
-    elem("div", { className: "pfp-holder" }, [
-      elem("a", { href: "/profile/" + atid }, [
-        elem("img", {
-          className: "pfp",
-          src: profile.avatar,
-          loading: "lazy",
-        }),
-      ]),
-    ]),
-    elem("div", { className: "content" }, [
-      elem("a", { className: "header", href: "/profile/" + atid }, [
-        elem("span", { className: "handle", innerHTML: atid }),
-        profile.displayName
-          ? elem("span", {
-              className: "display-name",
-              innerHTML: profile.displayName,
-            })
-          : "",
-      ]),
-      elem("div", {
-        className: "bio",
-        innerHTML: profile.description
-          ? processText(profile.description)?.replaceAll("<br/>", " ")
-          : "",
-      }),
-    ]),
-  ]);
 }

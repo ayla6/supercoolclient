@@ -7,15 +7,18 @@ body {
     margin: 0;
     background: #224 center/cover fixed repeat;
     color: $dark-grey;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 #container {
     background-color: $container-color;
-    min-width: 888px;
+    width: 920px;
+    box-sizing: border-box;
     padding: 64px 16px 16px 16px;
     margin: 0 auto;
     display: table;
-    min-height: calc(100vh - 32px);
+    min-height: 100vh;
 }
 
 a {
@@ -28,7 +31,7 @@ a {
 
 #content {
     margin-left: auto;
-    width: max-content;
+    width: 582px;
 }
 
 .button {
@@ -54,8 +57,8 @@ button.active {
     border: $border;
 }
 
-.profile-header .stats a:hover,
-.profile-header .stats a:hover b,
+.profile-header .stats-buttons a:hover,
+.profile-header .stats-buttons a:hover b,
 .side-nav a {
     text-decoration: none;
     color: var(--accent-color);
@@ -83,73 +86,6 @@ a.timestamp:hover {
     text-shadow: 0 1px 0 #fff;
 }
 
-.left-bar {
-    display: block;
-    float: left;
-    &.sticky {
-        position: fixed;
-    }
-}
-
-.side-nav {
-    $width: 300px;
-    background: #f9f9f9;
-    border-radius: 4px;
-    width: $width;
-    margin-bottom: 8px;
-    position: relative;
-    a {
-        width: $width - 24px;
-        display: block;
-        padding: 8px 12px;
-        border-bottom: 1px solid #e8e8e8;
-        .images {
-            margin-top: 4px;
-            img {
-                width: 66px;
-                height: 66px;
-                object-fit: cover;
-                margin-right: 4px;
-                &:last-of-type {
-                    margin: 0;
-                }
-            }
-        }
-        &::before {
-            content: "❯";
-            display: block;
-            float: right;
-            color: $light-grey;
-            line-height: 0.9;
-            font-size: 19px;
-            position: absolute;
-            right: 12px;
-        }
-        &:hover::before,
-        &.active::before {
-            color: #666;
-        }
-        &:first-of-type {
-            border-radius: 4px 4px 0 0;
-        }
-        &:last-of-type {
-            border-bottom: none;
-            border-radius: 0 0 4px 4px;
-        }
-        &:only-of-type {
-            border-radius: 4px !important;
-        }
-        &.active,
-        &:hover {
-            background: #fff;
-            color: $dark-grey;
-        }
-        &.active {
-            font-weight: 700;
-        }
-    }
-}
-
 code {
     font-family: monospace;
     background-color: #3331;
@@ -159,4 +95,152 @@ code {
 
 .emoji {
     font-style: normal;
+}
+
+.buffer {
+    width: 100%;
+    height: 80vh;
+}
+
+@media (min-width: 920px) {
+    .side-bar {
+        display: block;
+        float: left;
+        &.sticky {
+            position: fixed;
+        }
+    }
+
+    .side-nav {
+        $width: 300px;
+        background: #f9f9f9;
+        border-radius: 4px;
+        width: $width;
+        margin-bottom: 8px;
+        position: relative;
+        a {
+            width: $width - 24px;
+            display: block;
+            padding: 8px 12px;
+            border-bottom: 1px solid #e8e8e8;
+            .images {
+                margin-top: 4px;
+                img {
+                    width: 66px;
+                    height: 66px;
+                    object-fit: cover;
+                    margin-right: 4px;
+                    &:last-of-type {
+                        margin: 0;
+                    }
+                }
+            }
+            &::before {
+                content: "❯";
+                display: block;
+                float: right;
+                color: $light-grey;
+                line-height: 0.9;
+                font-size: 19px;
+                position: absolute;
+                right: 12px;
+            }
+            &:hover::before,
+            &.active::before {
+                color: #666;
+            }
+            &:first-of-type {
+                border-radius: 4px 4px 0 0;
+            }
+            &:last-of-type {
+                border-bottom: none;
+                border-radius: 0 0 4px 4px;
+            }
+            &:only-of-type {
+                border-radius: 4px !important;
+            }
+            &.active,
+            &:hover {
+                background: #fff;
+                color: $dark-grey;
+            }
+            &.active {
+                font-weight: 700;
+            }
+        }
+    }
+}
+
+@media (max-width: 920px) {
+    html {
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    #navbar {
+        bottom: 0;
+        padding: 0;
+    }
+
+    #container {
+        min-width: unset;
+        width: 100vw;
+        padding: 48px 0;
+    }
+    #content {
+        margin-left: auto;
+        margin-right: auto;
+        width: 100vw;
+    }
+
+    .side-bar {
+        display: block;
+        width: 100%;
+        overflow-x: scroll;
+        white-space: nowrap; /* Prevent wrapping */
+        scrollbar-width: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10; /* Ensure it's above other content */
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        a {
+            &.active,
+            &:hover {
+                background: #fff;
+                color: $dark-grey;
+            }
+            &.active {
+                font-weight: 700;
+            }
+        }
+    }
+    .side-nav {
+        width: 100%;
+        background: #f9f9f9;
+        display: flex; /* Allow horizontal arrangement */
+        margin-right: 8px;
+        overflow-x: scroll;
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+            display: none;
+        }
+        a {
+            flex-direction: row;
+            display: inline-block; /* Allow horizontal arrangement */
+            padding: 8px 12px;
+            border-bottom: 1px solid #e8e8e8;
+            border-right: 1px solid #e8e8e8;
+            &:last-of-type {
+                border-right: none;
+            }
+            .images {
+                display: none;
+            }
+        }
+    }
 }

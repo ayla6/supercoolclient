@@ -2,14 +2,71 @@ import { AppBskyActorDefs, SCCProfile } from "@atcute/client/lexicons";
 import { manager, rpc } from "../../login";
 import { idchoose } from "../blocks/id";
 import { elem } from "../blocks/elem";
-import { processText } from "../blocks/textprocessing";
+import { processText } from "../blocks/textProcessing";
 import { get } from "../blocks/cache";
+
+export function profilePage(profile: AppBskyActorDefs.ProfileViewDetailed) {
+  const container = document.getElementById("container");
+  container.innerHTML = "";
+  document.title = profile.handle + " — SuperCoolClient";
+  const did = profile.did;
+  let sccprofile: any;
+  /*try {
+    sccprofile = (
+      await get("com.atproto.repo.getRecord", {
+        params: {
+          collection: "notasite.scc.profile",
+          rkey: "self",
+          repo: profile.data.did,
+        },
+      })
+    )?.data.value;
+    } catch (error) {}*/
+  container.append(
+    header(profile, sccprofile),
+    elem("div", { className: "side-bar" }, [
+      elem("div", { className: "side-nav" }, [
+        navButton("posts", did, "Posts"),
+        navButton("replies", did, "Posts and replies"),
+        manager.session.did === profile.did
+          ? navButton("likes", did, "Favourites")
+          : "",
+        navButton("following", did, "Following"),
+        navButton("followers", did, "Followers"),
+        navButton("media", did, "Media"),
+        //await mediaNavButton("media", did, "Media"),
+      ]),
+      sccprofile?.pinnedSearches && sccprofile.pinnedSearches.length > 0
+        ? elem(
+            "div",
+            { className: "side-nav" },
+            ((): Node[] => {
+              let array: Node[] = [];
+              for (const search of sccprofile.pinnedSearches) {
+                array.push(
+                  navButton(
+                    "search?" + encodeURIComponent(search),
+                    did,
+                    search,
+                  ),
+                );
+              }
+              return array;
+            })(),
+          )
+        : "",
+    ]),
+    elem("div", { id: "content" }),
+  );
+  return profile.did;
+}
 
 export function header(
   profile: AppBskyActorDefs.ProfileViewDetailed,
   sccprofile?: SCCProfile.Record,
 ) {
-  const atid = idchoose(profile);
+  const handle = idchoose(profile);
+  const did = "/" + profile.did;
   let customCss = `background-image:
     url(${profile.banner?.replace("img/banner", "img/feed_fullsize")});`;
   if (sccprofile != undefined) {
@@ -23,15 +80,15 @@ export function header(
     ]),
     elem("div", { className: "stats" }, [
       elem("button", { className: "button follow", innerHTML: "+ Follow" }),
-      elem("a", { href: "/profile/" + atid }, [
+      elem("a", { href: did }, [
         elem("b", { innerHTML: profile.postsCount.toLocaleString() }),
         new Text(" Posts"),
       ]),
-      elem("a", { href: "/profile/" + atid + "/following" }, [
+      elem("a", { href: did + "/following" }, [
         elem("b", { innerHTML: profile.followsCount.toLocaleString() }),
         new Text(" Following"),
       ]),
-      elem("a", { href: "/profile/" + atid + "/followers" }, [
+      elem("a", { href: did + "/followers" }, [
         elem("b", { innerHTML: profile.followersCount.toLocaleString() }),
         new Text(" Followers"),
       ]),
@@ -41,32 +98,42 @@ export function header(
         className: "display-name",
         innerHTML: profile.displayName,
       }),
-      elem("span", { className: "handle", innerHTML: "@" + atid }),
+      elem("span", { className: "handle", innerHTML: "@" + handle }),
     ]),
     elem("div", {
       className: "bio",
       innerHTML: profile.description ? processText(profile.description) : "",
     }),
+    elem("div", { className: "mobile-stats" }, [
+      elem("button", { className: "button follow", innerHTML: "+ Follow" }),
+      elem("a", { href: did }, [
+        elem("b", { innerHTML: profile.postsCount.toLocaleString() }),
+        new Text(" Posts"),
+      ]),
+      elem("a", { href: did + "/following" }, [
+        elem("b", { innerHTML: profile.followsCount.toLocaleString() }),
+        new Text(" Following"),
+      ]),
+      elem("a", { href: did + "/followers" }, [
+        elem("b", { innerHTML: profile.followersCount.toLocaleString() }),
+        new Text(" Followers"),
+      ]),
+    ]),
   ]);
 }
 
-function navButton(name: string, atid: string, text: string, did?: string) {
+function navButton(name: string, did: string, text: string) {
   const button = elem("a", {
-    href: "/profile/" + atid + (name === "posts" ? "" : "/" + name),
+    href: `/${did}${name === "posts" ? "" : "/" + name}`,
     innerHTML: text,
   });
   button.setAttribute("value", name);
   return button;
 }
 
-async function mediaNavButton(
-  name: string,
-  atid: string,
-  text: string,
-  did?: string,
-) {
+async function mediaNavButton(name: string, did: string, text: string) {
   const button = elem("a", {
-    href: "/profile/" + atid + (name === "posts" ? "" : "/" + name),
+    href: `/${did}${name === "posts" ? "" : "/" + name}`,
     innerHTML: text,
   });
   button.setAttribute("value", name);
@@ -95,61 +162,4 @@ async function mediaNavButton(
     }
   }
   return button;
-}
-
-export async function profilePage(atid: string) {
-  const container = document.getElementById("container");
-  container.innerHTML = "";
-  const profile = await get("app.bsky.actor.getProfile", {
-    params: { actor: atid },
-  });
-  atid = idchoose(profile.data);
-  let sccprofile: any;
-  /*try {
-    sccprofile = (
-      await get("com.atproto.repo.getRecord", {
-        params: {
-          collection: "notasite.scc.profile",
-          rkey: "self",
-          repo: profile.data.did,
-        },
-      })
-    )?.data.value;
-    } catch (error) {}*/
-  container.append(
-    header(profile.data, sccprofile),
-    elem("div", { className: "left-bar" }, [
-      elem("div", { className: "side-nav" }, [
-        navButton("posts", atid, "Posts"),
-        navButton("replies", atid, "Posts and replies"),
-        manager.session.did === profile.data.did
-          ? navButton("likes", atid, "Favourites")
-          : "",
-        navButton("following", atid, "Following"),
-        navButton("followers", atid, "Followers"),
-        await mediaNavButton("media", atid, "Media", profile.data.did),
-      ]),
-      sccprofile?.pinnedSearches && sccprofile.pinnedSearches.length > 0
-        ? elem(
-            "div",
-            { className: "side-nav" },
-            ((): Node[] => {
-              let array: Node[] = [];
-              for (const search of sccprofile.pinnedSearches) {
-                array.push(
-                  navButton(
-                    "search?" + encodeURIComponent(search),
-                    atid,
-                    search,
-                  ),
-                );
-              }
-              return array;
-            })(),
-          )
-        : "",
-    ]),
-    elem("div", { id: "content" }),
-  );
-  return profile.data.did;
 }

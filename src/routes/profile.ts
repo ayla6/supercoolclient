@@ -1,5 +1,8 @@
+import { get } from "../elements/blocks/cache";
+import { profileRedirect } from "../router";
 import { feed, feedNSID } from "../elements/content/feed";
 import { profiles } from "../elements/content/graph";
+import { load } from "../elements/content/load";
 import { profilePage } from "../elements/page/profile";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
@@ -12,12 +15,20 @@ const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
 export async function profileRoute(currentURL: string, loadedState: string) {
   const splitURL = currentURL.split("/");
   const splitLoaded = loadedState.split("/");
-  document.title = splitURL[2] + " — SuperCoolClient";
 
-  let atid = splitURL[2];
-  if (splitLoaded[2] != atid || splitLoaded[3] == "post")
-    atid = await profilePage(atid);
-  profileURLChange(currentURL, loadedState);
+  let atid = splitURL[1];
+  const profile = (
+    await get("app.bsky.actor.getProfile", {
+      params: { actor: atid },
+    })
+  ).data;
+  if (window.location.pathname === currentURL) {
+    if (atid != profile.did) profileRedirect(profile.did);
+    if (splitLoaded[1] != atid || splitLoaded[2] === "post")
+      atid = profilePage(profile);
+
+    profileURLChange(currentURL, loadedState);
+  }
 }
 
 export async function profileURLChange(
@@ -26,13 +37,13 @@ export async function profileURLChange(
 ) {
   const splitURL = currentURL.split("/");
   const splitLoaded = loadedState.split("/");
-  const atid = splitURL[2];
-  const currentPlace = splitURL[3] ?? "posts";
-  const lastPlace = splitLoaded[3] ?? "posts";
+  const atid = splitURL[1];
+  const currentPlace = splitURL[2] ?? "posts";
+  const lastPlace = splitLoaded[2] ?? "posts";
   const content = document.getElementById("content");
   document
     .querySelector(
-      `[value="${(lastPlace ?? "posts") + (lastPlace === "search" ? splitLoaded[4] : "")}"]`,
+      `[value="${(lastPlace ?? "posts") + (lastPlace === "search" ? splitLoaded[3] : "")}"]`,
     )
     ?.classList.remove("active");
   document
@@ -40,9 +51,10 @@ export async function profileURLChange(
       `[value="${currentPlace + (currentPlace === "search" ? window.location.search : "")}"]`,
     )
     ?.classList.add("active");
-  if (splitLoaded[3] != splitURL[3]) content.innerHTML = "";
+  if (splitLoaded[2] != splitURL[2]) content.innerHTML = "";
   let posts: HTMLElement[];
-  let forcereload = currentPlace === lastPlace && splitLoaded[1] === "profile";
+  let forcereload =
+    currentPlace === lastPlace && splitLoaded[1]?.slice(0, 3) === "did:";
   switch (currentPlace) {
     case "following":
       posts = await profiles(
@@ -83,6 +95,7 @@ export async function profileURLChange(
   content.append(...posts);
 }
 
-export async function profileRedirect(currentURL: string, loadedState: string) {
-  window.location.href = currentURL.slice(0, -1);
+export function profileTrim(currentURL: string, loadedState: string) {
+  history.pushState(null, "", new URL(window.location.href.slice(0, -1)));
+  profileRoute(currentURL.slice(0, -1), loadedState);
 }

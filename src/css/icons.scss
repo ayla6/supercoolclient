@@ -1,0 +1,86 @@
+@use "variables" as *;
+@use "sass:map";
+@use "sass:string";
+
+@function url-encode($string) {
+    $map: (
+        "%": "%25",
+        "<": "%3C",
+        ">": "%3E",
+        "#": "%23",
+        "{": "%7B",
+        "}": "%7D",
+        "|": "%7C",
+        "\\":"%5C",
+        "^": "%5E",
+        "~": "%7E",
+        "[": "%5B",
+        "]": "%5D",
+        "`": "%60",
+        ";": "%3B",
+        "/": "%2F",
+        "?": "%3F",
+        ":": "%3A",
+        "@": "%40",
+        "=": "%3D",
+        "&": "%26",
+        "$": "%24",
+    );
+    $result: "";
+    @for $i from 1 through string.length($string) {
+        $char: string.slice($string, $i, $i);
+        @if map.has-key($map, $char) {
+            $result: $result + map.get($map, $char);
+        } @else {
+            $result: $result + $char;
+        }
+    }
+    @return $result;
+}
+@function inline-svg($string) {
+    @return url("data:image/svg+xml;utf8,#{url-encode($string)}");
+}
+
+$reposted: inline-svg(
+    '<svg width="24" height="24" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4 12v-3a3 3 0 0 1 3-3h13m-3-3 3 3-3 3"/><path d="m20 12v3a3 3 0 0 1-3 3h-13m3 3-3-3 3-3"/></svg>'
+);
+
+$repost-active-color: #609928;
+$repost: inline-svg(
+    '<svg width="24" height="24" fill="none" stroke="' + $dark-grey +
+        '" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4 12v-3a3 3 0 0 1 3-3h13m-3-3 3 3-3 3"/><path d="m20 12v3a3 3 0 0 1-3 3h-13m3 3-3-3 3-3"/></svg>'
+);
+$repost-active: inline-svg(
+    '<svg width="24" height="24" fill="none" stroke="' + $repost-active-color +
+        '" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m4 12v-3a3 3 0 0 1 3-3h13m-3-3 3 3-3 3"/><path d="m20 12v3a3 3 0 0 1-3 3h-13m3 3-3-3 3-3"/></svg>'
+);
+
+$reply-active-color: #999;
+$reply: inline-svg(
+    '<svg width="24" height="24" version="1.1" fill="' + $dark-grey +
+        '" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m18 3c2.2091 0 4 1.7909 4 4v8c0 2.2091-1.7909 4-4 4h-4.724l-4.762 2.857c-0.62331 0.37406-1.4248-0.020842-1.508-0.743l-6e-3 -0.114v-2h-1c-2.1314 2e-6 -3.8884-1.6713-3.995-3.8l-5e-3 -0.2v-8c0-2.2091 1.7909-4 4-4z"/></svg>'
+);
+$reply-active: inline-svg(
+    '<svg width="24" height="24" version="1.1" fill="' + $reply-active-color +
+        '" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m18 3c2.2091 0 4 1.7909 4 4v8c0 2.2091-1.7909 4-4 4h-4.724l-4.762 2.857c-0.62331 0.37406-1.4248-0.020842-1.508-0.743l-6e-3 -0.114v-2h-1c-2.1314 2e-6 -3.8884-1.6713-3.995-3.8l-5e-3 -0.2v-8c0-2.2091 1.7909-4 4-4z"/></svg>'
+);
+
+$fav-active-color: #f90;
+$fav: inline-svg(
+    '<svg width="24" height="24" fill="' + $dark-grey +
+        '" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m8.243 7.34-6.38 0.925-0.113 0.023a1 1 0 0 0-0.44 1.684l4.622 4.499-1.09 6.355-0.013 0.11a1 1 0 0 0 1.464 0.944l5.706-3 5.693 3 0.1 0.046a1 1 0 0 0 1.352-1.1l-1.091-6.355 4.624-4.5 0.078-0.085a1 1 0 0 0-0.633-1.62l-6.38-0.926-2.852-5.78a1 1 0 0 0-1.794 0l-2.853 5.78z"/></svg>'
+);
+$fav-active: inline-svg(
+    '<svg width="24" height="24" fill="' + $fav-active-color +
+        '" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m8.243 7.34-6.38 0.925-0.113 0.023a1 1 0 0 0-0.44 1.684l4.622 4.499-1.09 6.355-0.013 0.11a1 1 0 0 0 1.464 0.944l5.706-3 5.693 3 0.1 0.046a1 1 0 0 0 1.352-1.1l-1.091-6.355 4.624-4.5 0.078-0.085a1 1 0 0 0-0.633-1.62l-6.38-0.926-2.852-5.78a1 1 0 0 0-1.794 0l-2.853 5.78z"/></svg>'
+);
+
+$quote-active-color: #999;
+$quote: inline-svg(
+    '<svg width="24" height="24" fill="' + $dark-grey +
+        '" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9 5a2 2 0 0 1 2 2v6c0 3.13-1.65 5.193-4.757 5.97a1 1 0 1 1-0.486-1.94c2.227-0.557 3.243-1.827 3.243-4.03v-1h-3a2 2 0 0 1-1.995-1.85l-5e-3 -0.15v-3a2 2 0 0 1 2-2z"/><path d="m18 5a2 2 0 0 1 2 2v6c0 3.13-1.65 5.193-4.757 5.97a1 1 0 1 1-0.486-1.94c2.227-0.557 3.243-1.827 3.243-4.03v-1h-3a2 2 0 0 1-1.995-1.85l-5e-3 -0.15v-3a2 2 0 0 1 2-2z"/></svg>'
+);
+$quote-active: inline-svg(
+    '<svg width="24" height="24" fill="' + $quote-active-color +
+        '" version="1.1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9 5a2 2 0 0 1 2 2v6c0 3.13-1.65 5.193-4.757 5.97a1 1 0 1 1-0.486-1.94c2.227-0.557 3.243-1.827 3.243-4.03v-1h-3a2 2 0 0 1-1.995-1.85l-5e-3 -0.15v-3a2 2 0 0 1 2-2z"/><path d="m18 5a2 2 0 0 1 2 2v6c0 3.13-1.65 5.193-4.757 5.97a1 1 0 1 1-0.486-1.94c2.227-0.557 3.243-1.827 3.243-4.03v-1h-3a2 2 0 0 1-1.995-1.85l-5e-3 -0.15v-3a2 2 0 0 1 2-2z"/></svg>'
+);

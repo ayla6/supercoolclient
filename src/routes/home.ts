@@ -1,15 +1,21 @@
-import { get } from "../elements/blocks/cache";
+import { get, inCache } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
-import { escapeHTML } from "../elements/blocks/textprocessing";
-import { feed } from "../elements/content/feed";
+import { escapeHTML } from "../elements/blocks/textProcessing";
+import { feed, timeline } from "../elements/content/feed";
 
 let currentFeed: string;
 
-function navButton(title: string, feed: string) {
-  return elem("a", {
+function navButton(feed: string, title: string) {
+  const button = elem("a", {
     innerHTML: escapeHTML(title),
-    href: `?feedgen=${feed}&title=${title}`,
+    href: `?feed=${feed}&title=${title}`,
+    onclick: (e) => {
+      e.preventDefault();
+      loadFeed(feed, title);
+    },
   });
+  button.setAttribute("ignore", "");
+  return button;
 }
 export async function homeRoute(
   currentURL: Array<string>,
@@ -19,7 +25,7 @@ export async function homeRoute(
     const container = document.getElementById("container");
     container.innerHTML = "";
     const leftBar = document.createElement("div");
-    leftBar.className = "left-bar sticky";
+    leftBar.className = "side-bar sticky";
     const feedNav = document.createElement("div");
     feedNav.className = "side-nav";
     const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
@@ -39,9 +45,9 @@ export async function homeRoute(
         },
       })
     ).data.feeds;
-    feedNav.append(navButton("Following", "following"));
+    feedNav.append(navButton("following", "Following"));
     for (const feed of feedGens) {
-      feedNav.append(navButton(feed.displayName, feed.uri));
+      feedNav.append(navButton(feed.uri, feed.displayName));
     }
     leftBar.append(feedNav);
     container.append(leftBar);
@@ -53,11 +59,11 @@ export async function homeRoute(
   }
 }
 
-export async function homeURLChange(currentURL?: string, loadedState?: string) {
-  const url = new URL(window.location.href);
-  const params = url.searchParams;
-  let feedgen = params.get("feedgen");
-  let title = params.get("title");
+async function loadFeed(
+  feedgen: string,
+  title: string,
+  wasAtHome: boolean = true,
+) {
   if (!feedgen) {
     if (localStorage.getItem("last-feed"))
       [feedgen, title] = JSON.parse(localStorage.getItem("last-feed"));
@@ -66,38 +72,39 @@ export async function homeURLChange(currentURL?: string, loadedState?: string) {
       title = "Following";
     }
   }
-  const wasAtHome = loadedState?.split("/")[1] === "";
   const lastFeed = currentFeed;
   currentFeed = feedgen;
   localStorage.setItem("last-feed", JSON.stringify([feedgen, title]));
 
   document.title = `${title} — SuperCoolClient`;
 
-  params.delete("following");
-  params.delete("feedgen");
-  params.delete("title");
-  window.history.replaceState({}, "", url.toString());
-
   window.scrollTo({ top: 0 });
-  const nsid =
-    feedgen === "following"
-      ? "app.bsky.feed.getTimeline"
-      : "app.bsky.feed.getFeed";
   if (lastFeed !== feedgen || !wasAtHome) {
     document.querySelector(".active")?.classList.remove("active");
     document
-      .querySelector(`[href="?feedgen=${feedgen}&title=${title}"]`)
+      .querySelector(`[href="?feed=${feedgen}&title=${title}"]`)
       ?.classList.add("active");
   }
   const content = document.getElementById("content");
   if (currentFeed !== lastFeed) content.innerHTML = "";
   if (currentFeed === feedgen) {
-    const items = await feed(
-      nsid,
-      { feed: feedgen },
-      currentFeed === lastFeed && wasAtHome,
-    );
+    const forceReload = currentFeed === lastFeed && wasAtHome;
+    const items =
+      feedgen === "following"
+        ? await timeline(forceReload)
+        : await feed("app.bsky.feed.getFeed", { feed: feedgen }, forceReload);
     content.innerHTML = "";
     content.append(...items);
   }
+}
+
+export async function homeURLChange(currentURL?: string, loadedState?: string) {
+  const url = new URL(window.location.href);
+  const params = url.searchParams;
+  let feedgen = params.get("feed");
+  let title = params.get("title");
+
+  history.replaceState({}, "", window.location.href.split("?")[0]);
+
+  loadFeed(feedgen, title, loadedState?.split("/")[1] === "");
 }

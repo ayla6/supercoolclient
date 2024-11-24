@@ -17,14 +17,11 @@
 
 import { login } from "./login";
 import { loadNavbar } from "./elements/ui/navbar";
-import {
-  profileRedirect,
-  profileRoute,
-  profileURLChange,
-} from "./routes/profile";
+import { profileRoute, profileTrim, profileURLChange } from "./routes/profile";
 import { homeRoute, homeURLChange } from "./routes/home";
 import { postRoute } from "./routes/post";
 import { elem } from "./elements/blocks/elem";
+import { notificationsRoute } from "./routes/notifications";
 
 let loadedState: string = "";
 
@@ -32,24 +29,21 @@ function saveLastLocation() {
   loadedState = window.location.pathname;
   if (window.location.search) loadedState += "/" + window.location.search;
 }
-const originalPushState = history.pushState;
-history.pushState = function (state, title, url) {
-  saveLastLocation();
-  originalPushState.apply(history, arguments);
-};
 
 const routes: { [key: string]: string } = {
   "/": "home",
-  "/profile/:handle/": "profileRedirect",
-  "/profile/:handle": "profile",
-  "/profile/:handle/:location": "profile",
-  "/profile/:handle/post/:rkey": "post",
+  "/notifications": "notifications",
+  "/:did/": "profileTrim",
+  "/:did": "profile",
+  "/:did/:location": "profile",
+  "/:did/post/:rkey": "post",
 };
 const changeRoutes: { [key: string]: Function } = {
   home: homeRoute,
   profile: profileRoute,
   post: postRoute,
-  profileRedirect: profileRedirect,
+  profileTrim: profileTrim,
+  notifications: notificationsRoute,
 };
 const localRoutes: { [key: string]: Function } = {
   home: homeURLChange,
@@ -81,13 +75,16 @@ export async function updatePage() {
   const currentURL = window.location.pathname;
   const splitURL = window.location.pathname.split("/");
   const splitLoaded = loadedState.split("/");
-  if (splitURL[2] != splitLoaded[2]) {
+  let ableToLocal = true;
+  if (splitURL[1] != splitLoaded[1]) {
     document.body.setAttribute("style", "");
+    ableToLocal = false;
   }
   const route = matchRoute(currentURL);
-  if (route === matchRoute(loadedState)) {
+  if (ableToLocal && route === matchRoute(loadedState)) {
     localRoutes[route](currentURL, loadedState);
   } else {
+    document.title = "SuperCoolClient";
     window.scrollTo({ top: 0 });
     document.body.removeChild(document.getElementById("container"));
     document.body.append(elem("div", { id: "container" }));
@@ -96,29 +93,13 @@ export async function updatePage() {
   saveLastLocation();
 }
 
-document.addEventListener("click", (e) => {
-  const anchor = e.target instanceof Element ? e.target.closest("a") : null;
-  if (!anchor || e.ctrlKey || e.button !== 0) return;
+export function profileRedirect(did: string) {
+  let splitURL = window.location.href.split("/");
+  splitURL[3] = did;
+  history.pushState(null, "", new URL(splitURL.join("/")));
+}
 
-  const url = new URL(anchor.href);
-  if (window.location.origin !== url.origin) return;
-
-  e.preventDefault();
+export function navigateTo(url: URL | string) {
   history.pushState(null, "", url);
   updatePage();
-});
-
-addEventListener("popstate", () => {
-  updatePage();
-});
-
-/*const record: AppSCCProfile.Record = {
-  $type: 'app.scc.profile',
-  accentColor: '#f58ea9',
-  pinnedSearches: ['#test']
 }
-rpc.call('com.atproto.repo.putRecord', {data: {record: record, collection: 'app.scc.profile',repo: sessionStorage.getItem('userdid'), rkey: 'self'}})*/
-
-login();
-loadNavbar();
-updatePage();
