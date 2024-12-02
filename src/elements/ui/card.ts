@@ -1,5 +1,5 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
-import * as embed from "./embed";
+import { loadEmbed } from "./embed";
 import { idchoose } from "../blocks/id";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { manager, rpc } from "../../login";
@@ -181,7 +181,7 @@ export function post(
         ? elem(
             "div",
             { className: "embeds" },
-            embed.load(record.embed, post.author.did),
+            loadEmbed(record.embed, post.author.did),
           )
         : "",
       ...warnings,

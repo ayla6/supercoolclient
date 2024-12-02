@@ -51,44 +51,14 @@ export async function profileURLChange(
     ?.classList.add("active");
   if (splitLoaded[2] != splitURL[2]) content.innerHTML = "";
   let posts: HTMLElement[];
-  let forcereload =
+  let forceReload =
     currentPlace === lastPlace && splitLoaded[1]?.slice(0, 3) === "did:";
-  switch (currentPlace) {
-    case "following":
-      posts = await hydrateFeed(
-        "app.bsky.graph.getFollows",
-        { actor: atid },
-        forcereload,
-      );
-      break;
-    case "followers":
-      posts = await hydrateFeed(
-        "app.bsky.graph.getFollowers",
-        { actor: atid },
-        forcereload,
-      );
-      break;
-    case "search":
-      posts = await hydrateFeed(
-        "app.bsky.feed.searchPosts",
-        {
-          author: atid,
-          q: decodeURIComponent(window.location.search).slice(1),
-        },
-        forcereload,
-      );
-      break;
-    default:
-      posts = await hydrateFeed(
-        urlEquivalents[currentPlace][0],
-        {
-          actor: atid,
-          filter: urlEquivalents[currentPlace][1],
-        },
-        forcereload,
-      );
-      break;
-  }
+  const feed = feedConfig[currentPlace] ?? feedConfig.default;
+  posts = await hydrateFeed(
+    feed.endpoint ?? urlEquivalents[currentPlace][0],
+    feed.params(atid, currentPlace),
+    forceReload,
+  );
   content.innerHTML = "";
   content.append(...posts);
 }
@@ -97,3 +67,28 @@ export function profileTrim(currentURL: string, loadedState: string) {
   history.pushState(null, "", new URL(window.location.href.slice(0, -1)));
   profileRoute(currentURL.slice(0, -1), loadedState);
 }
+
+const feedConfig = {
+  following: {
+    endpoint: "app.bsky.graph.getFollows",
+    params: (atid: string) => ({ actor: atid }),
+  },
+  followers: {
+    endpoint: "app.bsky.graph.getFollowers",
+    params: (atid: string) => ({ actor: atid }),
+  },
+  search: {
+    endpoint: "app.bsky.feed.searchPosts",
+    params: (atid: string) => ({
+      author: atid,
+      q: decodeURIComponent(window.location.search).slice(1),
+    }),
+  },
+  default: {
+    endpoint: null,
+    params: (atid: string, place: string) => ({
+      actor: atid,
+      filter: urlEquivalents[place][1],
+    }),
+  },
+};

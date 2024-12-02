@@ -3,8 +3,9 @@ import { get } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
 import { post } from "../elements/ui/card";
 import { rpc } from "../login";
-import { thread } from "../elements/page/thread";
+import { loadThread } from "../elements/page/thread";
 import { profileRedirect } from "../router";
+import { stickyHeader } from "../elements/ui/stickyHeader";
 
 let preloadedPost: AppBskyFeedDefs.PostView;
 export function setPreloaded(post: AppBskyFeedDefs.PostView) {
@@ -14,8 +15,10 @@ export async function postRoute(currentURL: string, loadedState: string) {
   const splitURL = currentURL.split("/");
   const container = document.getElementById("container");
   container.innerHTML = "";
+  container.append(stickyHeader("Post"));
   const content = elem("div", { id: "content" });
   container.append(content);
+
   if (
     preloadedPost &&
     preloadedPost.uri.split("/")[4] === splitURL[3] &&
@@ -44,5 +47,5 @@ export async function postRoute(currentURL: string, loadedState: string) {
   )
     profileRedirect(postThread.thread.post.author.did);
 
-  thread(postThread, content);
+  loadThread(postThread, content);
 }

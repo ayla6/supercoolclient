@@ -14,54 +14,45 @@ import { elem } from "../blocks/elem";
 import { escapeHTML } from "../blocks/textProcessing";
 import { external } from "./embeds/external";
 
-export function load(
-  embed: Brand.Union<
-    | AppBskyEmbedExternal.Main
-    | AppBskyEmbedImages.Main
-    | AppBskyEmbedRecord.Main
-    | AppBskyEmbedRecordWithMedia.Main
-    | AppBskyEmbedVideo.Main
-  >,
-  did: string,
-): Node[] {
+type Embed = Brand.Union<
+  | AppBskyEmbedExternal.Main
+  | AppBskyEmbedImages.Main
+  | AppBskyEmbedRecord.Main
+  | AppBskyEmbedRecordWithMedia.Main
+  | AppBskyEmbedVideo.Main
+>;
+
+export function loadEmbed(embed: Embed, did: string): Node[] {
   let embeds = [];
-  switch (embed.$type) {
-    case "app.bsky.embed.recordWithMedia":
-      {
-        embeds.push(...load(embed.media, did));
-        embeds.push(
-          ...load({ ...embed.record, $type: "app.bsky.embed.record" }, did),
-        );
-      }
-      break;
-    case "app.bsky.embed.images":
-      embeds.push(
-        elem("div", { className: "images" }, loadImages(embed.images, did)),
-      );
-      break;
-    case "app.bsky.embed.record":
-      {
-        const uri = embed.record.uri.split("/");
-        embeds.push(
-          elem("a", {
-            href: `/${uri[2]}/post/${uri[4]}`,
-            innerHTML: escapeHTML(embed.record.uri),
-            className: "record-link",
-          }),
-        );
-      }
-      break;
-    case "app.bsky.embed.external":
+  const embedHandlers = {
+    "app.bsky.embed.recordWithMedia": (embed: any, did: string) => {
+      return [
+        ...loadEmbed(embed.media, did),
+        ...loadEmbed({ ...embed.record, $type: "app.bsky.embed.record" }, did),
+      ];
+    },
+    "app.bsky.embed.images": (embed: any, did: string) => [
+      elem("div", { className: "images" }, loadImages(embed.images, did)),
+    ],
+    "app.bsky.embed.record": (embed: any, did: string) => {
+      const uri = embed.record.uri.split("/");
+      return [
+        elem("a", {
+          href: `/${uri[2]}/post/${uri[4]}`,
+          innerHTML: escapeHTML(embed.record.uri),
+          className: "record-link",
+        }),
+      ];
+    },
+    "app.bsky.embed.external": (embed: any, did: string) => {
       const url = new URL(embed.external.uri);
       if (url.hostname === "media.tenor.com") {
         const urlParams = new URLSearchParams(url.search);
-        const { width, height } = {
-          width: Number(urlParams.get("ww")),
-          height: Number(urlParams.get("hh")),
-        };
+        const width = Number(urlParams.get("ww"));
+        const height = Number(urlParams.get("hh"));
         const splitPathname = url.pathname.split("/");
         const newURL = `https://t.gifs.bsky.app/${splitPathname[1].slice(0, -2)}P3/${splitPathname[2]}`;
-        embeds.push(
+        return [
           elem("video", {
             src: newURL,
             autoplay: true,
@@ -70,14 +61,15 @@ export function load(
             width,
             height,
           }),
-        );
-      } else embeds.push(external(embed, did));
-      break;
-    case "app.bsky.embed.video":
+        ];
+      }
+      return [external(embed, did)];
+    },
+    "app.bsky.embed.video": (embed: any) => {
       console.log(embed.video);
-      break;
-    default:
-      break;
-  }
+      return [];
+    },
+  };
+  embeds.push(...(embedHandlers[embed.$type]?.(embed, did) || []));
   return embeds;
 }

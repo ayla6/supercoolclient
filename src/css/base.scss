@@ -12,14 +12,17 @@ body {
 }
 
 #container {
+    position: relative;
+    top: 32px;
+    padding: 16px;
     background-color: $container-color;
     width: 920px;
     box-sizing: border-box;
-    padding: 64px 16px 16px 16px;
     margin: 0 auto;
     min-height: 100vh;
     display: flex;
     flex-flow: wrap;
+    align-content: baseline;
 }
 
 a {
@@ -106,6 +109,10 @@ code {
 }
 
 @media (min-width: 920px) {
+    .sticky-header {
+        display: none;
+    }
+
     .side-bar {
         display: block;
         &.sticky {
@@ -174,6 +181,38 @@ code {
 }
 
 @media (max-width: 920px) {
+    .sticky-header {
+        z-index: 1;
+        display: block;
+        position: fixed;
+        top: 0;
+        background-color: #fff;
+        width: 100vw;
+        height: 32px;
+        background-image: linear-gradient(#fff, $lighter-grey);
+        user-select: none;
+        a {
+            background: none;
+            border: none;
+            font-size: 24px;
+            float: left;
+            line-height: 18px;
+            padding-top: 8px;
+            padding-bottom: 6px;
+            &:hover {
+                text-decoration: none;
+            }
+        }
+        span {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: min-content;
+            padding: 8px 0;
+            height: 16px;
+        }
+    }
+
     html {
         scrollbar-width: none;
         &::-webkit-scrollbar {
@@ -189,8 +228,10 @@ code {
     #container {
         min-width: unset;
         width: 100vw;
-        padding: 48px 0;
+        padding: 12px 0;
+        top: 32px;
     }
+
     #content {
         margin-left: auto;
         margin-right: auto;

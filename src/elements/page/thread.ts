@@ -6,7 +6,7 @@ import { post } from "../ui/card";
 import { elem } from "../blocks/elem";
 import { error } from "../ui/error";
 
-export function thread(
+export function loadThread(
   postThread: AppBskyFeedGetPostThread.Output,
   outputElement: HTMLElement,
 ) {
@@ -96,6 +96,7 @@ export function thread(
 
     outputElement.innerHTML = "";
     outputElement.append(...mainThreadPosts);
+    mainPost.scrollIntoView();
     outputElement.append(...replyPosts);
     if (mutedPosts.length > 0)
       outputElement.append(mutedPostsButton(outputElement, mutedPosts));
