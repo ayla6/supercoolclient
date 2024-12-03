@@ -23,7 +23,6 @@
         display: flex;
         flex-flow: column;
         flex-grow: 1;
-        margin-left: 8px;
         padding: 8px;
         margin-bottom: 8px;
     }
@@ -37,7 +36,7 @@
         float: left;
         flex-shrink: 1;
         line-height: 0;
-        margin: 3px;
+        margin: 3px 10px;
         border-radius: 3px;
         a {
             display: block;
@@ -364,12 +363,15 @@
     }
 
     .pfp-holder {
-        margin: 0;
-        margin-right: 4px;
+        margin: 0 4px 0 1px;
     }
 
     .pfp-holder::after {
         display: none;
+    }
+
+    .content {
+        margin-left: 0;
     }
 
     .interaction {

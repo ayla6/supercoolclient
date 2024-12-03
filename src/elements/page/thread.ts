@@ -104,7 +104,7 @@ export function loadThread(
           if (isLastChild) {
             string.classList.add("transparent");
           }
-          replies.appendChild(getString(isLastChild));
+          replies?.appendChild(getString(isLastChild));
           stringContainer.append(elem("div", { className: "connect-string" }));
 
           stringContainer.append(string);
