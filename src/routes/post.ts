@@ -1,7 +1,7 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { cache, get } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
-import { post } from "../elements/ui/card";
+import { postCard } from "../elements/ui/card";
 import { rpc } from "../login";
 import { loadThread } from "../elements/page/thread";
 import { profileRedirect } from "../router";
@@ -24,7 +24,7 @@ export async function postRoute(currentURL: string, loadedState: string) {
     preloadedPost.uri.split("/")[4] === splitURL[3] &&
     splitURL[1] === preloadedPost.author.did
   ) {
-    const mainPost = post(preloadedPost, true);
+    const mainPost = postCard(preloadedPost, true);
     mainPost.classList.add("full");
     content.append(mainPost);
     //scrollTo({ top: -63 });

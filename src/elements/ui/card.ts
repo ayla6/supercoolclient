@@ -9,7 +9,7 @@ import { formatDate, formatTimeDifference } from "../blocks/date";
 import { setPreloaded } from "../../routes/post";
 import { Brand } from "@atcute/client/lexicons";
 
-export function profile(profile: AppBskyActorDefs.ProfileView) {
+export function profileCard(profile: AppBskyActorDefs.ProfileView) {
   const atid =
     profile.handle === "handle.invalid" ? profile.did : profile.handle;
   return elem("div", { className: "card profile" }, [
@@ -53,10 +53,10 @@ export function statProfile(
       },
 ) {
   const _profile = "actor" in stat ? stat.actor : stat;
-  return profile(_profile);
+  return profileCard(_profile);
 }
 
-export function post(
+export function postCard(
   postHousing:
     | AppBskyFeedDefs.FeedViewPost
     | AppBskyFeedDefs.PostView

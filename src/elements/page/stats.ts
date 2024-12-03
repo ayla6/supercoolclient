@@ -1,7 +1,7 @@
 import { get } from "../blocks/cache";
 import { elem } from "../blocks/elem";
 import { feedNSID, hydrateFeed } from "../content/feed";
-import { post } from "../ui/card";
+import { postCard } from "../ui/card";
 import { stickyHeader } from "../ui/stickyHeader";
 
 export async function statsPage(
@@ -20,7 +20,7 @@ export async function statsPage(
   content = elem("div", { id: "content" });
   container.append(content);
   content.append(
-    post(
+    postCard(
       (
         await get("app.bsky.feed.getPosts", {
           params: {

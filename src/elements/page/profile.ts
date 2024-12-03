@@ -1,5 +1,5 @@
 import { AppBskyActorDefs, SCCProfile } from "@atcute/client/lexicons";
-import { manager, rpc } from "../../login";
+import { manager } from "../../login";
 import { idchoose } from "../blocks/id";
 import { elem } from "../blocks/elem";
 import { processText } from "../blocks/textProcessing";

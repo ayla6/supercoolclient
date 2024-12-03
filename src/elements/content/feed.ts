@@ -1,5 +1,5 @@
 import { get, inCache } from "../blocks/cache";
-import { post, profile } from "../ui/card";
+import { postCard } from "../ui/card";
 
 export type feedNSID =
   | "app.bsky.feed.getAuthorFeed"
@@ -26,7 +26,7 @@ export async function hydrateFeed(
   nsid: feedNSID,
   params: any,
   forceReload: boolean = false,
-  type: Function = post,
+  type: Function = postCard,
 ): Promise<HTMLElement[]> {
   const dataLocation = dataLocations[nsid] ?? "feed";
   async function _load(forceReload: boolean = false) {

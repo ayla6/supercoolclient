@@ -2,7 +2,7 @@ import { get } from "../elements/blocks/cache";
 import { profileRedirect } from "../router";
 import { feedNSID, hydrateFeed } from "../elements/content/feed";
 import { profilePage } from "../elements/page/profile";
-import { profile } from "../elements/ui/card";
+import { profileCard } from "../elements/ui/card";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -74,12 +74,12 @@ const feedConfig = {
   following: {
     endpoint: "app.bsky.graph.getFollows",
     params: (atid: string) => ({ actor: atid }),
-    type: profile,
+    type: profileCard,
   },
   followers: {
     endpoint: "app.bsky.graph.getFollowers",
     params: (atid: string) => ({ actor: atid }),
-    type: profile,
+    type: profileCard,
   },
   search: {
     endpoint: "app.bsky.feed.searchPosts",
