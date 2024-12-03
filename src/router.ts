@@ -24,11 +24,11 @@ import { likesRoute } from "./routes/likes";
 import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
 
-let loadedState: string = "";
+let loadedURL: string = "";
 
 function saveLastLocation() {
-  loadedState = window.location.pathname;
-  if (window.location.search) loadedState += "/" + window.location.search;
+  loadedURL = window.location.pathname;
+  if (window.location.search) loadedURL += "/" + window.location.search;
 }
 
 const routes: { [key: string]: string } = {
@@ -84,21 +84,21 @@ export async function updatePage() {
   window.onscroll = null;
   const currentURL = window.location.pathname;
   const splitURL = window.location.pathname.split("/");
-  const splitLoaded = loadedState.split("/");
+  const splitLoaded = loadedURL.split("/");
   let ableToLocal = true;
   if (splitURL[1] != splitLoaded[1]) {
     document.body.setAttribute("style", "");
     ableToLocal = false;
   }
   const route = matchRoute(currentURL);
-  if (ableToLocal && route === matchRoute(loadedState)) {
-    localRoutes[route](currentURL, loadedState);
+  if (ableToLocal && route === matchRoute(loadedURL)) {
+    localRoutes[route](currentURL, loadedURL);
   } else {
     document.title = "SuperCoolClient";
     window.scrollTo({ top: 0 });
     document.body.removeChild(document.getElementById("container"));
     document.body.append(elem("div", { id: "container" }));
-    changeRoutes[route](currentURL, loadedState);
+    changeRoutes[route](currentURL, loadedURL);
   }
   saveLastLocation();
 }

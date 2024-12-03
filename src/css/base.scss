@@ -30,6 +30,7 @@ a {
     text-decoration: none;
     &:hover {
         text-decoration: underline;
+        text-decoration-thickness: 1px;
     }
 }
 
@@ -68,12 +69,14 @@ button.active {
 .side-nav a {
     text-decoration: none;
     color: var(--accent-color);
+    text-decoration-thickness: 1px;
 }
 
 a.header:hover,
 a.handle:hover,
 a.timestamp:hover {
     text-decoration: underline;
+    text-decoration-thickness: 1px;
     color: var(--accent-color) !important;
 }
 

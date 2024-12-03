@@ -11,9 +11,9 @@ const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   likes: ["app.bsky.feed.getActorLikes"],
 };
 
-export async function profileRoute(currentURL: string, loadedState: string) {
+export async function profileRoute(currentURL: string, loadedURL: string) {
   const splitURL = currentURL.split("/");
-  const splitLoaded = loadedState.split("/");
+  const splitLoaded = loadedURL.split("/");
 
   let atid = splitURL[1];
   const profile = (
@@ -26,16 +26,13 @@ export async function profileRoute(currentURL: string, loadedState: string) {
     if (splitLoaded[1] != atid || splitLoaded[2] === "post")
       atid = profilePage(profile);
 
-    profileURLChange(currentURL, loadedState);
+    profileURLChange(currentURL, loadedURL);
   }
 }
 
-export async function profileURLChange(
-  currentURL: string,
-  loadedState: string,
-) {
+export async function profileURLChange(currentURL: string, loadedURL: string) {
   const splitURL = currentURL.split("/");
-  const splitLoaded = loadedState.split("/");
+  const splitLoaded = loadedURL.split("/");
   const atid = splitURL[1];
   const currentPlace = splitURL[2] ?? "posts";
   const lastPlace = splitLoaded[2] ?? "posts";
@@ -65,9 +62,9 @@ export async function profileURLChange(
   content.append(...posts);
 }
 
-export function profileTrim(currentURL: string, loadedState: string) {
+export function profileTrim(currentURL: string, loadedURL: string) {
   history.pushState(null, "", new URL(window.location.href.slice(0, -1)));
-  profileRoute(currentURL.slice(0, -1), loadedState);
+  profileRoute(currentURL.slice(0, -1), loadedURL);
 }
 
 const feedConfig = {

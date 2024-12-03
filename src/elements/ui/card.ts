@@ -4,7 +4,11 @@ import { idchoose } from "../blocks/id";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { manager, rpc } from "../../login";
 import { elem } from "../blocks/elem";
-import { processRichText, processText } from "../blocks/textProcessing";
+import {
+  escapeHTML,
+  processRichText,
+  processText,
+} from "../blocks/textProcessing";
 import { formatDate, formatTimeDifference } from "../blocks/date";
 import { setPreloaded } from "../../routes/post";
 import { Brand } from "@atcute/client/lexicons";
@@ -140,65 +144,85 @@ export function postCard(
     if (items[0]) fullViewStats = elem("div", { className: "stats" }, items);
   }
 
+  const profilePicture = elem("div", { className: "pfp-holder" }, [
+    elem("a", { href: authorURL }, [
+      elem("img", {
+        className: "pfp",
+        src: post.author.avatar,
+        loading: "lazy",
+      }),
+    ]),
+  ]);
+
   return elem("div", { className: "card post" + (fullView ? " full" : "") }, [
     //profile picture
-    elem("div", { className: "left-area" }, [
-      elem("div", { className: "pfp-holder" }, [
-        elem("a", { href: authorURL }, [
-          elem("img", {
-            className: "pfp",
-            src: post.author.avatar,
-            loading: "lazy",
-          }),
+    fullView
+      ? ""
+      : elem("div", { className: "left-area" }, [
+          profilePicture,
+          replyStatus.hasReplies
+            ? elem("div", { className: "reply-string" })
+            : "",
         ]),
-      ]),
-      replyStatus.hasReplies ? elem("div", { className: "reply-string" }) : "",
-    ]),
     //content
     elem("div", { className: "content" }, [
       // header
-      elem("div", { className: "header" }, [
-        elem(
-          "span",
-          {
-            className: "handle-area",
-          },
-          isRepost
-            ? [
-                elem("div", { className: "repost" }, [
-                  elem("div", {
-                    className: "icon",
-                  }),
-                ]),
-                elem("a", {
-                  className: "handle",
-                  href: "/" + reposter.did,
-                  innerHTML: reposter.handle,
-                }),
-                new Text(" reposted "),
-                elem("a", {
-                  className: "handle",
-                  href: authorURL,
-                  innerHTML: atid,
-                }),
-              ]
-            : [
-                elem("a", {
-                  className: "handle",
-                  href: authorURL,
-                  innerHTML: atid,
-                }),
-              ],
-        ),
+      elem(
+        "div",
+        { className: "header" },
         fullView
-          ? ""
-          : elem("a", {
-              className: "timestamp",
-              href: postURL,
-              innerHTML: postDate,
-              onclick: () => setPreloaded(post),
-            }),
-      ]),
+          ? [
+              profilePicture,
+              elem("a", { className: "handle-area", href: authorURL }, [
+                elem("span", {
+                  className: "handle",
+                  innerHTML: atid,
+                }),
+                elem("span", {
+                  className: "",
+                  innerHTML: escapeHTML(post.author.displayName),
+                }),
+              ]),
+            ]
+          : [
+              elem(
+                "span",
+                { className: "handle-area" },
+                isRepost
+                  ? [
+                      elem("div", { className: "repost" }, [
+                        elem("div", {
+                          className: "icon",
+                        }),
+                      ]),
+                      elem("a", {
+                        className: "handle",
+                        href: "/" + reposter.did,
+                        innerHTML: reposter.handle,
+                      }),
+                      new Text(" reposted "),
+                      elem("a", {
+                        className: "handle",
+                        href: authorURL,
+                        innerHTML: atid,
+                      }),
+                    ]
+                  : [
+                      elem("a", {
+                        className: "handle",
+                        href: authorURL,
+                        innerHTML: atid,
+                      }),
+                    ],
+              ),
+              elem("a", {
+                className: "timestamp",
+                href: postURL,
+                innerHTML: postDate,
+                onclick: () => setPreloaded(post),
+              }),
+            ],
+      ),
       replyTo
         ? elem(
             "span",

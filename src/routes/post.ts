@@ -11,8 +11,9 @@ let preloadedPost: AppBskyFeedDefs.PostView;
 export function setPreloaded(post: AppBskyFeedDefs.PostView) {
   preloadedPost = post;
 }
-export async function postRoute(currentURL: string, loadedState: string) {
+export async function postRoute(currentURL: string, loadedURL: string) {
   const splitURL = currentURL.split("/");
+  const splitLoaded = loadedURL.split("/");
   const container = document.getElementById("container");
   container.innerHTML = "";
   container.append(stickyHeader("Post"));
@@ -29,12 +30,17 @@ export async function postRoute(currentURL: string, loadedState: string) {
     content.append(mainPost);
     //scrollTo({ top: -63 });
   }
+
   const postThread = (
-    await rpc.get("app.bsky.feed.getPostThread", {
-      params: {
-        uri: `at://${splitURL[1]}/app.bsky.feed.post/${splitURL[3]}`,
+    await get(
+      "app.bsky.feed.getPostThread",
+      {
+        params: {
+          uri: `at://${splitURL[1]}/app.bsky.feed.post/${splitURL[3]}`,
+        },
       },
-    })
+      splitLoaded[2] !== "post",
+    )
   ).data;
 
   if ("post" in postThread.thread) {
@@ -49,7 +55,7 @@ export async function postRoute(currentURL: string, loadedState: string) {
   let rootPost: AppBskyFeedDefs.PostView;
   if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
     const record = postThread.thread.post.record as AppBskyFeedPost.Record;
-    if ("reply" in record)
+    if (record.reply)
       rootPost = (
         await rpc.get("app.bsky.feed.getPosts", {
           params: {

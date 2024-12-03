@@ -346,10 +346,26 @@
 
 .post.full {
     .header {
-        font-size: 14px;
-        height: 16px;
+        justify-content: left;
+
+        font-size: 15px;
         line-height: 16px;
         margin-bottom: 0;
+    }
+
+    .handle-area {
+        display: flex;
+        flex-flow: column;
+        justify-content: center;
+    }
+
+    .pfp-holder {
+        margin: 0;
+        margin-right: 4px;
+    }
+
+    .pfp-holder::after {
+        display: none;
     }
 
     .interaction {

@@ -6,7 +6,7 @@ import { stickyHeader } from "../ui/stickyHeader";
 
 export async function statsPage(
   currentURL: string,
-  loadedState: string,
+  loadedURL: string,
   title: string,
   nsid: feedNSID,
   func?: Function,

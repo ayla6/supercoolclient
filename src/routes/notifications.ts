@@ -2,7 +2,7 @@ import { get } from "../elements/blocks/cache";
 
 export async function notificationsRoute(
   currentURL: string,
-  loadedState: string,
+  loadedURL: string,
 ) {
   const container = document.getElementById("container");
   container.innerHTML = "";

@@ -82,20 +82,19 @@ export function loadThread(
         if (post.$type !== "app.bsky.feed.defs#threadViewPost") continue;
 
         const isLastChild = post === parent.replies[parent.replies.length - 1];
+        const isMainThread =
+          parentReplyBuffer === replyPosts &&
+          post.post.author.did === thread.post.author.did;
 
         const replyElem = postCard(post, false, {
           isReply: true,
-          hasReplies: post.replies?.length > 0,
+          hasReplies: post.replies?.length > 0 && !isMainThread,
         });
 
-        if (
-          parentReplyBuffer === replyPosts &&
-          post.post.author.did === thread.post.author.did
-        ) {
+        let replies = [...previousReplies];
+        if (isMainThread) {
           mainThreadPosts.push(replyElem);
         } else {
-          let replies = [...previousReplies];
-
           const replyContainer = elem("div", { className: "reply-container" });
           replyContainer.append(...getStrings(previousReplies));
 
