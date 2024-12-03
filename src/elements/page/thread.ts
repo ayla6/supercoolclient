@@ -62,8 +62,8 @@ export function loadThread(
       isAuthorPost: boolean,
       loadNonThread: boolean,
       level: number,
-      wentDownALevel: boolean = false,
-      isLastReplyOfParent: boolean = false,
+      isDownALevel: boolean = false,
+      lastReplyOfParent: boolean[] = [false],
     ) {
       const finalReply = parentPost.replies[parentPost.replies.length - 1];
       for (const reply of parentPost.replies) {
@@ -88,23 +88,22 @@ export function loadThread(
               const replyContainer = elem("div", {
                 className: "reply-container",
               });
-              for (let i = 0; i < level; i++) {
+              for (let i = 1; i <= level; i++) {
                 const stringHolder = elem("div", {
                   className: "string-holder",
                 });
                 const string = elem("div", {
                   className: "reply-string",
                 });
-                if (i === level - 1) {
-                  if (wentDownALevel)
-                    stringHolder.append(
-                      elem("div", {
-                        className: "connect-string",
-                      }),
-                    );
-                  if (isLastReply && wentDownALevel && !isLastReplyOfParent)
-                    string.classList.add("transparent");
+                if (i === level && isDownALevel) {
+                  stringHolder.append(
+                    elem("div", {
+                      className: "connect-string",
+                    }),
+                  );
                 }
+                if (lastReplyOfParent[i] ?? isLastReply)
+                  string.classList.add("transparent");
                 stringHolder.append(string);
                 replyContainer.append(stringHolder);
               }
@@ -125,6 +124,8 @@ export function loadThread(
                 );
               const goDownLevel =
                 !hasThreadContinuation && reply.replies.length > 1;
+              let newLastReply = [...lastReplyOfParent];
+              newLastReply[level] = isLastReply;
               loadReplies(
                 reply,
                 isThreadContinuation ||
@@ -132,7 +133,7 @@ export function loadThread(
                 !hasThreadContinuation,
                 level + Number(goDownLevel),
                 goDownLevel,
-                goDownLevel && level > 0 ? isLastReply : isLastReplyOfParent,
+                newLastReply,
               );
             }
           }
