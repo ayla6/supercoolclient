@@ -62,8 +62,12 @@ export function loadThread(
       isAuthorPost: boolean,
       loadNonThread: boolean,
       level: number,
+      wentDownALevel: boolean = false,
+      isLastReplyOfParent: boolean = false,
     ) {
+      const finalReply = parentPost.replies[parentPost.replies.length - 1];
       for (const reply of parentPost.replies) {
+        const isLastReply = finalReply === reply;
         if (reply.$type === "app.bsky.feed.defs#threadViewPost") {
           const isThreadContinuation =
             isAuthorPost && reply.post.author.did === authorDid;
@@ -72,33 +76,63 @@ export function loadThread(
               isReply: true,
               hasReplies: Boolean(reply.replies && reply.replies[0]),
             });
-            replyPost.style.paddingLeft = level * 48 + "px";
-            replyPost.style.width = `calc(100% - ${replyPost.style.paddingLeft})`;
 
-            if (isThreadContinuation) {
+            if (
+              isThreadContinuation ||
+              (isAuthorPost && parentPost.post !== thread.post)
+            ) {
               mainThreadPosts.push(replyPost);
             } else if (reply.post.author.viewer.muted) {
               mutedPosts.push(replyPost);
-            } else if (isAuthorPost && parentPost.post !== thread.post) {
-              mainThreadPosts.push(replyPost);
             } else {
-              replyPosts.push(replyPost);
+              const replyContainer = elem("div", {
+                className: "reply-container",
+              });
+              for (let i = 0; i < level; i++) {
+                const stringHolder = elem("div", {
+                  className: "string-holder",
+                });
+                const string = elem("div", {
+                  className: "reply-string",
+                });
+                if (i === level - 1) {
+                  if (wentDownALevel)
+                    stringHolder.append(
+                      elem("div", {
+                        className: "connect-string",
+                      }),
+                    );
+                  if (isLastReply && wentDownALevel && !isLastReplyOfParent)
+                    string.classList.add("transparent");
+                }
+                stringHolder.append(string);
+                replyContainer.append(stringHolder);
+              }
+              replyContainer.append(replyPost);
+              replyPosts.push(replyContainer);
             }
 
-            if (reply.replies && reply.replies[0]) {
+            if (
+              !reply.post.author.viewer.muted &&
+              reply.replies &&
+              reply.replies[0]
+            ) {
               const hasThreadContinuation =
                 isThreadContinuation &&
                 reply.replies?.some(
                   (reply) =>
                     "post" in reply && reply.post.author.did === authorDid,
                 );
+              const goDownLevel =
+                !hasThreadContinuation && reply.replies.length > 1;
               loadReplies(
                 reply,
                 isThreadContinuation ||
                   (parentPost.post !== thread.post && isAuthorPost),
                 !hasThreadContinuation,
-                level +
-                  Number(!hasThreadContinuation && reply.replies.length > 1),
+                level + Number(goDownLevel),
+                goDownLevel,
+                goDownLevel && level > 0 ? isLastReply : isLastReplyOfParent,
               );
             }
           }

@@ -1,4 +1,3 @@
-import { RPCOptions } from "@atcute/client";
 import { get } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
 import { escapeHTML } from "../elements/blocks/textProcessing";

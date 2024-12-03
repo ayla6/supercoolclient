@@ -117,7 +117,7 @@ export function post(
     postDate = formatDate(indexedAt ?? createdAt);
     if (
       post.indexedAt &&
-      Math.abs(indexedAt.getTime() - createdAt.getTime()) > 50000
+      Math.abs(indexedAt.getTime() - createdAt.getTime()) > 250000
     ) {
       warnings.push(
         elem("div", {
@@ -224,7 +224,7 @@ export function post(
             loadEmbed(record.embed, post.author.did),
           )
         : "",
-      ...warnings,
+      elem("div", { className: "warnings" }, warnings),
       elem("div", { className: "footer" }, [
         fullView
           ? elem("div", { className: "post-data" }, [

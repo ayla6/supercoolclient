@@ -14,6 +14,7 @@
 .card {
     display: flex;
     scroll-margin: 48px;
+    flex-grow: 1;
 
     .content {
         background: #fff;
@@ -24,7 +25,6 @@
         flex-grow: 1;
         margin-left: 8px;
         padding: 8px;
-        max-width: 100%;
         margin-bottom: 8px;
     }
 
@@ -48,7 +48,7 @@
     }
 
     .pfp-holder,
-    .pfp-holder .pfp {
+    .pfp {
         height: 48px;
         width: 48px;
     }
@@ -81,7 +81,7 @@
         }
 
         .pfp-holder,
-        .pfp-holder .pfp {
+        .pfp {
             height: 32px;
             width: 32px;
         }
@@ -124,98 +124,6 @@
         display: flex;
         flex-flow: column;
     }
-    .reply-string {
-        width: 2px;
-        margin: 0 auto;
-        flex-grow: 1;
-        background-color: $lighter-grey;
-    }
-
-    .embeds {
-        //border: 1px solid $lighter-grey;
-        border-radius: $border-radius;
-        display: block;
-        line-height: 0;
-        width: 100%;
-        max-width: 100%;
-        overflow: hidden;
-        position: relative;
-        text-align: center;
-        margin-top: 4px;
-
-        a {
-            max-width: 100%;
-            display: inline-block;
-            line-height: 14px;
-        }
-
-        .record-link {
-            max-width: 100%;
-            display: block;
-            line-break: anywhere;
-        }
-
-        .external {
-            padding: 4px;
-            width: 100%;
-
-            img {
-                max-width: 100%;
-            }
-
-            span {
-                display: block;
-                text-align: left;
-
-                &.description {
-                    margin-top: 3px;
-                }
-
-                &.title {
-                    font-weight: 700;
-                }
-            }
-        }
-
-        .external-image::after {
-            background-color: $light-grey;
-            border-radius: $border-radius;
-            color: #fff;
-            content: "External";
-            display: block;
-            font-size: 12px;
-            line-height: 12px;
-            padding: 2px 6px;
-            position: absolute;
-            right: 0;
-            top: 0;
-        }
-
-        .images {
-            width: 100%;
-            overflow-x: scroll;
-        }
-
-        .image {
-            line-height: 0;
-
-            img {
-                object-fit: cover;
-                max-width: 100%;
-                height: 100%;
-                border-radius: $border-radius;
-                position: relative;
-            }
-        }
-
-        video {
-            object-fit: cover;
-            max-width: 100%;
-            height: 100%;
-            border-radius: $border-radius;
-            position: relative;
-        }
-    }
 
     .footer {
         display: flex;
@@ -223,97 +131,19 @@
         margin-top: 2px;
     }
 
-    .header {
-        display: flex;
-        flex-flow: row;
-        justify-content: space-between;
-        font-size: 12px;
-        line-height: 12px;
-        margin-bottom: 2px;
-
-        .handle {
-            font-weight: 700;
-        }
-
-        .handle-area {
-            line-break: anywhere;
-            display: inline-block;
-        }
-
-        .icon {
-            background-image: icon.$reposted;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            display: inline-block;
-            height: 10px;
-            width: 10px;
-        }
-
-        .repost {
-            background-color: #609928;
-            background-image: linear-gradient(#609928, #588d25);
-            border-radius: 2px;
-            display: inline-block;
-            height: 11px;
-            margin-right: 3px;
-            padding: 0px 4px;
-            padding-top: 1px;
-            vertical-align: top;
-        }
-
-        .timestamp {
-            color: #999;
-        }
-    }
-
-    .interaction {
-        background: none;
-        border: none;
-        color: $dark-grey;
-        cursor: pointer;
-        display: inline-block;
-        font-size: 12px;
-        line-height: 14px;
-        margin-right: 6px;
-        padding: 0;
-
-        &:hover {
-            text-decoration: none;
-        }
-
-        span {
-            vertical-align: middle;
-        }
-
-        .icon {
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            cursor: pointer;
-            display: inline-block;
-            height: 12px;
-            margin-right: 2px;
-            vertical-align: sub;
-            width: 12px;
-        }
-    }
-
     .pfp-holder::after {
         background-image: url("../svg/bubble.svg");
-        bottom: 32px;
         content: "";
         display: block;
-        height: 16px;
-        left: 50px;
         position: relative;
         width: 12px;
+        height: 16px;
+        left: 50px;
+        bottom: 32px;
     }
 
     .post-content {
         display: block;
-        width: 100%;
-        word-wrap: break-word;
         word-break: break-word;
         //line-height: 1.25em;
     }
@@ -346,44 +176,251 @@
         }
     }
 
-    &.full {
-        .header {
-            font-size: 14px;
-            height: 16px;
-            line-height: 16px;
-            margin-bottom: 0;
+    .reply-string {
+        flex-grow: 1;
+        margin: 0 auto;
+    }
+}
+
+.post .header {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    font-size: 12px;
+    line-height: 12px;
+    margin-bottom: 2px;
+
+    .handle {
+        font-weight: 700;
+    }
+
+    .handle-area {
+        line-break: anywhere;
+        display: inline-block;
+    }
+
+    .icon {
+        background-image: icon.$reposted;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: inline-block;
+        height: 10px;
+        width: 10px;
+    }
+
+    .repost {
+        background-color: #609928;
+        background-image: linear-gradient(#609928, #588d25);
+        border-radius: 2px;
+        display: inline-block;
+        height: 11px;
+        margin-right: 3px;
+        padding: 0px 4px;
+        padding-top: 1px;
+        vertical-align: top;
+    }
+
+    .timestamp {
+        color: #999;
+    }
+}
+
+.embeds {
+    //border: 1px solid $lighter-grey;
+    border-radius: $border-radius;
+    display: block;
+    line-height: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    margin-top: 4px;
+
+    a {
+        max-width: 100%;
+        display: inline-block;
+        line-height: 14px;
+    }
+
+    .record-link {
+        max-width: 100%;
+        display: block;
+        line-break: anywhere;
+    }
+
+    .external {
+        padding: 4px;
+        width: 100%;
+
+        img {
+            max-width: 100%;
         }
 
-        .interaction {
-            font-size: 14px;
+        span {
+            display: block;
+            text-align: left;
 
-            .icon {
-                height: 14px;
-                width: 14px;
+            &.description {
+                margin-top: 3px;
+            }
+
+            &.title {
+                font-weight: 700;
             }
         }
+    }
 
-        .post-content {
-            font-family: $serif;
-            font-size: 18px;
-        }
+    .external-image::after {
+        background-color: $light-grey;
+        border-radius: $border-radius;
+        color: #fff;
+        content: "External";
+        display: block;
+        font-size: 12px;
+        line-height: 12px;
+        padding: 2px 6px;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 
-        .stat {
-            margin-right: 4px;
-        }
+    .images {
+        width: 100%;
+        overflow-x: scroll;
+    }
 
-        .stat-name {
-            color: $medium-grey;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
+    .image {
+        line-height: 0;
 
-        .stats {
-            border-bottom: 1px solid $light-grey;
-            border-top: 1px solid $light-grey;
-            margin: 4px 0;
-            padding: 4px 0;
+        img {
+            object-fit: cover;
+            max-width: 100%;
+            height: 100%;
+            border-radius: $border-radius;
+            position: relative;
         }
+    }
+
+    video {
+        object-fit: cover;
+        max-width: 100%;
+        height: 100%;
+        border-radius: $border-radius;
+        position: relative;
+    }
+}
+
+.post .interaction {
+    background: none;
+    border: none;
+    color: $dark-grey;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    line-height: 14px;
+    margin-right: 6px;
+    padding: 0;
+
+    &:hover {
+        text-decoration: none;
+    }
+
+    span {
+        vertical-align: middle;
+    }
+
+    .icon {
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        display: inline-block;
+        height: 12px;
+        margin-right: 2px;
+        vertical-align: sub;
+        width: 12px;
+    }
+}
+
+.post.full {
+    .header {
+        font-size: 14px;
+        height: 16px;
+        line-height: 16px;
+        margin-bottom: 0;
+    }
+
+    .interaction {
+        font-size: 14px;
+
+        .icon {
+            height: 14px;
+            width: 14px;
+        }
+    }
+
+    .post-content {
+        font-family: $serif;
+        font-size: 18px;
+    }
+
+    .stat {
+        margin-right: 4px;
+    }
+
+    .stat-name {
+        color: $medium-grey;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+
+    .stats {
+        border-bottom: 1px solid $light-grey;
+        border-top: 1px solid $light-grey;
+        margin: 4px 0;
+        padding: 4px 0;
+    }
+}
+
+.reply-container {
+    display: flex;
+    flex-flow: row;
+
+    .pfp-holder,
+    .pfp {
+        width: 32px;
+        height: 32px;
+    }
+
+    .pfp-holder::after {
+        left: 34px;
+        bottom: 24px;
+    }
+}
+
+.reply-string {
+    margin: 0 19px;
+    border: 1px solid $lighter-grey;
+    &.transparent {
+        border-color: transparent;
+    }
+}
+
+.string-holder {
+    position: relative;
+    .connect-string {
+        position: absolute;
+        margin-left: 19px;
+        border: 1px solid $lighter-grey;
+        border-width: 0 0 2px 2px;
+        height: 19px;
+        width: 19px;
+        border-radius: 0 0 0 18px;
+    }
+    .reply-string {
+        height: 100%;
     }
 }
 
