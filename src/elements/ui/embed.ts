@@ -8,7 +8,7 @@ import {
   AppBskyFeedPost,
   Brand,
 } from "@atcute/client/lexicons";
-import { image, loadImages } from "./embeds/image";
+import { loadImages } from "./embeds/image";
 import { post } from "./card";
 import { elem } from "../blocks/elem";
 import { escapeHTML } from "../blocks/textProcessing";

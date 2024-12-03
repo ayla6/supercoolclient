@@ -8,33 +8,34 @@ export type feedNSID =
   | "app.bsky.feed.searchPosts"
   | "app.bsky.feed.getTimeline"
   | "app.bsky.graph.getFollows"
-  | "app.bsky.graph.getFollowers";
+  | "app.bsky.graph.getFollowers"
+  | "app.bsky.feed.getLikes"
+  | "app.bsky.feed.getRepostedBy"
+  | "app.bsky.feed.getQuotes";
+
+const dataLocations = {
+  "app.bsky.feed.searchPosts": "posts",
+  "app.bsky.graph.getFollows": "follows",
+  "app.bsky.graph.getFollowers": "followers",
+  "app.bsky.feed.getLikes": "likes",
+  "app.bsky.feed.getRepostedBy": "repostedBy",
+  "app.bsky.feed.getQuotes": "posts",
+};
 
 export async function hydrateFeed(
   nsid: feedNSID,
   params: any,
   forceReload: boolean = false,
+  type: Function = post,
 ): Promise<HTMLElement[]> {
-  const type = nsid.split(".")[2] === "feed";
-  const dataLocation = type
-    ? nsid === "app.bsky.feed.searchPosts"
-      ? "posts"
-      : "feed"
-    : nsid === "app.bsky.graph.getFollows"
-      ? "follows"
-      : "followers";
+  const dataLocation = dataLocations[nsid] ?? "feed";
   async function _load(forceReload: boolean = false) {
-    return await load(
-      nsid,
-      params,
-      dataLocation,
-      type ? post : profile,
-      forceReload,
-    );
+    return await loadFeed(nsid, params, dataLocation, type, forceReload);
   }
   let { items, cursor } = await _load(forceReload);
   params.cursor = cursor;
   if (cursor && inCache(nsid, params)) {
+    console.log("maaaa");
     while (inCache(nsid, params)) {
       const { items: newItems, cursor } = await _load();
       params.cursor = cursor;
@@ -42,22 +43,13 @@ export async function hydrateFeed(
     }
   }
   if (params.cursor != undefined)
-    window.onscroll = await loadOnscroll(_load, params);
+    window.onscroll = await loadOnScroll(_load, params);
   else window.onscroll = null;
   return items;
 }
 
-type QueryWithCursor =
-  | "app.bsky.graph.getFollows"
-  | "app.bsky.graph.getFollowers"
-  | "app.bsky.feed.getAuthorFeed"
-  | "app.bsky.feed.getFeed"
-  | "app.bsky.feed.getActorLikes"
-  | "app.bsky.feed.searchPosts"
-  | "app.bsky.feed.getTimeline";
-
-export async function load(
-  nsid: QueryWithCursor,
+async function loadFeed(
+  nsid: feedNSID,
   params: any,
   dataLocation: string,
   func: Function,
@@ -73,7 +65,7 @@ export async function load(
   return { items, cursor };
 }
 
-export async function loadOnscroll(load: Function, params: any) {
+export async function loadOnScroll(load: Function, params: any) {
   return async function (ev) {
     if (
       window.innerHeight + Math.round(window.scrollY) >=

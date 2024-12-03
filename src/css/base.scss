@@ -13,8 +13,8 @@ body {
 
 #container {
     position: relative;
-    top: 32px;
-    padding: 16px;
+    top: 40px;
+    padding: 8px;
     background-color: $container-color;
     width: 920px;
     box-sizing: border-box;
@@ -36,7 +36,7 @@ a {
 #content {
     display: flex;
     flex-flow: column;
-    width: 582px;
+    width: 592px;
     margin-left: auto;
 }
 
@@ -57,7 +57,7 @@ button.active {
     background: linear-gradient(var(--accent-color));
 }
 
-.card .pfp,
+.card .pfp-holder,
 .profile-header,
 .side-nav {
     border: $border;
@@ -188,7 +188,9 @@ code {
         top: 0;
         background-color: #fff;
         width: 100vw;
-        height: 32px;
+        height: 40px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #e8e8e8;
         background-image: linear-gradient(#fff, $lighter-grey);
         user-select: none;
         a {
@@ -197,8 +199,8 @@ code {
             font-size: 24px;
             float: left;
             line-height: 18px;
-            padding-top: 8px;
-            padding-bottom: 6px;
+            padding-top: 12px;
+            padding-bottom: 10px;
             &:hover {
                 text-decoration: none;
             }
@@ -208,7 +210,7 @@ code {
             margin-left: auto;
             margin-right: auto;
             width: min-content;
-            padding: 8px 0;
+            padding: 12px 0;
             height: 16px;
         }
     }
@@ -228,8 +230,8 @@ code {
     #container {
         min-width: unset;
         width: 100vw;
-        padding: 12px 0;
-        top: 32px;
+        padding: 8px 0;
+        padding-bottom: 40px;
     }
 
     #content {
@@ -239,6 +241,7 @@ code {
     }
 
     .side-bar {
+        background: #f9f9f9;
         display: block;
         width: 100%;
         overflow-x: scroll;
@@ -263,27 +266,27 @@ code {
         }
     }
     .side-nav {
-        width: 100%;
-        background: #f9f9f9;
-        display: flex; /* Allow horizontal arrangement */
+        width: min-content;
+        display: flex;
         margin-right: 8px;
-        overflow-x: scroll;
         scrollbar-width: none;
+        border: none;
         &::-webkit-scrollbar {
             display: none;
         }
         a {
             flex-direction: row;
-            display: inline-block; /* Allow horizontal arrangement */
-            padding: 8px 12px;
+            display: inline-block;
+            padding: 12px 12px;
             border-bottom: 1px solid #e8e8e8;
             border-right: 1px solid #e8e8e8;
-            &:last-of-type {
-                border-right: none;
-            }
+            height: 15px;
             .images {
                 display: none;
             }
+        }
+        &:last-of-type {
+            margin-right: 0;
         }
     }
 }

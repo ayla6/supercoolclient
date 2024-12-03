@@ -1,12 +1,5 @@
-import {
-  AppBskyEmbedDefs,
-  AppBskyEmbedExternal,
-  AppBskyEmbedRecord,
-  AppBskyFeedPost,
-} from "@atcute/client/lexicons";
 import { manager, rpc } from "../../login";
 import { elem } from "../blocks/elem";
-import { idchoose } from "../blocks/id";
 
 function navButton(text: string, link: string, icon?: string) {
   const button = document.createElement("a");
@@ -22,7 +15,7 @@ export function loadNavbar() {
   navbar.append(
     navButton("Home", "/"),
     navButton("Notifications", "/notifications"),
-    navButton("Profile", "/" + manager.session.did),
+    manager.session ? navButton("Profile", "/" + manager.session.did) : "",
     elem("button", {
       innerHTML: "Post",
     }),

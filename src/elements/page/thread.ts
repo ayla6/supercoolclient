@@ -8,6 +8,7 @@ import { error } from "../ui/error";
 
 export function loadThread(
   postThread: AppBskyFeedGetPostThread.Output,
+  rootPost: AppBskyFeedDefs.PostView | null,
   outputElement: HTMLElement,
 ) {
   if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
@@ -18,14 +19,17 @@ export function loadThread(
     let replyPosts: HTMLElement[] = [];
     let mutedPosts: HTMLElement[] = [];
 
-    if (thread.parent?.$type === "app.bsky.feed.defs#threadViewPost") {
+    if (thread.parent) {
       let currentThread = thread;
       while (
         currentThread.parent &&
         currentThread.parent.$type === "app.bsky.feed.defs#threadViewPost"
       ) {
         currentThread = currentThread.parent;
-        const parentPost = post(currentThread.post);
+        const parentPost = post(currentThread.post, false, {
+          isReply: Boolean(currentThread.parent),
+          hasReplies: true,
+        });
         mainThreadPosts.push(parentPost);
       }
       if (
@@ -39,12 +43,18 @@ export function loadThread(
               : "Post not found",
           ),
         );
+        if (rootPost)
+          mainThreadPosts.push(
+            post(rootPost, false, {
+              isReply: false,
+              hasReplies: true,
+            }),
+          );
       }
       mainThreadPosts.reverse();
     }
 
     const mainPost = post(thread.post, true);
-    mainPost.classList.add("full");
     mainThreadPosts.push(mainPost);
 
     function loadReplies(
@@ -58,8 +68,11 @@ export function loadThread(
           const isThreadContinuation =
             isAuthorPost && reply.post.author.did === authorDid;
           if (loadNonThread || isThreadContinuation) {
-            const replyPost = post(reply.post);
-            replyPost.style.paddingLeft = level * 24 + "px";
+            const replyPost = post(reply.post, false, {
+              isReply: true,
+              hasReplies: Boolean(reply.replies && reply.replies[0]),
+            });
+            replyPost.style.paddingLeft = level * 48 + "px";
             replyPost.style.width = `calc(100% - ${replyPost.style.paddingLeft})`;
 
             if (isThreadContinuation) {
@@ -72,7 +85,7 @@ export function loadThread(
               replyPosts.push(replyPost);
             }
 
-            if (reply.replies) {
+            if (reply.replies && reply.replies[0]) {
               const hasThreadContinuation =
                 isThreadContinuation &&
                 reply.replies?.some(
@@ -92,7 +105,7 @@ export function loadThread(
         }
       }
     }
-    if (thread.replies) loadReplies(thread, true, true, 0);
+    if (thread.replies && thread.replies[0]) loadReplies(thread, true, true, 0);
 
     outputElement.innerHTML = "";
     outputElement.append(...mainThreadPosts);

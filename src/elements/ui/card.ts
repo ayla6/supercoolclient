@@ -7,7 +7,7 @@ import { elem } from "../blocks/elem";
 import { processRichText, processText } from "../blocks/textProcessing";
 import { formatDate, formatTimeDifference } from "../blocks/date";
 import { setPreloaded } from "../../routes/post";
-import { navigateTo } from "../../router";
+import { Brand } from "@atcute/client/lexicons";
 
 export function profile(profile: AppBskyActorDefs.ProfileView) {
   const atid =
@@ -42,12 +42,27 @@ export function profile(profile: AppBskyActorDefs.ProfileView) {
   ]);
 }
 
+export function statProfile(
+  stat:
+    | AppBskyActorDefs.ProfileView
+    | {
+        [Brand.Type]?: string;
+        actor: AppBskyActorDefs.ProfileView;
+        createdAt: string;
+        indexedAt: string;
+      },
+) {
+  const _profile = "actor" in stat ? stat.actor : stat;
+  return profile(_profile);
+}
+
 export function post(
   postHousing:
     | AppBskyFeedDefs.FeedViewPost
     | AppBskyFeedDefs.PostView
     | AppBskyFeedDefs.ThreadViewPost,
   fullView = false,
+  replyStatus = { isReply: false, hasReplies: false },
 ) {
   const post: AppBskyFeedDefs.PostView =
     "post" in postHousing ? postHousing.post : postHousing;
@@ -55,6 +70,20 @@ export function post(
   const atid = idchoose(post.author);
   const authorURL = "/" + post.author.did;
   const postURL = `${authorURL}/post/${post.uri.split("/")[4]}`;
+
+  const replyTo =
+    "reply" in postHousing
+      ? {
+          handle:
+            postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
+              ? idchoose(postHousing.reply.parent.author)
+              : postHousing.reply.parent.uri.split("/")[2],
+          did:
+            postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
+              ? postHousing.reply.parent.author.did
+              : postHousing.reply.parent.uri.split("/")[2],
+        }
+      : null;
 
   const isRepost =
     "reason" in postHousing &&
@@ -85,7 +114,7 @@ export function post(
   const createdAt = new Date(record.createdAt);
   let postDate: string;
   if (fullView) {
-    postDate = formatDate(indexedAt || createdAt);
+    postDate = formatDate(indexedAt ?? createdAt);
     if (
       post.indexedAt &&
       Math.abs(indexedAt.getTime() - createdAt.getTime()) > 50000
@@ -111,9 +140,9 @@ export function post(
     if (items[0]) fullViewStats = elem("div", { className: "stats" }, items);
   }
 
-  const postElem = elem("div", { className: "card post" }, [
+  return elem("div", { className: "card post" + (fullView ? " full" : "") }, [
     //profile picture
-    elem("div", {}, [
+    elem("div", { className: "left-area" }, [
       elem("div", { className: "pfp-holder" }, [
         elem("a", { href: authorURL }, [
           elem("img", {
@@ -123,6 +152,7 @@ export function post(
           }),
         ]),
       ]),
+      replyStatus.hasReplies ? elem("div", { className: "reply-string" }) : "",
     ]),
     //content
     elem("div", { className: "content" }, [
@@ -169,6 +199,16 @@ export function post(
               onclick: () => setPreloaded(post),
             }),
       ]),
+      replyTo
+        ? elem(
+            "span",
+            {
+              className: "small",
+              innerHTML: "Reply to ",
+            },
+            [elem("a", { innerHTML: replyTo.handle, href: "/" + replyTo.did })],
+          )
+        : "",
       // text content
       record.text
         ? elem("div", {
@@ -188,8 +228,9 @@ export function post(
       elem("div", { className: "footer" }, [
         fullView
           ? elem("div", { className: "post-data" }, [
-              elem("span", {
+              elem("a", {
                 className: "timestamp",
+                href: postURL,
                 innerHTML: postDate,
                 onclick: () => setPreloaded(post),
               }),
@@ -207,7 +248,6 @@ export function post(
       ]),
     ]),
   ]);
-  return postElem;
 }
 
 const plural = {
@@ -231,10 +271,10 @@ function stat(
       href: `${postURL}/${plural[type]}`,
     },
     [
-      elem("span", { innerHTML: String(count) }),
+      elem("span", { innerHTML: count.toLocaleString() }),
       elem("span", {
         className: "stat-name",
-        innerHTML: " " + String(count === 1 ? type : plural[type]),
+        innerHTML: " " + (count === 1 ? type : plural[type]),
       }),
     ],
   );
@@ -293,13 +333,18 @@ function interactionButton(
   };
 
   if (type === "like" || type === "repost") {
-    let isActive = Boolean(post.viewer[type]);
+    let isActive = Boolean(manager.session && post.viewer[type]);
     button.classList.toggle("active", isActive);
 
-    button.addEventListener("click", async () => {
-      isActive = !isActive;
-      await updateInteraction(isActive);
-    });
+    button.addEventListener(
+      "click",
+      manager.session
+        ? async () => {
+            isActive = !isActive;
+            await updateInteraction(isActive);
+          }
+        : async () => {},
+    );
   }
 
   return button;

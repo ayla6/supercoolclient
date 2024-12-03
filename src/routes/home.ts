@@ -1,9 +1,11 @@
-import { get, inCache } from "../elements/blocks/cache";
+import { RPCOptions } from "@atcute/client";
+import { get } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
 import { escapeHTML } from "../elements/blocks/textProcessing";
 import { hydrateFeed } from "../elements/content/feed";
 
 let currentFeed: string;
+let currentScroll: { [key: string]: number } = {};
 
 function navButton(feed: string, title: string) {
   const button = elem("a", {
@@ -11,7 +13,8 @@ function navButton(feed: string, title: string) {
     href: `?feed=${feed}&title=${title}`,
     onclick: (e) => {
       e.preventDefault();
-      loadFeed(feed, title);
+      currentScroll[currentFeed] = scrollY;
+      loadHomeFeed(feed, title);
     },
   });
   button.setAttribute("ignore", "");
@@ -59,7 +62,7 @@ export async function homeRoute(
   }
 }
 
-async function loadFeed(
+async function loadHomeFeed(
   feedgen: string,
   title: string,
   wasAtHome: boolean = true,
@@ -98,6 +101,7 @@ async function loadFeed(
     );
     content.innerHTML = "";
     content.append(...items);
+    if (!forceReload) window.scrollTo({ top: currentScroll[currentFeed] });
   }
 }
 
@@ -109,5 +113,5 @@ export async function homeURLChange(currentURL?: string, loadedState?: string) {
 
   history.replaceState({}, "", window.location.href.split("?")[0]);
 
-  loadFeed(feedgen, title, loadedState?.split("/")[1] === "");
+  loadHomeFeed(feedgen, title, loadedState?.split("/")[1] === "");
 }

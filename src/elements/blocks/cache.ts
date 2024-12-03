@@ -2,8 +2,8 @@ import { Queries } from "@atcute/client/lexicons";
 import { rpc } from "../../login";
 import { RPCOptions, XRPCResponse } from "@atcute/client";
 
-let cache: {
-  [key in keyof Queries]?: { [key: string]: { [key: string]: any } };
+export let cache: {
+  [key in keyof Queries]?: { [key: string]: { [key: string]: any } | any };
 } = {};
 
 function noCursor(params: { [key: string]: any }) {
@@ -24,35 +24,43 @@ export async function get<K extends keyof Queries>(
   forceReload: boolean = false,
 ): Promise<XRPCResponse<OutputOf<Queries[K]>>> {
   if ("params" in params) {
-    const noCursorParams = JSON.stringify(noCursor(params.params));
-    const paramsKey = JSON.stringify(params.params);
-    if (forceReload && cache[nsid] && cache[nsid][noCursorParams]) {
-      delete cache[nsid][noCursorParams];
+    const specificParamsKey = JSON.stringify(params.params);
+    const paramsKey =
+      "cursor" in params.params
+        ? JSON.stringify(noCursor(params.params))
+        : specificParamsKey;
+    if (forceReload && cache[nsid] && cache[nsid][paramsKey]) {
+      delete cache[nsid][paramsKey];
     }
     if (
       !forceReload &&
       cache[nsid] &&
-      cache[nsid][noCursorParams] &&
-      cache[nsid][noCursorParams][paramsKey]
+      cache[nsid][paramsKey] &&
+      (specificParamsKey === paramsKey ||
+        cache[nsid][paramsKey][specificParamsKey])
     ) {
-      return cache[nsid][noCursorParams][paramsKey];
+      if (specificParamsKey === paramsKey) return cache[nsid][paramsKey];
+      else return cache[nsid][paramsKey][specificParamsKey];
     } else {
       const result = await rpc.get(nsid, params);
       if (!cache[nsid]) cache[nsid] = {};
-      if (!cache[nsid][noCursorParams])
-        cache[String(nsid)][noCursorParams] = {};
-      cache[nsid][noCursorParams][paramsKey] = result;
+      if (specificParamsKey === paramsKey)
+        cache[String(nsid)][specificParamsKey] = result;
+      else {
+        if (!cache[nsid][paramsKey]) cache[String(nsid)][paramsKey] = {};
+        cache[nsid][paramsKey][specificParamsKey] = result;
+      }
       return result;
     }
   }
 }
 
 export function inCache(nsid: keyof Queries, params: any) {
-  const noCursorParams = JSON.stringify(noCursor(params));
-  const paramsKey = JSON.stringify(params);
+  const paramsKey = JSON.stringify(noCursor(params));
+  const specificParamsKey = JSON.stringify(params);
   return (
     cache[nsid] &&
-    cache[nsid][noCursorParams] &&
-    cache[nsid][noCursorParams][paramsKey]
+    cache[nsid][paramsKey] &&
+    cache[nsid][paramsKey][specificParamsKey]
   );
 }

@@ -15,13 +15,14 @@
   history.pushState(null, "", url);
 });*/
 
-import { login } from "./login";
-import { loadNavbar } from "./elements/ui/navbar";
 import { profileRoute, profileTrim, profileURLChange } from "./routes/profile";
 import { homeRoute, homeURLChange } from "./routes/home";
 import { postRoute } from "./routes/post";
 import { elem } from "./elements/blocks/elem";
 import { notificationsRoute } from "./routes/notifications";
+import { likesRoute } from "./routes/likes";
+import { repostsRoute } from "./routes/reposts";
+import { quotesRoute } from "./routes/quotes";
 
 let loadedState: string = "";
 
@@ -37,6 +38,9 @@ const routes: { [key: string]: string } = {
   "/:did": "profile",
   "/:did/:location": "profile",
   "/:did/post/:rkey": "post",
+  "/:did/post/:rkey/likes": "postLikes",
+  "/:did/post/:rkey/reposts": "postReposts",
+  "/:did/post/:rkey/quotes": "postQuotes",
 };
 const changeRoutes: { [key: string]: Function } = {
   home: homeRoute,
@@ -44,11 +48,17 @@ const changeRoutes: { [key: string]: Function } = {
   post: postRoute,
   profileTrim: profileTrim,
   notifications: notificationsRoute,
+  postLikes: likesRoute,
+  postReposts: repostsRoute,
+  postQuotes: quotesRoute,
 };
 const localRoutes: { [key: string]: Function } = {
   home: homeURLChange,
   profile: profileURLChange,
   post: postRoute,
+  postLikes: likesRoute,
+  postReposts: repostsRoute,
+  postQuotes: quotesRoute,
 };
 function matchRoute(url: string) {
   const splitURL = url.split("/");

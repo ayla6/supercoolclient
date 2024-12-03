@@ -1,8 +1,8 @@
 import { get } from "../elements/blocks/cache";
 
 export async function notificationsRoute(
-  currentURL: Array<string>,
-  loadedState: Array<string>,
+  currentURL: string,
+  loadedState: string,
 ) {
   const container = document.getElementById("container");
   container.innerHTML = "";
@@ -10,7 +10,7 @@ export async function notificationsRoute(
   content.id = "content";
   container.append(content);
   console.log(
-    get("app.bsky.notification.listNotifications", { params: {} }, true),
+    await get("app.bsky.notification.listNotifications", { params: {} }, true),
   );
   content.innerHTML = "";
   //content.append(...items);

@@ -2,14 +2,14 @@
 import { AtpSessionData, XRPC, CredentialManager } from "@atcute/client";
 let savedSessionData: AtpSessionData;
 
-export const manager = new CredentialManager({
+export let manager = new CredentialManager({
   service: "https://bsky.social",
   onSessionUpdate(session) {
     savedSessionData = session;
     localStorage.setItem("session", JSON.stringify(session));
   },
 });
-export const rpc = new XRPC({ handler: manager });
+export let rpc = new XRPC({ handler: manager });
 
 export async function login() {
   if (manager.session) {
@@ -23,11 +23,17 @@ export async function login() {
   } else {
     console.log("No saved session data. Logging in...");
     let id = prompt("user");
-    let password = prompt("app password");
-    await manager.login({
-      identifier: id,
-      password: password,
-    });
+    if (id) {
+      let password = prompt("app password");
+      await manager.login({
+        identifier: id,
+        password: password,
+      });
+    } else
+      manager = new CredentialManager({
+        service: "https://public.api.bsky.app",
+      });
+    rpc = new XRPC({ handler: manager });
   }
   return manager;
 }

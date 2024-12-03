@@ -1,5 +1,5 @@
-import { AppBskyFeedDefs } from "@atcute/client/lexicons";
-import { get } from "../elements/blocks/cache";
+import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
+import { cache, get } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
 import { post } from "../elements/ui/card";
 import { rpc } from "../login";
@@ -36,10 +36,28 @@ export async function postRoute(currentURL: string, loadedState: string) {
       },
     })
   ).data;
-  if (preloadedPost && "post" in postThread.thread) {
-    Object.assign(preloadedPost, postThread.thread.post);
+
+  if ("post" in postThread.thread) {
+    if (preloadedPost) Object.assign(preloadedPost, postThread.thread.post);
+    if (!cache["app.bsky.feed.getPosts"]) cache["app.bsky.feed.getPosts"] = {};
+    cache["app.bsky.feed.getPosts"][
+      `{"uris":["at://${splitURL[1]}/app.bsky.feed.post/${splitURL[3]}"]}`
+    ] = { data: { posts: [postThread.thread.post] } };
   }
   preloadedPost = null;
+
+  let rootPost: AppBskyFeedDefs.PostView;
+  if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
+    const record = postThread.thread.post.record as AppBskyFeedPost.Record;
+    if ("reply" in record)
+      rootPost = (
+        await rpc.get("app.bsky.feed.getPosts", {
+          params: {
+            uris: [record.reply.root.uri],
+          },
+        })
+      ).data.posts[0];
+  }
 
   if (
     postThread.thread.$type === "app.bsky.feed.defs#threadViewPost" &&
@@ -47,5 +65,5 @@ export async function postRoute(currentURL: string, loadedState: string) {
   )
     profileRedirect(postThread.thread.post.author.did);
 
-  loadThread(postThread, content);
+  loadThread(postThread, rootPost, content);
 }

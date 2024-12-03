@@ -28,7 +28,7 @@ export function profilePage(profile: AppBskyActorDefs.ProfileViewDetailed) {
       elem("div", { className: "side-nav" }, [
         navButton("posts", did, "Posts"),
         navButton("replies", did, "Posts and replies"),
-        manager.session.did === profile.did
+        manager.session?.did === profile.did
           ? navButton("likes", did, "Favourites")
           : "",
         navButton("following", did, "Following"),

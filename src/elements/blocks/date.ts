@@ -23,6 +23,6 @@ export function formatTimeDifference(date1: Date, date2: Date): string {
   } else if (diffInSeconds < 31536000) {
     return `${Math.round(diffInSeconds / 2592000)}mo`;
   } else {
-    return `${Math.round(diffInSeconds / 31536000)}y`;
+    return formatDate(date2);
   }
 }
