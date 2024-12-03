@@ -210,8 +210,9 @@ export function postCard(
       : "";
 
   // Add warnings if needed
-  const warnings = [];
+  let warnings: HTMLElement[];
   if (fullView) {
+    warnings = [];
     if (
       post.indexedAt &&
       Math.abs(indexedAt.getTime() - createdAt.getTime()) > 250000
@@ -335,44 +336,6 @@ function interactionButton(
   );
   button.setAttribute("role", "button");
 
-  const updateInteraction = async (active: boolean) => {
-    try {
-      const collection = "app.bsky.feed." + type;
-      count += active ? 1 : -1;
-      countSpan.innerHTML = count.toLocaleString();
-      if (active) {
-        const { cid, uri } = post;
-        const response = await rpc.call("com.atproto.repo.createRecord", {
-          data: {
-            record: {
-              $type: collection,
-              createdAt: new Date().toISOString(),
-              subject: { cid, uri },
-            },
-            collection,
-            repo: manager.session.did,
-          },
-        });
-        post.viewer[type] = response.data.uri;
-      } else {
-        const recordUri = post.viewer[type];
-        if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
-        const [, , did, , rkey] = recordUri.split("/");
-        await rpc.call("com.atproto.repo.deleteRecord", {
-          data: { rkey, collection, repo: did },
-        });
-        delete post.viewer[type];
-      }
-      post[type + "Count"] = count;
-      button.classList.toggle("active", active);
-    } catch (err) {
-      console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
-      // revert count if the interaction failed
-      count += active ? -1 : 1;
-      countSpan.innerHTML = count.toLocaleString();
-    }
-  };
-
   if (type === "like" || type === "repost") {
     let isActive = Boolean(manager.session && post.viewer[type]);
     button.classList.toggle("active", isActive);
@@ -382,11 +345,56 @@ function interactionButton(
       manager.session
         ? async () => {
             isActive = !isActive;
-            await updateInteraction(isActive);
+            await updateInteraction(isActive, post, type, countSpan, button);
           }
         : async () => {},
     );
   }
 
   return button;
+}
+
+async function updateInteraction(
+  active: boolean,
+  post: AppBskyFeedDefs.PostView,
+  type: "repost" | "like",
+  countSpan: HTMLSpanElement,
+  button: HTMLButtonElement,
+) {
+  let count = post[type + "Count"];
+  try {
+    const collection = "app.bsky.feed." + type;
+    count += active ? 1 : -1;
+    countSpan.innerHTML = count.toLocaleString();
+    if (active) {
+      const { cid, uri } = post;
+      const response = await rpc.call("com.atproto.repo.createRecord", {
+        data: {
+          record: {
+            $type: collection,
+            createdAt: new Date().toISOString(),
+            subject: { cid, uri },
+          },
+          collection,
+          repo: manager.session.did,
+        },
+      });
+      post.viewer[type] = response.data.uri;
+    } else {
+      const recordUri = post.viewer[type];
+      if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
+      const [, , did, , rkey] = recordUri.split("/");
+      await rpc.call("com.atproto.repo.deleteRecord", {
+        data: { rkey, collection, repo: did },
+      });
+      delete post.viewer[type];
+    }
+    post[type + "Count"] = count;
+    button.classList.toggle("active", active);
+  } catch (err) {
+    console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
+    // revert count if the interaction failed
+    count += active ? -1 : 1;
+    countSpan.innerHTML = count.toLocaleString();
+  }
 }

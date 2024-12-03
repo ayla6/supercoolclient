@@ -411,8 +411,11 @@
     flex-flow: row;
 
     .pfp-holder {
-        margin: 3px;
-        margin-right: 9px;
+        margin: 5px;
+    }
+
+    .content {
+        margin-left: 6px;
     }
 
     .pfp-holder,
@@ -428,7 +431,7 @@
 }
 
 .reply-string {
-    margin: 0 22px;
+    margin: 0 21px;
     border: 1px solid $lighter-grey;
     &.transparent {
         border-color: transparent;
@@ -439,11 +442,11 @@
     position: relative;
     .connect-string {
         position: absolute;
-        margin-left: 22px;
+        margin-left: 21px;
         border: 1px solid $lighter-grey;
         border-width: 0 0 2px 2px;
-        height: 20px;
-        width: 20px;
+        width: 21px;
+        height: 21px;
         border-radius: 0 0 0 18px;
     }
     .reply-string {

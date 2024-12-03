@@ -6,14 +6,6 @@ import { postCard } from "../ui/card";
 import { elem } from "../blocks/elem";
 import { error } from "../ui/error";
 
-function getString(transparentState: boolean) {
-  return elem("div", { className: "string-container" }, [
-    elem("div", {
-      className: "reply-string" + (transparentState ? " transparent" : ""),
-    }),
-  ]);
-}
-
 export function loadThread(
   postThread: AppBskyFeedGetPostThread.Output,
   rootPost: AppBskyFeedDefs.PostView | null,
@@ -66,19 +58,15 @@ export function loadThread(
 
     function loadReplies(
       parent: AppBskyFeedDefs.ThreadViewPost,
-      parentReplyBuffer: DocumentFragment,
       stringMargin: number,
-      wentDownALevel: boolean = false,
-      previousReplies:
-        | DocumentFragment
-        | Node = document.createDocumentFragment(),
+      previousStrings: boolean[] = [],
     ) {
       for (const post of parent.replies) {
         if (post.$type !== "app.bsky.feed.defs#threadViewPost") continue;
 
         const isLastChild = post === parent.replies[parent.replies.length - 1];
         const isMainThread =
-          parentReplyBuffer === replyPosts &&
+          thread.post === parent.post &&
           post.post.author.did === thread.post.author.did;
 
         const replyElem = postCard(post, false, {
@@ -91,11 +79,11 @@ export function loadThread(
           continue;
         }
 
-        let replies = post.replies ? previousReplies.cloneNode(true) : null;
+        let strings = [...previousStrings];
         const replyContainer = elem("div", { className: "reply-container" });
-        replyContainer.append(previousReplies);
+        replyContainer.append(...strings.map(getString));
 
-        if (wentDownALevel) {
+        if (stringMargin !== 0 && parent.replies.length !== 1) {
           const stringContainer = elem("div", {
             className: "string-container",
           });
@@ -104,7 +92,7 @@ export function loadThread(
           if (isLastChild) {
             string.classList.add("transparent");
           }
-          replies?.appendChild(getString(isLastChild));
+          strings.push(isLastChild);
           stringContainer.append(elem("div", { className: "connect-string" }));
 
           stringContainer.append(string);
@@ -112,24 +100,19 @@ export function loadThread(
         }
         replyContainer.append(replyElem);
 
-        parentReplyBuffer.append(replyContainer);
+        replyPosts.append(replyContainer);
 
         if (post.replies) {
-          let replyBuffer = document.createDocumentFragment();
           loadReplies(
             post,
-            replyBuffer,
             stringMargin + Number(post.replies.length > 1),
-            post.replies.length > 1,
-            replies,
+            strings,
           );
-          parentReplyBuffer.append(replyBuffer);
         }
       }
     }
 
-    if (thread.replies && thread.replies[0])
-      loadReplies(thread, replyPosts, 0, false);
+    if (thread.replies && thread.replies[0]) loadReplies(thread, 0);
 
     outputElement.innerHTML = "";
     outputElement.append(mainThreadPosts);
@@ -170,4 +153,12 @@ function mutedPostsButton(outputElement: HTMLElement, posts: DocumentFragment) {
     ],
   );
   return button;
+}
+
+function getString(isLastChild: boolean) {
+  return elem("div", { className: "string-container" }, [
+    elem("div", {
+      className: "reply-string" + (isLastChild ? " transparent" : ""),
+    }),
+  ]);
 }
