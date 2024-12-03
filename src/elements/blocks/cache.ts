@@ -64,3 +64,7 @@ export function inCache(nsid: keyof Queries, params: any) {
     cache[nsid][paramsKey][specificParamsKey]
   );
 }
+
+export function deleteCache(nsid: keyof Queries) {
+  delete cache[nsid];
+}

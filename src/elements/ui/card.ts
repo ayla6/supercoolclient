@@ -68,13 +68,38 @@ export function postCard(
   fullView = false,
   replyStatus = { isReply: false, hasReplies: false },
 ) {
+  // Extract core data
   const post: AppBskyFeedDefs.PostView =
     "post" in postHousing ? postHousing.post : postHousing;
   const record = post.record as AppBskyFeedPost.Record;
   const atid = idchoose(post.author);
   const authorURL = "/" + post.author.did;
   const postURL = `${authorURL}/post/${post.uri.split("/")[4]}`;
+  const indexedAt = new Date(post.indexedAt);
+  const createdAt = new Date(record.createdAt);
+  const postDate = fullView
+    ? formatDate(indexedAt ?? createdAt)
+    : formatTimeDifference(new Date(), indexedAt || createdAt);
 
+  // Create base elements
+  const postElem = elem("div", { className: "card post" });
+  const content = elem("div", { className: "content" });
+  const header = elem("div", { className: "header" });
+  const footer = elem("div", { className: "footer" });
+  if (fullView) postElem.classList.add("full");
+
+  // Create reusable components
+  const profilePicture = elem("div", { className: "pfp-holder" }, [
+    elem("a", { href: authorURL }, [
+      elem("img", {
+        className: "pfp",
+        src: post.author.avatar,
+        loading: "lazy",
+      }),
+    ]),
+  ]);
+
+  // Handle reply and repost info
   const replyTo =
     "reply" in postHousing
       ? {
@@ -100,25 +125,93 @@ export function postCard(
         }
       : null;
 
-  let translateButton: Node | "" = "";
-  if (record.text && "langs" in record && record.langs[0] != "en") {
-    translateButton = elem("a", {
-      className: "translate",
-      innerHTML: "Translate",
-      onclick: () =>
-        window.open(
-          "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
-        ),
-    });
+  // Build header based on view type
+  if (!fullView) {
+    postElem.append(
+      elem("div", { className: "left-area" }, [
+        profilePicture,
+        replyStatus.hasReplies
+          ? elem("div", { className: "reply-string" })
+          : "",
+      ]),
+    );
+
+    header.append(
+      elem(
+        "span",
+        { className: "handle-area" },
+        isRepost
+          ? [
+              elem("div", { className: "repost" }, [
+                elem("div", { className: "icon" }),
+              ]),
+              elem("a", {
+                className: "handle",
+                href: "/" + reposter!.did,
+                innerHTML: reposter!.handle,
+              }),
+              new Text(" reposted "),
+              elem("a", {
+                className: "handle",
+                href: authorURL,
+                innerHTML: atid,
+              }),
+            ]
+          : [
+              elem("a", {
+                className: "handle",
+                href: authorURL,
+                innerHTML: atid,
+              }),
+            ],
+      ),
+      elem("a", {
+        className: "timestamp",
+        href: postURL,
+        innerHTML: postDate,
+        onclick: () => setPreloaded(post),
+      }),
+    );
+  } else {
+    header.append(
+      profilePicture,
+      elem("a", { className: "handle-area", href: authorURL }, [
+        elem("span", { className: "handle", innerHTML: atid }),
+        elem("span", {
+          className: "",
+          innerHTML: escapeHTML(post.author.displayName),
+        }),
+      ]),
+    );
+
+    footer.append(
+      elem("div", { className: "post-data" }, [
+        elem("a", {
+          className: "timestamp",
+          href: postURL,
+          innerHTML: postDate,
+          onclick: () => setPreloaded(post),
+        }),
+      ]),
+    );
   }
 
-  let warnings = [];
+  // Add translate button if needed
+  const translateButton =
+    record.text && "langs" in record && record.langs[0] != "en"
+      ? elem("a", {
+          className: "translate",
+          innerHTML: "Translate",
+          onclick: () =>
+            window.open(
+              "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
+            ),
+        })
+      : "";
 
-  const indexedAt = new Date(post.indexedAt);
-  const createdAt = new Date(record.createdAt);
-  let postDate: string;
+  // Add warnings if needed
+  const warnings = [];
   if (fullView) {
-    postDate = formatDate(indexedAt ?? createdAt);
     if (
       post.indexedAt &&
       Math.abs(indexedAt.getTime() - createdAt.getTime()) > 250000
@@ -130,148 +223,72 @@ export function postCard(
         }),
       );
     }
-  } else {
-    postDate = formatTimeDifference(new Date(), indexedAt || createdAt);
   }
 
+  // Build full view stats if needed
   let fullViewStats: HTMLElement;
   if (fullView) {
-    const items = [
+    const stats = [
       stat("like", post, postURL),
       stat("repost", post, postURL),
       stat("quote", post, postURL),
-    ];
-    if (items[0]) fullViewStats = elem("div", { className: "stats" }, items);
+    ].filter(Boolean);
+
+    if (stats.length > 0) {
+      fullViewStats = elem("div", { className: "stats" }, stats);
+    }
   }
 
-  const profilePicture = elem("div", { className: "pfp-holder" }, [
-    elem("a", { href: authorURL }, [
-      elem("img", {
-        className: "pfp",
-        src: post.author.avatar,
-        loading: "lazy",
-      }),
-    ]),
-  ]);
+  // Assemble content
+  content.append(header);
 
-  return elem("div", { className: "card post" + (fullView ? " full" : "") }, [
-    //profile picture
-    fullView
-      ? ""
-      : elem("div", { className: "left-area" }, [
-          profilePicture,
-          replyStatus.hasReplies
-            ? elem("div", { className: "reply-string" })
-            : "",
-        ]),
-    //content
-    elem("div", { className: "content" }, [
-      // header
+  if (replyTo) {
+    content.append(
+      elem("span", { className: "small", innerHTML: "Reply to " }, [
+        elem("a", { innerHTML: replyTo.handle, href: "/" + replyTo.did }),
+      ]),
+    );
+  }
+
+  if (record.text) {
+    content.append(
+      elem("div", {
+        className: "post-content",
+        innerHTML: processRichText(record.text, record.facets),
+      }),
+    );
+  }
+
+  if (record.embed) {
+    content.append(
       elem(
         "div",
-        { className: "header" },
-        fullView
-          ? [
-              profilePicture,
-              elem("a", { className: "handle-area", href: authorURL }, [
-                elem("span", {
-                  className: "handle",
-                  innerHTML: atid,
-                }),
-                elem("span", {
-                  className: "",
-                  innerHTML: escapeHTML(post.author.displayName),
-                }),
-              ]),
-            ]
-          : [
-              elem(
-                "span",
-                { className: "handle-area" },
-                isRepost
-                  ? [
-                      elem("div", { className: "repost" }, [
-                        elem("div", {
-                          className: "icon",
-                        }),
-                      ]),
-                      elem("a", {
-                        className: "handle",
-                        href: "/" + reposter.did,
-                        innerHTML: reposter.handle,
-                      }),
-                      new Text(" reposted "),
-                      elem("a", {
-                        className: "handle",
-                        href: authorURL,
-                        innerHTML: atid,
-                      }),
-                    ]
-                  : [
-                      elem("a", {
-                        className: "handle",
-                        href: authorURL,
-                        innerHTML: atid,
-                      }),
-                    ],
-              ),
-              elem("a", {
-                className: "timestamp",
-                href: postURL,
-                innerHTML: postDate,
-                onclick: () => setPreloaded(post),
-              }),
-            ],
+        { className: "embeds" },
+        loadEmbed(record.embed, post.author.did),
       ),
-      replyTo
-        ? elem(
-            "span",
-            {
-              className: "small",
-              innerHTML: "Reply to ",
-            },
-            [elem("a", { innerHTML: replyTo.handle, href: "/" + replyTo.did })],
-          )
-        : "",
-      // text content
-      record.text
-        ? elem("div", {
-            className: "post-content",
-            innerHTML: processRichText(record.text, record.facets),
-          })
-        : "",
-      // embeds
-      record.embed
-        ? elem(
-            "div",
-            { className: "embeds" },
-            loadEmbed(record.embed, post.author.did),
-          )
-        : "",
-      elem("div", { className: "warnings" }, warnings),
-      elem("div", { className: "footer" }, [
-        fullView
-          ? elem("div", { className: "post-data" }, [
-              elem("a", {
-                className: "timestamp",
-                href: postURL,
-                innerHTML: postDate,
-                onclick: () => setPreloaded(post),
-              }),
-              translateButton,
-            ])
-          : translateButton,
-        // likes repost and comments
-        fullViewStats ? fullViewStats : "",
-        elem("div", { className: "stats-buttons" }, [
-          interactionButton("reply", post),
-          interactionButton("repost", post),
-          interactionButton("like", post),
-          interactionButton("quote", post),
-        ]),
-      ]),
+    );
+  }
+
+  if (warnings) {
+    content.append(elem("div", { className: "warnings" }, warnings));
+  }
+
+  footer.append(translateButton);
+  content.append(footer);
+  if (fullViewStats) content.append(fullViewStats);
+
+  content.append(
+    elem("div", { className: "stats-buttons" }, [
+      interactionButton("reply", post),
+      interactionButton("repost", post),
+      interactionButton("like", post),
+      interactionButton("quote", post),
     ]),
-  ]);
+  );
+
+  postElem.append(content);
+
+  return postElem;
 }
 
 const plural = {

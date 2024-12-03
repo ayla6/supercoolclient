@@ -6,18 +6,12 @@ import { postCard } from "../ui/card";
 import { elem } from "../blocks/elem";
 import { error } from "../ui/error";
 
-function getStrings(transparentState: boolean[]) {
-  let strings: HTMLElement[] = [];
-  for (const string of transparentState) {
-    strings.push(
-      elem("div", { className: "string-container" }, [
-        elem("div", {
-          className: "reply-string" + (string ? " transparent" : ""),
-        }),
-      ]),
-    );
-  }
-  return strings;
+function getString(transparentState: boolean) {
+  return elem("div", { className: "string-container" }, [
+    elem("div", {
+      className: "reply-string" + (transparentState ? " transparent" : ""),
+    }),
+  ]);
 }
 
 export function loadThread(
@@ -28,9 +22,9 @@ export function loadThread(
   if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
     const thread = postThread.thread;
 
-    let mainThreadPosts: HTMLElement[] = [];
-    let replyPosts: HTMLElement[] = [];
-    let mutedPosts: HTMLElement[] = [];
+    let mainThreadPosts = document.createDocumentFragment();
+    let replyPosts = document.createDocumentFragment();
+    let mutedPosts = document.createDocumentFragment();
 
     if (thread.parent) {
       let currentThread = thread;
@@ -43,13 +37,13 @@ export function loadThread(
           isReply: Boolean(currentThread.parent),
           hasReplies: true,
         });
-        mainThreadPosts.push(parentPost);
+        mainThreadPosts.prepend(parentPost);
       }
       if (
         currentThread.parent &&
         currentThread.parent.$type !== "app.bsky.feed.defs#threadViewPost"
       ) {
-        mainThreadPosts.push(
+        mainThreadPosts.prepend(
           error(
             currentThread.parent.$type === "app.bsky.feed.defs#blockedPost"
               ? "Blocked post"
@@ -57,27 +51,28 @@ export function loadThread(
           ),
         );
         if (rootPost)
-          mainThreadPosts.push(
+          mainThreadPosts.prepend(
             postCard(rootPost, false, {
               isReply: false,
               hasReplies: true,
             }),
           );
       }
-      mainThreadPosts.reverse();
     }
 
     const mainPost = postCard(thread.post, true);
-    mainThreadPosts.push(mainPost);
+    mainThreadPosts.append(mainPost);
+    const mend = Date.now();
 
     function loadReplies(
       parent: AppBskyFeedDefs.ThreadViewPost,
-      parentReplyBuffer: HTMLElement[],
+      parentReplyBuffer: DocumentFragment,
       stringMargin: number,
       wentDownALevel: boolean = false,
-      previousReplies: boolean[] = [],
+      previousReplies:
+        | DocumentFragment
+        | Node = document.createDocumentFragment(),
     ) {
-      let replyBuffer = [];
       for (const post of parent.replies) {
         if (post.$type !== "app.bsky.feed.defs#threadViewPost") continue;
 
@@ -91,57 +86,56 @@ export function loadThread(
           hasReplies: post.replies?.length > 0 && !isMainThread,
         });
 
-        let replies = [...previousReplies];
         if (isMainThread) {
-          mainThreadPosts.push(replyElem);
-        } else {
-          const replyContainer = elem("div", { className: "reply-container" });
-          replyContainer.append(...getStrings(previousReplies));
+          mainThreadPosts.append(replyElem);
+          continue;
+        }
 
-          if (wentDownALevel) {
-            const stringContainer = elem("div", {
-              className: "string-container",
-            });
+        let replies = post.replies ? previousReplies.cloneNode(true) : null;
+        const replyContainer = elem("div", { className: "reply-container" });
+        replyContainer.append(previousReplies);
 
-            const string = elem("div", { className: "reply-string" });
-            if (isLastChild) {
-              string.classList.add("transparent");
-              replies.push(true);
-            } else replies.push(false);
-            stringContainer.append(
-              elem("div", { className: "connect-string" }),
-            );
+        if (wentDownALevel) {
+          const stringContainer = elem("div", {
+            className: "string-container",
+          });
 
-            stringContainer.append(string);
-            replyContainer.append(stringContainer);
+          const string = elem("div", { className: "reply-string" });
+          if (isLastChild) {
+            string.classList.add("transparent");
           }
-          replyContainer.append(replyElem);
+          replies.appendChild(getString(isLastChild));
+          stringContainer.append(elem("div", { className: "connect-string" }));
 
-          if (post.post.author.did === parent.post.author.did)
-            replyBuffer = [replyContainer, ...replyBuffer];
-          else replyBuffer.push(replyContainer);
+          stringContainer.append(string);
+          replyContainer.append(stringContainer);
+        }
+        replyContainer.append(replyElem);
 
-          if (post.replies) {
-            loadReplies(
-              post,
-              replyBuffer,
-              stringMargin + Number(post.replies.length > 1),
-              post.replies.length > 1,
-              replies,
-            );
-          }
+        parentReplyBuffer.append(replyContainer);
+
+        if (post.replies) {
+          let replyBuffer = document.createDocumentFragment();
+          loadReplies(
+            post,
+            replyBuffer,
+            stringMargin + Number(post.replies.length > 1),
+            post.replies.length > 1,
+            replies,
+          );
+          parentReplyBuffer.append(replyBuffer);
         }
       }
-      parentReplyBuffer.push(...replyBuffer);
     }
+
     if (thread.replies && thread.replies[0])
       loadReplies(thread, replyPosts, 0, false);
 
     outputElement.innerHTML = "";
-    outputElement.append(...mainThreadPosts);
+    outputElement.append(mainThreadPosts);
     mainPost.scrollIntoView();
-    outputElement.append(...replyPosts);
-    if (mutedPosts.length > 0)
+    outputElement.append(replyPosts);
+    if (mutedPosts.hasChildNodes())
       outputElement.append(mutedPostsButton(outputElement, mutedPosts));
     outputElement.append(elem("div", { className: "buffer" }));
   } else {
@@ -155,14 +149,14 @@ export function loadThread(
   }
 }
 
-function mutedPostsButton(outputElement: HTMLElement, posts: HTMLElement[]) {
+function mutedPostsButton(outputElement: HTMLElement, posts: DocumentFragment) {
   const button = elem(
     "div",
     {
       className: "card show-muted",
       onclick: () => {
         outputElement.removeChild(button);
-        outputElement.append(...posts);
+        outputElement.append(posts);
       },
     },
     [

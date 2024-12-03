@@ -23,6 +23,7 @@ import { notificationsRoute } from "./routes/notifications";
 import { likesRoute } from "./routes/likes";
 import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
+import { deleteCache } from "./elements/blocks/cache";
 
 let loadedURL: string = "";
 
@@ -94,6 +95,8 @@ export async function updatePage() {
   if (ableToLocal && route === matchRoute(loadedURL)) {
     localRoutes[route](currentURL, loadedURL);
   } else {
+    if (loadedURL[2] === "post" && currentURL[2] !== "post")
+      deleteCache("app.bsky.feed.getPostThread");
     document.title = "SuperCoolClient";
     window.scrollTo({ top: 0 });
     document.body.removeChild(document.getElementById("container"));
