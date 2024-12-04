@@ -1,0 +1,61 @@
+@use "variables" as *;
+
+$reply-pfp-size: 32px;
+$pfp-margin: 3px;
+$speech-bubble-margin: 8px;
+$string-width: 2px;
+$string-margin: ($reply-pfp-size + $pfp-margin) * 0.5 + ($string-width / 2);
+
+.post .reply-string {
+    flex-grow: 1;
+    margin: 0 auto;
+}
+
+.reply-container {
+    display: flex;
+    flex-flow: row;
+
+    .pfp-holder {
+        margin: $pfp-margin $speech-bubble-margin $pfp-margin $pfp-margin;
+    }
+
+    .pfp-holder,
+    .pfp {
+        width: $reply-pfp-size;
+        height: $reply-pfp-size;
+    }
+
+    .pfp-holder::after {
+        $height: 16px;
+        width: $speech-bubble-margin;
+        left: $reply-pfp-size + $pfp-margin;
+        bottom: ($reply-pfp-size + $height) / 2;
+    }
+}
+
+.string-container {
+    position: relative;
+    .reply-string {
+        height: 100%;
+    }
+}
+.reply-string {
+    margin: 0 $string-margin;
+    border: ($string-width / 2) solid $lighter-grey;
+    &.transparent {
+        border-color: transparent;
+    }
+}
+.reply-container .post .reply-string {
+    margin-left: $string-margin;
+}
+
+.connect-string {
+    position: absolute;
+    margin-left: $string-margin;
+    border: 1px solid $lighter-grey;
+    border-width: 0 0 $string-width $string-width;
+    width: $string-margin;
+    height: ($reply-pfp-size / 2) + $pfp-margin;
+    border-radius: 0 0 0 $string-margin;
+}
