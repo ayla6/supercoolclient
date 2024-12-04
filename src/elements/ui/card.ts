@@ -46,18 +46,13 @@ export function profileCard(profile: AppBskyActorDefs.ProfileView) {
   ]);
 }
 
-export function statProfile(
-  stat:
-    | AppBskyActorDefs.ProfileView
-    | {
-        [Brand.Type]?: string;
-        actor: AppBskyActorDefs.ProfileView;
-        createdAt: string;
-        indexedAt: string;
-      },
-) {
-  const _profile = "actor" in stat ? stat.actor : stat;
-  return profileCard(_profile);
+export function statProfile(stat: {
+  [Brand.Type]?: string;
+  actor: AppBskyActorDefs.ProfileView;
+  createdAt: string;
+  indexedAt: string;
+}) {
+  return profileCard(stat.actor);
 }
 
 export function postCard(
@@ -68,7 +63,6 @@ export function postCard(
   fullView = false,
   hasReplies = false,
 ) {
-  // Extract core data
   const post: AppBskyFeedDefs.PostView =
     "post" in postHousing ? postHousing.post : postHousing;
   const record = post.record as AppBskyFeedPost.Record;
@@ -77,18 +71,14 @@ export function postCard(
   const postURL = `${authorURL}/post/${post.uri.split("/")[4]}`;
   const indexedAt = new Date(post.indexedAt);
   const createdAt = new Date(record.createdAt);
-  const postDate = fullView
-    ? formatDate(indexedAt ?? createdAt)
-    : formatTimeDifference(new Date(), indexedAt || createdAt);
 
-  // Create base elements
-  const postElem = elem("div", { className: "card post" });
+  const postElem = elem("div", {
+    className: "card post" + (fullView ? " full" : ""),
+  });
   const content = elem("div", { className: "content" });
   const header = elem("div", { className: "header" });
   const footer = elem("div", { className: "footer" });
-  if (fullView) postElem.classList.add("full");
 
-  // Create reusable components
   const profilePicture = elem("div", { className: "pfp-holder" }, [
     elem("a", { href: authorURL }, [
       elem("img", {
@@ -99,78 +89,7 @@ export function postCard(
     ]),
   ]);
 
-  // Handle reply and repost info
-  const replyTo =
-    "reply" in postHousing
-      ? {
-          handle:
-            postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
-              ? idchoose(postHousing.reply.parent.author)
-              : postHousing.reply.parent.uri.split("/")[2],
-          did:
-            postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
-              ? postHousing.reply.parent.author.did
-              : postHousing.reply.parent.uri.split("/")[2],
-        }
-      : null;
-
-  const isRepost =
-    "reason" in postHousing &&
-    postHousing.reason.$type === "app.bsky.feed.defs#reasonRepost";
-  const reposter =
-    isRepost && "by" in postHousing.reason
-      ? {
-          handle: idchoose(postHousing.reason.by),
-          did: postHousing.reason.by.did,
-        }
-      : null;
-
-  // Build header based on view type
-  if (!fullView) {
-    postElem.append(
-      elem("div", { className: "left-area" }, [
-        profilePicture,
-        hasReplies ? elem("div", { className: "reply-string" }) : "",
-      ]),
-    );
-
-    header.append(
-      elem(
-        "span",
-        { className: "handle-area" },
-        isRepost
-          ? [
-              elem("div", { className: "repost" }, [
-                elem("div", { className: "icon" }),
-              ]),
-              elem("a", {
-                className: "handle",
-                href: "/" + reposter!.did,
-                innerHTML: reposter!.handle,
-              }),
-              new Text(" reposted "),
-              elem("a", {
-                className: "handle",
-                href: authorURL,
-                innerHTML: atid,
-              }),
-            ]
-          : [
-              elem("a", {
-                className: "handle",
-                href: authorURL,
-                innerHTML: atid,
-              }),
-            ],
-      ),
-      elem("a", {
-        className: "timestamp",
-        href: postURL,
-        innerHTML: postDate,
-        onclick: () => setPreloaded(post),
-      }),
-    );
-  } else {
+  if (fullView) {
     header.append(
       profilePicture,
       elem("a", { className: "handle-area", href: authorURL }, [
@@ -187,30 +106,94 @@ export function postCard(
         elem("a", {
           className: "timestamp",
           href: postURL,
-          innerHTML: postDate,
+          innerHTML: formatDate(indexedAt ?? createdAt),
           onclick: () => setPreloaded(post),
         }),
       ]),
     );
+  } else {
+    let handleElem: any[];
+    if (
+      "reason" in postHousing &&
+      postHousing.reason.$type === "app.bsky.feed.defs#reasonRepost"
+    ) {
+      handleElem = [
+        elem("div", { className: "repost" }, [
+          elem("div", { className: "icon" }),
+        ]),
+        elem("a", {
+          className: "handle",
+          href: "/" + postHousing.reason.by.did,
+          innerHTML: idchoose(postHousing.reason.by),
+        }),
+        new Text(" reposted "),
+        elem("a", {
+          className: "handle",
+          href: authorURL,
+          innerHTML: atid,
+        }),
+      ];
+    } else {
+      handleElem = [
+        elem("a", {
+          className: "handle",
+          href: authorURL,
+          innerHTML: atid,
+        }),
+      ];
+    }
+
+    postElem.append(
+      elem("div", { className: "left-area" }, [
+        profilePicture,
+        hasReplies ? elem("div", { className: "reply-string" }) : "",
+      ]),
+    );
+
+    header.append(
+      elem("span", { className: "handle-area" }, handleElem),
+      elem("a", {
+        className: "timestamp",
+        href: postURL,
+        innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
+        onclick: () => setPreloaded(post),
+      }),
+    );
   }
+  content.append(header);
 
-  // Add translate button if needed
-  const translateButton =
-    record.text && "langs" in record && record.langs[0] != "en"
-      ? elem("a", {
-          className: "translate",
-          innerHTML: "Translate",
-          onclick: () =>
-            window.open(
-              "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
-            ),
-        })
-      : "";
+  if ("reply" in postHousing)
+    content.append(
+      elem("span", { className: "small", innerHTML: "Reply to " }, [
+        elem("a", {
+          innerHTML:
+            postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
+              ? idchoose(postHousing.reply.parent.author)
+              : postHousing.reply.parent.uri.split("/")[2],
+          href:
+            "/" +
+            (postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
+              ? postHousing.reply.parent.author.did
+              : postHousing.reply.parent.uri.split("/")[2]),
+        }),
+      ]),
+    );
+  if (record.text)
+    content.append(
+      elem("div", {
+        className: "post-content",
+        innerHTML: processRichText(record.text, record.facets),
+      }),
+    );
+  if (record.embed)
+    content.append(
+      elem("div", { className: "embeds" }, [
+        embedHandlers[record.embed.$type](record.embed as any, post.author.did),
+      ]),
+    );
 
-  // Add warnings if needed
-  let warnings: HTMLElement[];
   if (fullView) {
-    warnings = [];
+    let warnings = [];
     if (
       post.indexedAt &&
       Math.abs(indexedAt.getTime() - createdAt.getTime()) > 250000
@@ -222,10 +205,23 @@ export function postCard(
         }),
       );
     }
+    if (warnings)
+      content.append(elem("div", { className: "warnings" }, warnings));
   }
 
-  // Build full view stats if needed
-  let fullViewStats: HTMLElement;
+  if (record.text && "langs" in record && record.langs[0] != "en")
+    footer.append(
+      elem("a", {
+        className: "translate",
+        innerHTML: "Translate",
+        onclick: () =>
+          window.open(
+            "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
+          ),
+      }),
+    );
+  content.append(footer);
+
   if (fullView) {
     const stats = [
       stat("like", post, postURL),
@@ -233,46 +229,9 @@ export function postCard(
       stat("quote", post, postURL),
     ].filter(Boolean);
 
-    if (stats.length > 0) {
-      fullViewStats = elem("div", { className: "stats" }, stats);
-    }
+    if (stats.length > 0)
+      content.append(elem("div", { className: "stats" }, stats));
   }
-
-  // Assemble content
-  content.append(header);
-
-  if (replyTo) {
-    content.append(
-      elem("span", { className: "small", innerHTML: "Reply to " }, [
-        elem("a", { innerHTML: replyTo.handle, href: "/" + replyTo.did }),
-      ]),
-    );
-  }
-
-  if (record.text) {
-    content.append(
-      elem("div", {
-        className: "post-content",
-        innerHTML: processRichText(record.text, record.facets),
-      }),
-    );
-  }
-
-  if (record.embed) {
-    content.append(
-      elem("div", { className: "embeds" }, [
-        embedHandlers[record.embed.$type](record.embed as any, post.author.did),
-      ]),
-    );
-  }
-
-  if (warnings) {
-    content.append(elem("div", { className: "warnings" }, warnings));
-  }
-
-  footer.append(translateButton);
-  content.append(footer);
-  if (fullViewStats) content.append(fullViewStats);
 
   content.append(
     elem("div", { className: "stats-buttons" }, [
@@ -389,7 +348,6 @@ async function updateInteraction(
     button.classList.toggle("active", active);
   } catch (err) {
     console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
-    // revert count if the interaction failed
     count += active ? -1 : 1;
     countSpan.innerHTML = count.toLocaleString();
   }

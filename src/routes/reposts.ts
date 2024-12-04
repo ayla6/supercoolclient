@@ -1,5 +1,5 @@
 import { statsPage } from "../elements/page/stats";
-import { statProfile } from "../elements/ui/card";
+import { profileCard, statProfile } from "../elements/ui/card";
 
 export async function repostsRoute(currentURL: string, loadedURL: string) {
   statsPage(
@@ -7,6 +7,6 @@ export async function repostsRoute(currentURL: string, loadedURL: string) {
     loadedURL,
     "Reposts",
     "app.bsky.feed.getRepostedBy",
-    statProfile,
+    profileCard,
   );
 }
