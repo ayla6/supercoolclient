@@ -1,5 +1,5 @@
 import { get, inCache } from "../blocks/cache";
-import { postCard } from "../ui/card";
+import { postCard } from "../ui/post_card";
 
 export type feedNSID =
   | "app.bsky.feed.getAuthorFeed"

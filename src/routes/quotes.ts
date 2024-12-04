@@ -1,5 +1,5 @@
 import { statsPage } from "../elements/page/stats";
-import { postCard } from "../elements/ui/card";
+import { postCard } from "../elements/ui/post_card";
 
 export async function quotesRoute(currentURL: string, loadedURL: string) {
   statsPage(

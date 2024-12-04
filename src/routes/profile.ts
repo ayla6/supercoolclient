@@ -2,7 +2,7 @@ import { get } from "../elements/blocks/cache";
 import { profileRedirect } from "../router";
 import { feedNSID, hydrateFeed } from "../elements/content/feed";
 import { profilePage } from "../elements/page/profile";
-import { profileCard } from "../elements/ui/card";
+import { profileCard } from "../elements/ui/profile_card";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -15,16 +15,16 @@ export async function profileRoute(currentURL: string, loadedURL: string) {
   const splitURL = currentURL.split("/");
   const splitLoaded = loadedURL.split("/");
 
-  let atid = splitURL[1];
+  let atId = splitURL[1];
   const profile = (
     await get("app.bsky.actor.getProfile", {
-      params: { actor: atid },
+      params: { actor: atId },
     })
   ).data;
   if (window.location.pathname === currentURL) {
-    if (atid != profile.did) profileRedirect(profile.did);
-    if (splitLoaded[1] != atid || splitLoaded[2] === "post")
-      atid = profilePage(profile);
+    if (atId != profile.did) profileRedirect(profile.did);
+    if (splitLoaded[1] != atId || splitLoaded[2] === "post")
+      atId = profilePage(profile);
 
     profileURLChange(currentURL, loadedURL);
   }
@@ -33,7 +33,7 @@ export async function profileRoute(currentURL: string, loadedURL: string) {
 export async function profileURLChange(currentURL: string, loadedURL: string) {
   const splitURL = currentURL.split("/");
   const splitLoaded = loadedURL.split("/");
-  const atid = splitURL[1];
+  const atId = splitURL[1];
   const currentPlace = splitURL[2] ?? "posts";
   const lastPlace = splitLoaded[2] ?? "posts";
   const content = document.getElementById("content");
@@ -54,7 +54,7 @@ export async function profileURLChange(currentURL: string, loadedURL: string) {
   const feed = feedConfig[currentPlace] ?? feedConfig.default;
   posts = await hydrateFeed(
     feed.endpoint ?? urlEquivalents[currentPlace][0],
-    feed.params(atid, currentPlace),
+    feed.params(atId, currentPlace),
     forceReload,
     feed.type,
   );
@@ -70,25 +70,25 @@ export function profileTrim(currentURL: string, loadedURL: string) {
 const feedConfig = {
   following: {
     endpoint: "app.bsky.graph.getFollows",
-    params: (atid: string) => ({ actor: atid }),
+    params: (atId: string) => ({ actor: atId }),
     type: profileCard,
   },
   followers: {
     endpoint: "app.bsky.graph.getFollowers",
-    params: (atid: string) => ({ actor: atid }),
+    params: (atId: string) => ({ actor: atId }),
     type: profileCard,
   },
   search: {
     endpoint: "app.bsky.feed.searchPosts",
-    params: (atid: string) => ({
-      author: atid,
+    params: (atId: string) => ({
+      author: atId,
       q: decodeURIComponent(window.location.search).slice(1),
     }),
   },
   default: {
     endpoint: null,
-    params: (atid: string, place: string) => ({
-      actor: atid,
+    params: (atId: string, place: string) => ({
+      actor: atId,
       filter: urlEquivalents[place][1],
     }),
   },

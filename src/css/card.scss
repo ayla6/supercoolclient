@@ -151,10 +151,6 @@
         //line-height: 1.25em;
     }
 
-    .translate {
-        font-size: 12px;
-    }
-
     .post-data {
         display: flex;
         flex-flow: row;
@@ -171,7 +167,8 @@
         width: 80%;
     }
 
-    .translate {
+    .small-link {
+        font-size: 12px;
         color: var(--accent-color);
 
         &:hover {

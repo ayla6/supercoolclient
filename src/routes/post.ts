@@ -1,7 +1,7 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { cache, get } from "../elements/blocks/cache";
 import { elem } from "../elements/blocks/elem";
-import { postCard } from "../elements/ui/card";
+import { postCard } from "../elements/ui/post_card";
 import { rpc } from "../login";
 import { loadThread } from "../elements/page/thread";
 import { profileRedirect } from "../router";

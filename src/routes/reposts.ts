@@ -1,5 +1,5 @@
 import { statsPage } from "../elements/page/stats";
-import { profileCard, statProfile } from "../elements/ui/card";
+import { profileCard, statProfile } from "../elements/ui/profile_card";
 
 export async function repostsRoute(currentURL: string, loadedURL: string) {
   statsPage(

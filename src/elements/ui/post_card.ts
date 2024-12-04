@@ -1,59 +1,11 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { idchoose } from "../blocks/id";
-import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { manager, rpc } from "../../login";
 import { elem } from "../blocks/elem";
-import {
-  escapeHTML,
-  processRichText,
-  processText,
-} from "../blocks/text_processing";
+import { escapeHTML, processRichText } from "../blocks/text_processing";
 import { formatDate, formatTimeDifference } from "../blocks/date";
 import { setPreloaded } from "../../routes/post";
-import { Brand } from "@atcute/client/lexicons";
 import { embedHandlers } from "./embeds/embed_handlers";
-
-export function profileCard(profile: AppBskyActorDefs.ProfileView) {
-  const atid =
-    profile.handle === "handle.invalid" ? profile.did : profile.handle;
-  return elem("div", { className: "card profile" }, [
-    elem("div", { className: "pfp-holder" }, [
-      elem("a", { href: "/" + profile.did }, [
-        elem("img", {
-          className: "pfp",
-          src: profile.avatar,
-          loading: "lazy",
-        }),
-      ]),
-    ]),
-    elem("div", { className: "content" }, [
-      elem("a", { className: "header", href: "/" + profile.did }, [
-        elem("span", { className: "handle", innerHTML: atid }),
-        profile.displayName
-          ? elem("span", {
-              className: "display-name",
-              innerHTML: profile.displayName,
-            })
-          : "",
-      ]),
-      elem("div", {
-        className: "bio",
-        innerHTML: profile.description
-          ? processText(profile.description)?.replaceAll("<br/>", " ")
-          : "",
-      }),
-    ]),
-  ]);
-}
-
-export function statProfile(stat: {
-  [Brand.Type]?: string;
-  actor: AppBskyActorDefs.ProfileView;
-  createdAt: string;
-  indexedAt: string;
-}) {
-  return profileCard(stat.actor);
-}
 
 export function postCard(
   postHousing:
@@ -66,9 +18,14 @@ export function postCard(
   const post: AppBskyFeedDefs.PostView =
     "post" in postHousing ? postHousing.post : postHousing;
   const record = post.record as AppBskyFeedPost.Record;
-  const atid = idchoose(post.author);
-  const authorURL = "/" + post.author.did;
-  const postURL = `${authorURL}/post/${post.uri.split("/")[4]}`;
+
+  const author = post.author;
+  const atId = idchoose(author);
+  const authorDid = author.did;
+
+  const authorHref = `/${authorDid}`;
+  const href = `/${authorDid}/post/${post.uri.split("/")[4]}`;
+
   const indexedAt = new Date(post.indexedAt);
   const createdAt = new Date(record.createdAt);
 
@@ -80,7 +37,7 @@ export function postCard(
   const footer = elem("div", { className: "footer" });
 
   const profilePicture = elem("div", { className: "pfp-holder" }, [
-    elem("a", { href: authorURL }, [
+    elem("a", { href: authorHref }, [
       elem("img", {
         className: "pfp",
         src: post.author.avatar,
@@ -92,8 +49,8 @@ export function postCard(
   if (fullView) {
     header.append(
       profilePicture,
-      elem("a", { className: "handle-area", href: authorURL }, [
-        elem("span", { className: "handle", innerHTML: atid }),
+      elem("a", { className: "handle-area", href: authorHref }, [
+        elem("span", { className: "handle", innerHTML: atId }),
         elem("span", {
           className: "",
           innerHTML: escapeHTML(post.author.displayName),
@@ -105,7 +62,7 @@ export function postCard(
       elem("div", { className: "post-data" }, [
         elem("a", {
           className: "timestamp",
-          href: postURL,
+          href: href,
           innerHTML: formatDate(indexedAt ?? createdAt),
           onclick: () => setPreloaded(post),
         }),
@@ -117,28 +74,29 @@ export function postCard(
       "reason" in postHousing &&
       postHousing.reason.$type === "app.bsky.feed.defs#reasonRepost"
     ) {
+      const repostedBy = postHousing.reason.by;
       handleElem = [
         elem("div", { className: "repost" }, [
           elem("div", { className: "icon" }),
         ]),
         elem("a", {
           className: "handle",
-          href: "/" + postHousing.reason.by.did,
-          innerHTML: idchoose(postHousing.reason.by),
+          href: "/" + repostedBy.did,
+          innerHTML: idchoose(repostedBy),
         }),
         new Text(" reposted "),
         elem("a", {
           className: "handle",
-          href: authorURL,
-          innerHTML: atid,
+          href: authorHref,
+          innerHTML: atId,
         }),
       ];
     } else {
       handleElem = [
         elem("a", {
           className: "handle",
-          href: authorURL,
-          innerHTML: atid,
+          href: authorHref,
+          innerHTML: atId,
         }),
       ];
     }
@@ -154,7 +112,7 @@ export function postCard(
       elem("span", { className: "handle-area" }, handleElem),
       elem("a", {
         className: "timestamp",
-        href: postURL,
+        href: href,
         innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
         onclick: () => setPreloaded(post),
       }),
@@ -162,22 +120,24 @@ export function postCard(
   }
   content.append(header);
 
-  if ("reply" in postHousing)
+  if ("reply" in postHousing) {
+    const replyTo = postHousing.reply.parent;
     content.append(
       elem("span", { className: "small", innerHTML: "Reply to " }, [
         elem("a", {
           innerHTML:
-            postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
-              ? idchoose(postHousing.reply.parent.author)
-              : postHousing.reply.parent.uri.split("/")[2],
+            replyTo.$type === "app.bsky.feed.defs#postView"
+              ? idchoose(replyTo.author)
+              : replyTo.uri.split("/")[2],
           href:
             "/" +
-            (postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
-              ? postHousing.reply.parent.author.did
-              : postHousing.reply.parent.uri.split("/")[2]),
+            (replyTo.$type === "app.bsky.feed.defs#postView"
+              ? replyTo.author.did
+              : replyTo.uri.split("/")[2]),
         }),
       ]),
     );
+  }
   if (record.text)
     content.append(
       elem("div", {
@@ -188,7 +148,7 @@ export function postCard(
   if (record.embed)
     content.append(
       elem("div", { className: "embeds" }, [
-        embedHandlers[record.embed.$type](record.embed as any, post.author.did),
+        embedHandlers[record.embed.$type](record.embed as any, authorDid),
       ]),
     );
 
@@ -212,7 +172,7 @@ export function postCard(
   if (record.text && "langs" in record && record.langs[0] != "en")
     footer.append(
       elem("a", {
-        className: "translate",
+        className: "small-link",
         innerHTML: "Translate",
         onclick: () =>
           window.open(
@@ -224,9 +184,9 @@ export function postCard(
 
   if (fullView) {
     const stats = [
-      stat("like", post, postURL),
-      stat("repost", post, postURL),
-      stat("quote", post, postURL),
+      stat("like", post, href),
+      stat("repost", post, href),
+      stat("quote", post, href),
     ].filter(Boolean);
 
     if (stats.length > 0)
@@ -257,7 +217,7 @@ const plural = {
 function stat(
   type: "reply" | "like" | "repost" | "quote",
   post: AppBskyFeedDefs.PostView,
-  postURL: string,
+  href: string,
 ) {
   const count: number = post[type + "Count"];
   if (count === 0) return "";
@@ -265,7 +225,7 @@ function stat(
     "a",
     {
       className: "stat",
-      href: `${postURL}/${plural[type]}`,
+      href: `${href}/${plural[type]}`,
     },
     [
       elem("span", { innerHTML: count.toLocaleString() }),
