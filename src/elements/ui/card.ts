@@ -7,7 +7,7 @@ import {
   escapeHTML,
   processRichText,
   processText,
-} from "../blocks/textProcessing";
+} from "../blocks/text_processing";
 import { formatDate, formatTimeDifference } from "../blocks/date";
 import { setPreloaded } from "../../routes/post";
 import { Brand } from "@atcute/client/lexicons";

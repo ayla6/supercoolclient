@@ -2,7 +2,7 @@ import { get } from "../blocks/cache";
 import { elem } from "../blocks/elem";
 import { feedNSID, hydrateFeed } from "../content/feed";
 import { postCard } from "../ui/card";
-import { stickyHeader } from "../ui/stickyHeader";
+import { stickyHeader } from "../ui/sticky_header";
 
 export async function statsPage(
   currentURL: string,

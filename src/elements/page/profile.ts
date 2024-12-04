@@ -2,7 +2,7 @@ import { AppBskyActorDefs, SCCProfile } from "@atcute/client/lexicons";
 import { manager } from "../../login";
 import { idchoose } from "../blocks/id";
 import { elem } from "../blocks/elem";
-import { processText } from "../blocks/textProcessing";
+import { processText } from "../blocks/text_processing";
 import { get } from "../blocks/cache";
 
 export function profilePage(profile: AppBskyActorDefs.ProfileViewDetailed) {

@@ -5,7 +5,7 @@ import { postCard } from "../elements/ui/card";
 import { rpc } from "../login";
 import { loadThread } from "../elements/page/thread";
 import { profileRedirect } from "../router";
-import { stickyHeader } from "../elements/ui/stickyHeader";
+import { stickyHeader } from "../elements/ui/sticky_header";
 
 let preloadedPost: AppBskyFeedDefs.PostView;
 export function setPreloaded(post: AppBskyFeedDefs.PostView) {

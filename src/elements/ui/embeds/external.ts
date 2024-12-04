@@ -1,6 +1,6 @@
 import { AppBskyEmbedExternal } from "@atcute/client/lexicons";
 import { elem } from "../../blocks/elem";
-import { escapeHTML } from "../../blocks/textProcessing";
+import { escapeHTML } from "../../blocks/text_processing";
 
 export function loadEmbedExternal(
   embed: AppBskyEmbedExternal.Main,
