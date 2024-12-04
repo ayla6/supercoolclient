@@ -147,9 +147,11 @@ export function postCard(
     );
   if (record.embed)
     content.append(
-      elem("div", { className: "embeds" }, [
+      elem(
+        "div",
+        { className: "embeds" },
         embedHandlers[record.embed.$type](record.embed as any, authorDid),
-      ]),
+      ),
     );
 
   if (fullView) {

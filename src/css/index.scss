@@ -1,10 +1,12 @@
-@use "base.scss";
-@use "navbar.scss";
-@use "card.scss";
-@use "post_card.scss";
-@use "profile_card.scss";
-@use "profile.scss";
-@use "replies.scss";
+@use "base";
+@use "navbar";
+@use "profile";
+
+@use "card/card";
+@use "card/post_card";
+@use "card/embeds";
+@use "card/replies";
+@use "card/profile_card";
 
 :root {
     --accent-color: #269;

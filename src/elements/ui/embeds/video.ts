@@ -3,5 +3,5 @@ import { elem } from "../../blocks/elem";
 
 export function loadEmbedVideo(embed: AppBskyEmbedVideo.Main) {
   console.log(embed.video);
-  return elem("span", { innerHTML: "imagine a video" });
+  return [elem("div", { innerHTML: "imagine a video" })];
 }

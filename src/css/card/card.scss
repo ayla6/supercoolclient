@@ -1,4 +1,4 @@
-@use "variables" as *;
+@use "../variables" as *;
 
 .simple-card {
     background: $white;
@@ -24,6 +24,7 @@
         flex-grow: 1;
         padding: 8px;
         margin-bottom: 8px;
+        width: 0;
     }
 
     .display-name::before {

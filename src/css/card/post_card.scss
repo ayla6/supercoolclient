@@ -1,5 +1,5 @@
 @use "icons" as icon;
-@use "variables" as *;
+@use "../variables" as *;
 
 .post {
     .left-area {
@@ -87,96 +87,6 @@
         padding: 0px 4px;
         padding-top: 1px;
         vertical-align: top;
-    }
-}
-
-.embeds {
-    display: block;
-    line-height: 0;
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-    position: relative;
-    text-align: center;
-    margin-top: 4px;
-
-    > * {
-        border: 1px solid $light-grey;
-        box-sizing: border-box;
-        border-radius: $border-radius;
-    }
-
-    a {
-        max-width: 100%;
-        display: inline-block;
-        line-height: 14px;
-    }
-
-    .record-link {
-        max-width: 100%;
-        display: block;
-        word-break: break-word;
-    }
-
-    .external {
-        width: 100%;
-        &:hover {
-            text-decoration: none;
-            background: $lighter-grey;
-        }
-
-        div {
-            padding: 6px;
-        }
-
-        img {
-            $border-radius-minus-one: $border-radius - 1px;
-            border-radius: $border-radius-minus-one $border-radius-minus-one 0 0;
-            max-width: 100%;
-        }
-
-        span {
-            display: block;
-            text-align: left;
-            word-break: break-word;
-        }
-
-        .title {
-            font-weight: 700;
-        }
-
-        .description {
-            margin: 3px 0;
-        }
-
-        .small {
-            margin-top: 3px;
-            border-top: 1px solid $light-grey;
-        }
-    }
-
-    .images {
-        width: 100%;
-        overflow-x: scroll;
-    }
-
-    .image {
-        line-height: 0;
-
-        img {
-            object-fit: cover;
-            max-width: 100%;
-            height: 100%;
-            position: relative;
-        }
-    }
-
-    video {
-        object-fit: cover;
-        max-width: 100%;
-        height: 100%;
-        border-radius: $border-radius;
-        position: relative;
     }
 }
 

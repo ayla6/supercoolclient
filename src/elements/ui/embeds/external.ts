@@ -13,35 +13,43 @@ export function loadEmbedExternal(
     const height = Number(urlParams.get("hh"));
     const splitPathname = url.pathname.split("/");
     const newURL = `https://t.gifs.bsky.app/${splitPathname[1].slice(0, -2)}P3/${splitPathname[2]}`;
-    return elem("video", {
-      src: newURL,
-      autoplay: true,
-      loop: true,
-      muted: true,
-      width,
-      height,
-    });
-  } else {
-    return elem("a", { href: embed.external.uri, className: "external" }, [
-      embed.external.thumb
-        ? elem("img", {
-            src: `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${embed.external.thumb.ref.$link}@${embed.external.thumb.mimeType.split("/")[1]}`,
-          })
-        : "",
-      elem("div", {}, [
-        elem("span", {
-          innerHTML: escapeHTML(embed.external.title),
-          className: "title",
-        }),
-        elem("span", {
-          innerHTML: escapeHTML(embed.external.description),
-          className: "description",
-        }),
-        elem("span", {
-          innerHTML: escapeHTML(new URL(embed.external.uri).host),
-          className: "small",
+    return [
+      elem("div", { className: "images" }, [
+        elem("video", {
+          src: newURL,
+          autoplay: true,
+          loop: true,
+          muted: true,
+          width,
+          height,
         }),
       ]),
-    ]);
+    ];
+  } else {
+    return [
+      elem("a", { href: embed.external.uri, className: "external" }, [
+        embed.external.thumb
+          ? elem("div", { className: "image" }, [
+              elem("img", {
+                src: `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${embed.external.thumb.ref.$link}@${embed.external.thumb.mimeType.split("/")[1]}`,
+              }),
+            ])
+          : "",
+        elem("div", { className: "text" }, [
+          elem("span", {
+            innerHTML: escapeHTML(embed.external.title),
+            className: "title",
+          }),
+          elem("span", {
+            innerHTML: escapeHTML(embed.external.description),
+            className: "description",
+          }),
+          elem("span", {
+            innerHTML: escapeHTML(new URL(embed.external.uri).host),
+            className: "small",
+          }),
+        ]),
+      ]),
+    ];
   }
 }

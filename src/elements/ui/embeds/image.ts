@@ -18,7 +18,6 @@ export function image(image: AppBskyEmbedImages.Image, did: string) {
   const img = elem("img", {
     title: image.alt,
     alt: image.alt,
-    loading: "lazy",
   });
   const imageHolder = elem(
     "a",
@@ -29,19 +28,8 @@ export function image(image: AppBskyEmbedImages.Image, did: string) {
     [img],
   );
 
-  let isInteger: boolean;
-  const ratio = originalSize.width / originalSize.height;
-  if (
-    originalSize.width < embedContainer.width * 0.5 &&
-    originalSize.height < embedContainer.height * 0.5
-  ) {
-    const scale = Math.min(
-      Math.floor((embedContainer.width * 0.5) / originalSize.width),
-      Math.floor((embedContainer.height * 0.5) / originalSize.height),
-    );
-    img.width = originalSize.width * scale;
-    img.height = originalSize.height * scale;
-  }
+  img.width = originalSize.width;
+  img.height = originalSize.height;
 
   const ogFileType = image.image.mimeType.split("/")[1];
   const fullFileType = forcePngFileTypes.includes(ogFileType)
@@ -53,13 +41,6 @@ export function image(image: AppBskyEmbedImages.Image, did: string) {
   if (originalSize.width <= 1000 && originalSize.height <= 1000) {
     thumbSize = "fullsize";
     thumbFileType = fullFileType;
-    if (
-      isInteger ||
-      (originalSize.width <= embedContainer.width &&
-        originalSize.height <= embedContainer.height)
-    ) {
-      img.style.imageRendering = "pixelated";
-    }
   }
 
   img.src = `https://cdn.bsky.app/img/feed_${thumbSize}/plain/${did}/${image.image.ref.$link}@${thumbFileType}`;
@@ -69,11 +50,13 @@ export function image(image: AppBskyEmbedImages.Image, did: string) {
 }
 
 export function loadEmbedImages(embed: AppBskyEmbedImages.Main, did: string) {
-  return elem(
-    "div",
-    { className: "images" },
-    embed.images.map((img, index) => {
-      return image(img, did);
-    }),
-  );
+  return [
+    elem(
+      "div",
+      { className: "images" + (embed.images.length > 1 ? " multi" : "") },
+      embed.images.map((img, index) => {
+        return image(img, did);
+      }),
+    ),
+  ];
 }

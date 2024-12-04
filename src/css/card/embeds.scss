@@ -1,0 +1,99 @@
+@use "../variables" as *;
+
+.embeds {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+    margin-top: 4px;
+
+    > * {
+        display: block;
+        border: 1px solid $light-grey;
+        box-sizing: border-box;
+        border-radius: $border-radius;
+    }
+
+    a {
+        max-width: 100%;
+        line-height: 14px;
+    }
+
+    .record-link {
+        max-width: 100%;
+        display: block;
+        word-break: break-word;
+    }
+}
+
+$image-height: 320px;
+$multi-image-height: 220px;
+
+.images {
+    border: none;
+    display: flex;
+    max-height: $image-height + 2px;
+    overflow-x: scroll;
+    max-width: 100%;
+    > a {
+        line-height: 0;
+        flex-shrink: 0;
+        margin-right: 4px;
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+    a img,
+    video {
+        box-sizing: border-box;
+        border-radius: $border-radius;
+        border: 1px solid $light-grey;
+        max-height: $image-height;
+        width: auto;
+    }
+}
+.images.multi {
+    height: $multi-image-height + 2px;
+    a img,
+    video {
+        max-height: $multi-image-height;
+    }
+}
+
+.external {
+    width: 100%;
+    &:hover {
+        text-decoration: none;
+        background: $lighter-grey;
+    }
+
+    img {
+        $border-radius-minus-one: $border-radius - 1px;
+        border-radius: $border-radius-minus-one $border-radius-minus-one 0 0;
+        height: $image-height;
+    }
+
+    .text {
+        padding: 6px;
+    }
+
+    span {
+        display: block;
+        text-align: left;
+        word-break: break-word;
+    }
+
+    .title {
+        font-weight: 700;
+    }
+
+    .description {
+        margin: 3px 0;
+    }
+
+    .small {
+        margin-top: 3px;
+        border-top: 1px solid $light-grey;
+    }
+}
