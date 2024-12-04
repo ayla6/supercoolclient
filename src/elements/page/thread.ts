@@ -58,6 +58,7 @@ export function loadThread(
       previousStrings: boolean[],
       lockToAuthor: boolean,
       wasMainThread = false,
+      outputElement = replyPosts,
     ) {
       const lastChild = replies[replies.length - 1];
       for (const post of replies) {
@@ -68,7 +69,6 @@ export function loadThread(
           const isLastChild = post === lastChild;
           const isMainThread =
             wasMainThread && post.post.author.did === thread.post.author.did;
-          const outputElement = isMainThread ? mainThreadPosts : replyPosts;
 
           let newLockToAuthor = isMainThread ? true : lockToAuthor;
           let shownPostReplies: Brand.Union<
@@ -77,6 +77,7 @@ export function loadThread(
             | AppBskyFeedDefs.NotFoundPost
           >[];
           if (newLockToAuthor && post.replies) {
+            outputElement = mainThreadPosts;
             shownPostReplies = post.replies.filter(
               (reply) =>
                 reply.$type === "app.bsky.feed.defs#threadViewPost" &&
@@ -93,7 +94,7 @@ export function loadThread(
             false,
             Boolean(
               post.replies !== undefined
-                ? shownPostReplies?.length > 0
+                ? shownPostReplies?.length
                 : post.post.replyCount,
             ),
           );
@@ -128,6 +129,7 @@ export function loadThread(
               strings,
               newLockToAuthor,
               isMainThread,
+              outputElement,
             );
           } else if (post.post.replyCount && !post.replies) {
             const splitURI = post.post.uri.split("/");
