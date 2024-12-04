@@ -111,6 +111,20 @@ code {
     height: 80vh;
 }
 
+.small {
+    font-size: 12px;
+    color: $darkish-grey;
+}
+
+.small-link {
+    font-size: 12px;
+    color: var(--accent-color);
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
 @media (min-width: 920px) {
     .sticky-header {
         display: none;

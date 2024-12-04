@@ -1,0 +1,18 @@
+.profile {
+    .bio {
+        font-size: 12px;
+        line-height: 14px;
+        min-height: 42px;
+        max-height: 42px;
+        overflow-y: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .handle {
+        font-weight: 700;
+    }
+
+    .header {
+        font-size: 13px;
+    }
+}

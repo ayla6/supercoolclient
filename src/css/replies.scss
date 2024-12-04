@@ -1,11 +1,5 @@
 @use "variables" as *;
 
-$reply-pfp-size: 32px;
-$pfp-margin: 3px;
-$speech-bubble-margin: 8px;
-$string-width: 2px;
-$string-margin: ($reply-pfp-size + $pfp-margin) * 0.5 + ($string-width / 2);
-
 .post .reply-string {
     flex-grow: 1;
     margin: 0 auto;
@@ -26,10 +20,9 @@ $string-margin: ($reply-pfp-size + $pfp-margin) * 0.5 + ($string-width / 2);
     }
 
     .pfp-holder::after {
-        $height: 16px;
         width: $speech-bubble-margin;
         left: $reply-pfp-size + $pfp-margin;
-        bottom: ($reply-pfp-size + $height) / 2;
+        bottom: ($reply-pfp-size + $speech-bubble-height) / 2;
     }
 }
 

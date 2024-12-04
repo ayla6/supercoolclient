@@ -28,18 +28,20 @@ export function loadEmbedExternal(
             src: `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${embed.external.thumb.ref.$link}@${embed.external.thumb.mimeType.split("/")[1]}`,
           })
         : "",
-      elem("span", {
-        innerHTML: escapeHTML(embed.external.title),
-        className: "title",
-      }),
-      elem("span", {
-        innerHTML: escapeHTML(embed.external.description),
-        className: "description",
-      }),
-      elem("span", {
-        innerHTML: escapeHTML(new URL(embed.external.uri).host),
-        className: "small",
-      }),
+      elem("div", {}, [
+        elem("span", {
+          innerHTML: escapeHTML(embed.external.title),
+          className: "title",
+        }),
+        elem("span", {
+          innerHTML: escapeHTML(embed.external.description),
+          className: "description",
+        }),
+        elem("span", {
+          innerHTML: escapeHTML(new URL(embed.external.uri).host),
+          className: "small",
+        }),
+      ]),
     ]);
   }
 }
