@@ -29,15 +29,13 @@ export function loadEmbedExternal(
     return [
       elem("a", { href: embed.external.uri, className: "external" }, [
         embed.external.thumb
-          ? elem("div", { className: "image" }, [
-              elem("img", {
-                src: `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${embed.external.thumb.ref.$link}@${embed.external.thumb.mimeType.split("/")[1]}`,
-              }),
-            ])
+          ? elem("img", {
+              src: `https://cdn.bsky.app/img/feed_thumbnail/plain/${did}/${embed.external.thumb.ref.$link}@${embed.external.thumb.mimeType.split("/")[1]}`,
+            })
           : "",
         elem("div", { className: "text" }, [
           elem("span", {
-            innerHTML: escapeHTML(embed.external.title),
+            innerHTML: escapeHTML(embed.external.title || embed.external.uri),
             className: "title",
           }),
           elem("span", {

@@ -49,8 +49,9 @@ $multi-image-height: 220px;
         box-sizing: border-box;
         border-radius: $border-radius;
         border: 1px solid $light-grey;
-        max-height: $image-height;
         width: auto;
+        min-width: 30px;
+        max-height: $image-height;
     }
 }
 .images.multi {
@@ -71,7 +72,9 @@ $multi-image-height: 220px;
     img {
         $border-radius-minus-one: $border-radius - 1px;
         border-radius: $border-radius-minus-one $border-radius-minus-one 0 0;
-        height: $image-height;
+        width: 100%;
+        max-height: $image-height;
+        object-fit: cover;
     }
 
     .text {
