@@ -65,17 +65,21 @@ async function loadFeed(
   return { items, cursor };
 }
 
+let feedBeingLoaded = false;
 export async function loadOnScroll(load: Function, params: any) {
   return async function (ev) {
     if (
-      window.innerHeight + Math.round(window.scrollY) >=
-      document.body.offsetHeight
+      !feedBeingLoaded &&
+      window.innerHeight + Math.round(window.scrollY) + 1000 >=
+        document.body.offsetHeight
     ) {
+      feedBeingLoaded = true;
       const content = document.getElementById("content");
       const { items, cursor } = await load();
       content.append(...items);
       params.cursor = cursor;
       if (cursor === undefined) window.onscroll = null;
+      feedBeingLoaded = false;
     }
   };
 }
