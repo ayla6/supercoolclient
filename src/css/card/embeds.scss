@@ -34,6 +34,7 @@ $border-total-width: 2px;
 .images {
     $height: $image-height + $border-total-width;
     border: none;
+    border-radius: 0;
     display: flex;
     max-height: $height;
     overflow-x: scroll;
