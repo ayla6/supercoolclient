@@ -70,24 +70,30 @@ export function loadThread(
             wasMainThread && post.post.author.did === thread.post.author.did;
           const outputElement = isMainThread ? mainThreadPosts : replyPosts;
 
-          const newLockToAuthor = isMainThread ? true : lockToAuthor;
-          const filteredPostReplies = newLockToAuthor ? [] : post.replies;
+          let newLockToAuthor = isMainThread ? true : lockToAuthor;
+          let shownPostReplies: Brand.Union<
+            | AppBskyFeedDefs.ThreadViewPost
+            | AppBskyFeedDefs.BlockedPost
+            | AppBskyFeedDefs.NotFoundPost
+          >[];
           if (newLockToAuthor && post.replies) {
-            filteredPostReplies.push(
-              ...post.replies.filter(
-                (reply) =>
-                  reply.$type === "app.bsky.feed.defs#threadViewPost" &&
-                  reply.post.author.did === thread.post.author.did,
-              ),
+            shownPostReplies = post.replies.filter(
+              (reply) =>
+                reply.$type === "app.bsky.feed.defs#threadViewPost" &&
+                reply.post.author.did === thread.post.author.did,
             );
-          }
-          console.log(filteredPostReplies);
+            if (!shownPostReplies.length) {
+              newLockToAuthor = false;
+              shownPostReplies = post.replies;
+            }
+          } else shownPostReplies = post.replies;
+
           const replyElem = postCard(
             post,
             false,
             Boolean(
               post.replies !== undefined
-                ? filteredPostReplies?.length > 0
+                ? shownPostReplies?.length > 0
                 : post.post.replyCount,
             ),
           );
@@ -115,17 +121,16 @@ export function loadThread(
           replyContainer.append(replyElem);
           outputElement.append(replyContainer);
 
-          if (Boolean(filteredPostReplies?.length)) {
+          if (Boolean(shownPostReplies?.length)) {
             loadReplies(
-              filteredPostReplies,
-              stringMargin + Number(filteredPostReplies.length > 1),
+              shownPostReplies,
+              stringMargin + Number(shownPostReplies.length > 1),
               strings,
               newLockToAuthor,
               isMainThread,
             );
           } else if (post.post.replyCount && !post.replies) {
             const splitURI = post.post.uri.split("/");
-            console.log(splitURI);
             const continueThreadContainer = elem("div", {
               className: "reply-container",
             });
