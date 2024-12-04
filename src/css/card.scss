@@ -1,8 +1,8 @@
 @use "variables" as *;
 @use "icons" as icon;
 
-.error {
-    background: $lighter-grey;
+.simple-card {
+    background: $white;
     border: $border;
     border-radius: $border-radius;
     display: block;
@@ -17,7 +17,7 @@
     flex-grow: 1;
 
     .content {
-        background: #fff;
+        background: $white;
         border: $border;
         border-radius: $border-radius;
         display: flex;
@@ -250,7 +250,7 @@
     .record-link {
         max-width: 100%;
         display: block;
-        line-break: anywhere;
+        word-break: break-word;
     }
 
     .external {
@@ -264,6 +264,7 @@
         span {
             display: block;
             text-align: left;
+            word-break: break-word;
 
             &.description {
                 margin-top: 3px;
@@ -411,11 +412,7 @@
     flex-flow: row;
 
     .pfp-holder {
-        margin: 5px;
-    }
-
-    .content {
-        margin-left: 6px;
+        margin: 3px 8px;
     }
 
     .pfp-holder,
@@ -430,28 +427,29 @@
     }
 }
 
+.string-container {
+    position: relative;
+    .reply-string {
+        height: 100%;
+    }
+}
+
 .reply-string {
-    margin: 0 21px;
+    margin: 0 24px;
     border: 1px solid $lighter-grey;
     &.transparent {
         border-color: transparent;
     }
 }
 
-.string-container {
-    position: relative;
-    .connect-string {
-        position: absolute;
-        margin-left: 21px;
-        border: 1px solid $lighter-grey;
-        border-width: 0 0 2px 2px;
-        width: 21px;
-        height: 21px;
-        border-radius: 0 0 0 18px;
-    }
-    .reply-string {
-        height: 100%;
-    }
+.connect-string {
+    position: absolute;
+    margin-left: 24px;
+    border: 1px solid $lighter-grey;
+    border-width: 0 0 2px 2px;
+    width: 29px;
+    height: 19px;
+    border-radius: 0 0 0 20px;
 }
 
 .like-button {

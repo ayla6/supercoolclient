@@ -28,7 +28,7 @@ export async function postRoute(currentURL: string, loadedURL: string) {
     const mainPost = postCard(preloadedPost, true);
     mainPost.classList.add("full");
     content.append(mainPost);
-    //scrollTo({ top: -63 });
+    mainPost.scrollIntoView();
   }
 
   const postThread = (

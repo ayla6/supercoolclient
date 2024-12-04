@@ -4,7 +4,8 @@ import {
 } from "@atcute/client/lexicons";
 import { postCard } from "../ui/card";
 import { elem } from "../blocks/elem";
-import { error } from "../ui/error";
+import { Brand } from "@atcute/client/lexicons";
+import { setPreloaded } from "../../routes/post";
 
 export function loadThread(
   postThread: AppBskyFeedGetPostThread.Output,
@@ -25,94 +26,125 @@ export function loadThread(
         currentThread.parent.$type === "app.bsky.feed.defs#threadViewPost"
       ) {
         currentThread = currentThread.parent;
-        const parentPost = postCard(currentThread.post, false, {
-          isReply: Boolean(currentThread.parent),
-          hasReplies: true,
-        });
-        mainThreadPosts.prepend(parentPost);
+        mainThreadPosts.prepend(postCard(currentThread.post, false, true));
       }
       if (
         currentThread.parent &&
         currentThread.parent.$type !== "app.bsky.feed.defs#threadViewPost"
       ) {
         mainThreadPosts.prepend(
-          error(
-            currentThread.parent.$type === "app.bsky.feed.defs#blockedPost"
-              ? "Blocked post"
-              : "Post not found",
-          ),
+          elem("div", {
+            className: "simple-card",
+            innerHTML:
+              currentThread.parent.$type === "app.bsky.feed.defs#blockedPost"
+                ? "Blocked post"
+                : "Post not found",
+          }),
         );
-        if (rootPost)
-          mainThreadPosts.prepend(
-            postCard(rootPost, false, {
-              isReply: false,
-              hasReplies: true,
-            }),
-          );
+        if (rootPost) mainThreadPosts.prepend(postCard(rootPost, false, true));
       }
     }
 
     const mainPost = postCard(thread.post, true);
     mainThreadPosts.append(mainPost);
-    const mend = Date.now();
 
     function loadReplies(
-      parent: AppBskyFeedDefs.ThreadViewPost,
+      replies: Brand.Union<
+        | AppBskyFeedDefs.ThreadViewPost
+        | AppBskyFeedDefs.BlockedPost
+        | AppBskyFeedDefs.NotFoundPost
+      >[],
       stringMargin: number,
-      previousStrings: boolean[] = [],
+      previousStrings: boolean[],
+      lockToAuthor: boolean,
+      wasMainThread = false,
     ) {
-      for (const post of parent.replies) {
-        if (post.$type !== "app.bsky.feed.defs#threadViewPost") continue;
+      const lastChild = replies[replies.length - 1];
+      for (const post of replies) {
+        if (
+          post?.$type === "app.bsky.feed.defs#threadViewPost" &&
+          !(lockToAuthor && post.post.author.did !== thread.post.author.did)
+        ) {
+          const isLastChild = post === lastChild;
+          const isMainThread =
+            wasMainThread && post.post.author.did === thread.post.author.did;
+          const outputElement = isMainThread ? mainThreadPosts : replyPosts;
 
-        const isLastChild = post === parent.replies[parent.replies.length - 1];
-        const isMainThread =
-          thread.post === parent.post &&
-          post.post.author.did === thread.post.author.did;
-
-        const replyElem = postCard(post, false, {
-          isReply: true,
-          hasReplies: post.replies?.length > 0 && !isMainThread,
-        });
-
-        if (isMainThread) {
-          mainThreadPosts.append(replyElem);
-          continue;
-        }
-
-        let strings = [...previousStrings];
-        const replyContainer = elem("div", { className: "reply-container" });
-        replyContainer.append(...strings.map(getString));
-
-        if (stringMargin !== 0 && parent.replies.length !== 1) {
-          const stringContainer = elem("div", {
-            className: "string-container",
-          });
-
-          const string = elem("div", { className: "reply-string" });
-          if (isLastChild) {
-            string.classList.add("transparent");
+          const newLockToAuthor = isMainThread ? true : lockToAuthor;
+          const filteredPostReplies = newLockToAuthor ? [] : post.replies;
+          if (newLockToAuthor && post.replies) {
+            filteredPostReplies.push(
+              ...post.replies.filter(
+                (reply) =>
+                  reply.$type === "app.bsky.feed.defs#threadViewPost" &&
+                  reply.post.author.did === thread.post.author.did,
+              ),
+            );
           }
-          strings.push(isLastChild);
-          stringContainer.append(elem("div", { className: "connect-string" }));
-
-          stringContainer.append(string);
-          replyContainer.append(stringContainer);
-        }
-        replyContainer.append(replyElem);
-
-        replyPosts.append(replyContainer);
-
-        if (post.replies) {
-          loadReplies(
+          console.log(filteredPostReplies);
+          const replyElem = postCard(
             post,
-            stringMargin + Number(post.replies.length > 1),
-            strings,
+            false,
+            Boolean(
+              post.replies !== undefined
+                ? filteredPostReplies?.length > 0
+                : post.post.replyCount,
+            ),
           );
+
+          const replyContainer = elem("div", {
+            className: "reply-container",
+          });
+          replyContainer.append(...previousStrings.map(getString));
+
+          let strings: boolean[] = previousStrings;
+          if (stringMargin && replies?.length > 1) {
+            const stringContainer = elem("div", {
+              className: "string-container",
+            });
+            strings = previousStrings.slice();
+            strings.push(isLastChild);
+            stringContainer.append(
+              elem("div", { className: "connect-string" }),
+              elem("div", {
+                className: "reply-string" + (isLastChild ? " transparent" : ""),
+              }),
+            );
+            replyContainer.append(stringContainer);
+          }
+          replyContainer.append(replyElem);
+          outputElement.append(replyContainer);
+
+          if (Boolean(filteredPostReplies?.length)) {
+            loadReplies(
+              filteredPostReplies,
+              stringMargin + Number(filteredPostReplies.length > 1),
+              strings,
+              newLockToAuthor,
+              isMainThread,
+            );
+          } else if (post.post.replyCount && !post.replies) {
+            const splitURI = post.post.uri.split("/");
+            console.log(splitURI);
+            const continueThreadContainer = elem("div", {
+              className: "reply-container",
+            });
+            continueThreadContainer.append(
+              ...strings.map(getString),
+              elem("a", {
+                className: "simple-card",
+                innerHTML: "Continue thread...",
+                href: `/${splitURI[2]}/post/${splitURI[4]}`,
+                onclick: () => setPreloaded(post.post),
+              }),
+            );
+            outputElement.append(continueThreadContainer);
+          }
         }
       }
     }
-
-    if (thread.replies && thread.replies[0]) loadReplies(thread, 0);
+    if (Boolean(thread.replies?.length))
+      loadReplies(thread.replies, 0, [], false, true);
 
     outputElement.innerHTML = "";
     outputElement.append(mainThreadPosts);
@@ -123,11 +155,13 @@ export function loadThread(
     outputElement.append(elem("div", { className: "buffer" }));
   } else {
     outputElement.append(
-      error(
-        postThread.thread.$type === "app.bsky.feed.defs#blockedPost"
-          ? "Blocked post"
-          : "Post not found",
-      ),
+      elem("div", {
+        className: "simple-card",
+        innerHTML:
+          postThread.thread.$type === "app.bsky.feed.defs#blockedPost"
+            ? "Blocked post"
+            : "Post not found",
+      }),
     );
   }
 }

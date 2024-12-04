@@ -1,5 +1,4 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
-import { loadEmbed } from "./embed";
 import { idchoose } from "../blocks/id";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { manager, rpc } from "../../login";
@@ -12,6 +11,7 @@ import {
 import { formatDate, formatTimeDifference } from "../blocks/date";
 import { setPreloaded } from "../../routes/post";
 import { Brand } from "@atcute/client/lexicons";
+import { embedHandlers } from "./embeds/embed_handlers";
 
 export function profileCard(profile: AppBskyActorDefs.ProfileView) {
   const atid =
@@ -66,7 +66,7 @@ export function postCard(
     | AppBskyFeedDefs.PostView
     | AppBskyFeedDefs.ThreadViewPost,
   fullView = false,
-  replyStatus = { isReply: false, hasReplies: false },
+  hasReplies = false,
 ) {
   // Extract core data
   const post: AppBskyFeedDefs.PostView =
@@ -130,9 +130,7 @@ export function postCard(
     postElem.append(
       elem("div", { className: "left-area" }, [
         profilePicture,
-        replyStatus.hasReplies
-          ? elem("div", { className: "reply-string" })
-          : "",
+        hasReplies ? elem("div", { className: "reply-string" }) : "",
       ]),
     );
 
@@ -262,11 +260,9 @@ export function postCard(
 
   if (record.embed) {
     content.append(
-      elem(
-        "div",
-        { className: "embeds" },
-        loadEmbed(record.embed, post.author.did),
-      ),
+      elem("div", { className: "embeds" }, [
+        embedHandlers[record.embed.$type](record.embed as any, post.author.did),
+      ]),
     );
   }
 
