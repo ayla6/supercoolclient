@@ -51,8 +51,14 @@ $border-total-width: 2px;
         box-sizing: border-box;
         border-radius: $border-radius;
         border: 1px solid $light-grey;
-        width: auto;
+
         min-width: 30px;
+        min-height: 30px;
+
+        width: auto;
+        height: auto;
+
+        max-width: 100%;
         max-height: $height;
     }
 }
