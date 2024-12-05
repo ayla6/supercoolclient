@@ -98,9 +98,11 @@ async function loadHomeFeed(
       { feed: feedgen },
       forceReload,
     );
-    content.innerHTML = "";
-    content.append(...items);
-    if (!forceReload) window.scrollTo({ top: currentScroll[currentFeed] });
+    if (currentFeed === feedgen) {
+      content.innerHTML = "";
+      content.append(...items);
+      if (!forceReload) window.scrollTo({ top: currentScroll[currentFeed] });
+    }
   }
 }
 
