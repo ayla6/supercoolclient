@@ -14,6 +14,11 @@
         border: 1px solid $light-grey;
         box-sizing: border-box;
         border-radius: $border-radius;
+
+        margin-bottom: 4px;
+        &:last-child {
+            margin-bottom: 0;
+        }
     }
 
     a {
@@ -148,5 +153,27 @@ $border-total-width: 2px;
     .small {
         margin-top: 3px;
         border-top: 1px solid $light-grey;
+    }
+}
+
+.embeds .post {
+    .content {
+        border: none;
+        padding: 4px;
+        margin: 0;
+    }
+
+    $pfp-size: 24px;
+    .pfp-holder {
+        margin: 0;
+        margin-right: 4px;
+        &::after {
+            display: none;
+        }
+    }
+    .pfp-holder,
+    .pfp {
+        width: $pfp-size;
+        height: $pfp-size;
     }
 }

@@ -14,6 +14,7 @@ export function postCard(
     | AppBskyFeedDefs.ThreadViewPost,
   fullView = false,
   hasReplies = false,
+  embed = false,
 ) {
   const post: AppBskyFeedDefs.PostView =
     "post" in postHousing ? postHousing.post : postHousing;
@@ -45,7 +46,22 @@ export function postCard(
     ]),
   ]);
 
-  if (fullView) {
+  if (embed) {
+    header.append(
+      elem("div", {}, [
+        profilePicture,
+        elem("a", { className: "handle-area", href: authorHref }, [
+          elem("span", { className: "handle", innerHTML: atId }),
+        ]),
+      ]),
+      elem("a", {
+        className: "timestamp",
+        href: href,
+        innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
+        onclick: () => setPreloaded(post),
+      }),
+    );
+  } else if (fullView) {
     header.append(
       profilePicture,
       elem("a", { className: "handle-area", href: authorHref }, [
@@ -200,14 +216,15 @@ export function postCard(
       content.append(elem("div", { className: "stats" }, stats));
   }
 
-  content.append(
-    elem("div", { className: "stats-buttons" }, [
-      interactionButton("reply", post),
-      interactionButton("repost", post),
-      interactionButton("like", post),
-      interactionButton("quote", post),
-    ]),
-  );
+  if (post.viewer)
+    content.append(
+      elem("div", { className: "stats-buttons" }, [
+        interactionButton("reply", post),
+        interactionButton("repost", post),
+        interactionButton("like", post),
+        interactionButton("quote", post),
+      ]),
+    );
 
   postElem.append(content);
 

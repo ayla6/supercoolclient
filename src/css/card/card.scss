@@ -24,7 +24,7 @@
         flex-grow: 1;
         padding: 8px;
         margin-bottom: 8px;
-        width: 0;
+        min-width: 0;
     }
 
     .display-name::before {
