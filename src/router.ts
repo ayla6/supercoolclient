@@ -15,8 +15,8 @@
   history.pushState(null, "", url);
 });*/
 
-import { profileRoute, profileTrim, profileURLChange } from "./routes/profile";
-import { homeRoute, homeURLChange } from "./routes/home";
+import { profileRoute, profileTrim, profileUrlChange } from "./routes/profile";
+import { homeRoute, homeUrlChange } from "./routes/home";
 import { postRoute } from "./routes/post";
 import { elem } from "./elements/utils/elem";
 import { notificationsRoute } from "./routes/notifications";
@@ -25,11 +25,11 @@ import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
 import { deleteCache } from "./elements/utils/cache";
 
-let loadedURL: string = "";
+let loadedUrl: string = "";
 
 function saveLastLocation() {
-  loadedURL = window.location.pathname;
-  if (window.location.search) loadedURL += "/" + window.location.search;
+  loadedUrl = window.location.pathname;
+  if (window.location.search) loadedUrl += "/" + window.location.search;
 }
 
 const routes: { [key: string]: string } = {
@@ -54,23 +54,23 @@ const changeRoutes: { [key: string]: Function } = {
   postQuotes: quotesRoute,
 };
 const localRoutes: { [key: string]: Function } = {
-  home: homeURLChange,
-  profile: profileURLChange,
+  home: homeUrlChange,
+  profile: profileUrlChange,
   post: postRoute,
   postLikes: likesRoute,
   postReposts: repostsRoute,
   postQuotes: quotesRoute,
 };
 function matchRoute(url: string) {
-  const splitURL = url.split("/");
+  const splitUrl = url.split("/");
   for (const route of Object.keys(routes)) {
     const routeParts = route.split("/");
-    if (routeParts.length !== splitURL.length) continue;
+    if (routeParts.length !== splitUrl.length) continue;
 
     let match = true;
     for (let i = 0; i < routeParts.length; i++) {
       if (routeParts[i].startsWith(":")) continue;
-      if (routeParts[i] !== splitURL[i]) {
+      if (routeParts[i] !== splitUrl[i]) {
         match = false;
         break;
       }
@@ -83,33 +83,33 @@ function matchRoute(url: string) {
 
 export async function updatePage() {
   window.onscroll = null;
-  const currentURL = window.location.pathname;
-  const splitURL = window.location.pathname.split("/");
-  const splitLoaded = loadedURL.split("/");
+  const currentUrl = window.location.pathname;
+  const splitUrl = window.location.pathname.split("/");
+  const splitLoaded = loadedUrl.split("/");
   let ableToLocal = true;
-  if (splitURL[1] != splitLoaded[1]) {
+  if (splitUrl[1] != splitLoaded[1]) {
     document.body.setAttribute("style", "");
     ableToLocal = false;
   }
-  const route = matchRoute(currentURL);
-  if (ableToLocal && route === matchRoute(loadedURL)) {
-    localRoutes[route](currentURL, loadedURL);
+  const route = matchRoute(currentUrl);
+  if (ableToLocal && route === matchRoute(loadedUrl)) {
+    localRoutes[route](currentUrl, loadedUrl);
   } else {
-    if (loadedURL[2] === "post" && currentURL[2] !== "post")
+    if (loadedUrl[2] === "post" && currentUrl[2] !== "post")
       deleteCache("app.bsky.feed.getPostThread");
     document.title = "SuperCoolClient";
     window.scrollTo({ top: 0 });
     document.body.removeChild(document.getElementById("container"));
     document.body.append(elem("div", { id: "container" }));
-    changeRoutes[route](currentURL, loadedURL);
+    changeRoutes[route](currentUrl, loadedUrl);
   }
   saveLastLocation();
 }
 
 export function profileRedirect(did: string) {
-  let splitURL = window.location.href.split("/");
-  splitURL[3] = did;
-  history.pushState(null, "", new URL(splitURL.join("/")));
+  let splitUrl = window.location.href.split("/");
+  splitUrl[3] = did;
+  history.pushState(null, "", new URL(splitUrl.join("/")));
 }
 
 export function navigateTo(url: URL | string) {

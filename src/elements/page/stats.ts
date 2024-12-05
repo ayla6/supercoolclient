@@ -5,13 +5,13 @@ import { postCard } from "../ui/post_card";
 import { stickyHeader } from "../ui/sticky_header";
 
 export async function statsPage(
-  currentURL: string,
-  loadedURL: string,
+  currentUrl: string,
+  loadedUrl: string,
   title: string,
   nsid: feedNSID,
   func?: Function,
 ) {
-  const splitURL = currentURL.split("/");
+  const splitUrl = currentUrl.split("/");
   const container = document.getElementById("container");
   let content = document.getElementById("content");
 
@@ -24,7 +24,7 @@ export async function statsPage(
       (
         await get("app.bsky.feed.getPosts", {
           params: {
-            uris: [`at://${splitURL[1]}/app.bsky.feed.post/${splitURL[3]}`],
+            uris: [`at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}`],
           },
         })
       ).data.posts[0],
@@ -35,7 +35,7 @@ export async function statsPage(
     ...(await hydrateFeed(
       nsid,
       {
-        uri: `at://${splitURL[1]}/app.bsky.feed.post/${splitURL[3]}`,
+        uri: `at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}`,
       },
       true,
       func,

@@ -3,7 +3,7 @@ import { AppBskyEmbedDefs, AppBskyEmbedVideo } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
 
-function loadVideo(embed: AppBskyEmbedVideo.View, style?: string) {
+function loadVideo(embed: AppBskyEmbedVideo.View, style: string) {
   // stole from aglais!!
   const hls = new Hls({
     capLevelToPlayerSize: true,
@@ -45,7 +45,7 @@ export function loadEmbedVideo(
     }),
     elem("div", { className: "play-button" }),
   ]);
-  const videoContainer = elem("div", { className: "media-container" }, [
+  const mediaContainer = elem("div", { className: "media-container" }, [
     thumbnail,
   ]);
 
@@ -53,9 +53,9 @@ export function loadEmbedVideo(
   thumbnail.style.cssText = style;
 
   thumbnail.addEventListener("click", () => {
-    videoContainer.append(loadVideo(viewEmbed, style));
+    mediaContainer.append(loadVideo(viewEmbed, style));
     thumbnail.remove();
   });
 
-  return [videoContainer];
+  return [mediaContainer];
 }

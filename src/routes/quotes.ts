@@ -1,10 +1,10 @@
 import { statsPage } from "../elements/page/stats";
 import { postCard } from "../elements/ui/post_card";
 
-export async function quotesRoute(currentURL: string, loadedURL: string) {
+export async function quotesRoute(currentUrl: string, loadedUrl: string) {
   statsPage(
-    currentURL,
-    loadedURL,
+    currentUrl,
+    loadedUrl,
     "Quotes",
     "app.bsky.feed.getQuotes",
     postCard,

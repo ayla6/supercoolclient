@@ -76,6 +76,10 @@ $border-total-width: 2px;
     }
 }
 
+.video-container.no-controls {
+    cursor: pointer;
+}
+
 .video-thumbnail {
     cursor: pointer;
     .play-button {
@@ -109,6 +113,7 @@ $border-total-width: 2px;
     }
 
     .image {
+        line-height: 0;
         width: 100%;
         aspect-ratio: 1.91 / 1;
     }

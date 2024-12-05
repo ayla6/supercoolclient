@@ -1,20 +1,7 @@
 import { AppBskyEmbedExternal } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { escapeHTML } from "../../utils/text_processing";
-import { getProperSize } from "../../utils/get_proper_size";
-
-function gifClick(e: MouseEvent) {
-  //i saw this on aglais but like this is  basically the only option right
-  const gif = e.currentTarget as HTMLVideoElement;
-
-  e.preventDefault();
-
-  if (gif.paused) {
-    gif.play();
-  } else {
-    gif.pause();
-  }
-}
+import { loadEmbedGif } from "./gif";
 
 export function loadEmbedExternal(
   embed: AppBskyEmbedExternal.Main,
@@ -23,25 +10,7 @@ export function loadEmbedExternal(
 ) {
   const url = new URL(embed.external.uri);
   if (url.hostname === "media.tenor.com") {
-    const urlParams = new URLSearchParams(url.search);
-    const aspectRatio = {
-      width: Number(urlParams.get("ww") ?? 1600),
-      height: Number(urlParams.get("hh") ?? 900),
-    };
-    const splitPathname = url.pathname.split("/");
-    const newURL = `https://t.gifs.bsky.app/${splitPathname[1].slice(0, -2)}P3/${splitPathname[2]}`;
-    const video = elem("video", {
-      src: newURL,
-      autoplay: true,
-      loop: true,
-      muted: true,
-    });
-    video.addEventListener("click", gifClick);
-    const videoContainer = elem("div", { className: "video-container" }, [
-      video,
-    ]);
-    videoContainer.style.cssText = getProperSize(aspectRatio, true);
-    return [elem("div", { className: "media-container" }, [videoContainer])];
+    return loadEmbedGif(url);
   } else {
     const card = elem("a", { href: embed.external.uri, className: "external" });
     if (viewEmbed.external.thumb) {

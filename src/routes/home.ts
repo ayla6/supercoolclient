@@ -20,10 +20,10 @@ function navButton(feed: string, title: string) {
   return button;
 }
 export async function homeRoute(
-  currentURL: Array<string>,
-  loadedURL: Array<string>,
+  currentUrl: Array<string>,
+  loadedUrl: Array<string>,
 ) {
-  if (loadedURL[1] != "") {
+  if (loadedUrl[1] != "") {
     const container = document.getElementById("container");
     container.innerHTML = "";
     const leftBar = document.createElement("div");
@@ -57,7 +57,7 @@ export async function homeRoute(
     const content = document.createElement("div");
     content.id = "content";
     container.append(content);
-    homeURLChange();
+    homeUrlChange();
   }
 }
 
@@ -106,7 +106,7 @@ async function loadHomeFeed(
   }
 }
 
-export async function homeURLChange(currentURL?: string, loadedURL?: string) {
+export async function homeUrlChange(currentUrl?: string, loadedUrl?: string) {
   const url = new URL(window.location.href);
   const params = url.searchParams;
   let feedgen = params.get("feed");
@@ -114,5 +114,5 @@ export async function homeURLChange(currentURL?: string, loadedURL?: string) {
 
   history.replaceState({}, "", window.location.href.split("?")[0]);
 
-  loadHomeFeed(feedgen, title, loadedURL?.split("/")[1] === "");
+  loadHomeFeed(feedgen, title, loadedUrl?.split("/")[1] === "");
 }

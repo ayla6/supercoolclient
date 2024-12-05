@@ -11,30 +11,30 @@ const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   likes: ["app.bsky.feed.getActorLikes"],
 };
 
-export async function profileRoute(currentURL: string, loadedURL: string) {
-  const splitURL = currentURL.split("/");
-  const splitLoaded = loadedURL.split("/");
+export async function profileRoute(currentUrl: string, loadedUrl: string) {
+  const splitUrl = currentUrl.split("/");
+  const splitLoaded = loadedUrl.split("/");
 
-  let atId = splitURL[1];
+  let atId = splitUrl[1];
   const profile = (
     await get("app.bsky.actor.getProfile", {
       params: { actor: atId },
     })
   ).data;
-  if (window.location.pathname === currentURL) {
+  if (window.location.pathname === currentUrl) {
     if (atId != profile.did) profileRedirect(profile.did);
     if (splitLoaded[1] != atId || splitLoaded[2] === "post")
       atId = profilePage(profile);
 
-    profileURLChange(currentURL, loadedURL);
+    profileUrlChange(currentUrl, loadedUrl);
   }
 }
 
-export async function profileURLChange(currentURL: string, loadedURL: string) {
-  const splitURL = currentURL.split("/");
-  const splitLoaded = loadedURL.split("/");
-  const atId = splitURL[1];
-  const currentPlace = splitURL[2] ?? "posts";
+export async function profileUrlChange(currentUrl: string, loadedUrl: string) {
+  const splitUrl = currentUrl.split("/");
+  const splitLoaded = loadedUrl.split("/");
+  const atId = splitUrl[1];
+  const currentPlace = splitUrl[2] ?? "posts";
   const lastPlace = splitLoaded[2] ?? "posts";
   const content = document.getElementById("content");
   document
@@ -47,7 +47,7 @@ export async function profileURLChange(currentURL: string, loadedURL: string) {
       `[value="${currentPlace + (currentPlace === "search" ? window.location.search : "")}"]`,
     )
     ?.classList.add("active");
-  if (splitLoaded[2] != splitURL[2]) content.innerHTML = "";
+  if (splitLoaded[2] != splitUrl[2]) content.innerHTML = "";
   let posts: HTMLElement[];
   let forceReload =
     currentPlace === lastPlace && splitLoaded[1]?.slice(0, 3) === "did:";
@@ -62,9 +62,9 @@ export async function profileURLChange(currentURL: string, loadedURL: string) {
   content.append(...posts);
 }
 
-export function profileTrim(currentURL: string, loadedURL: string) {
+export function profileTrim(currentUrl: string, loadedUrl: string) {
   history.pushState(null, "", new URL(window.location.href.slice(0, -1)));
-  profileRoute(currentURL.slice(0, -1), loadedURL);
+  profileRoute(currentUrl.slice(0, -1), loadedUrl);
 }
 
 const feedConfig = {

@@ -11,9 +11,9 @@ let preloadedPost: AppBskyFeedDefs.PostView;
 export function setPreloaded(post: AppBskyFeedDefs.PostView) {
   preloadedPost = post;
 }
-export async function postRoute(currentURL: string, loadedURL: string) {
-  const splitURL = currentURL.split("/");
-  const splitLoaded = loadedURL.split("/");
+export async function postRoute(currentUrl: string, loadedUrl: string) {
+  const splitUrl = currentUrl.split("/");
+  const splitLoaded = loadedUrl.split("/");
   const container = document.getElementById("container");
   container.innerHTML = "";
   container.append(stickyHeader("Post"));
@@ -22,8 +22,8 @@ export async function postRoute(currentURL: string, loadedURL: string) {
 
   if (
     preloadedPost &&
-    preloadedPost.uri.split("/")[4] === splitURL[3] &&
-    splitURL[1] === preloadedPost.author.did
+    preloadedPost.uri.split("/")[4] === splitUrl[3] &&
+    splitUrl[1] === preloadedPost.author.did
   ) {
     const mainPost = postCard(preloadedPost, true);
     mainPost.classList.add("full");
@@ -36,7 +36,7 @@ export async function postRoute(currentURL: string, loadedURL: string) {
       "app.bsky.feed.getPostThread",
       {
         params: {
-          uri: `at://${splitURL[1]}/app.bsky.feed.post/${splitURL[3]}`,
+          uri: `at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}`,
         },
       },
       splitLoaded[2] !== "post",
@@ -47,7 +47,7 @@ export async function postRoute(currentURL: string, loadedURL: string) {
     if (preloadedPost) Object.assign(preloadedPost, postThread.thread.post);
     if (!cache["app.bsky.feed.getPosts"]) cache["app.bsky.feed.getPosts"] = {};
     cache["app.bsky.feed.getPosts"][
-      `{"uris":["at://${splitURL[1]}/app.bsky.feed.post/${splitURL[3]}"]}`
+      `{"uris":["at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}"]}`
     ] = { data: { posts: [postThread.thread.post] } };
   }
   preloadedPost = null;
@@ -67,7 +67,7 @@ export async function postRoute(currentURL: string, loadedURL: string) {
 
   if (
     postThread.thread.$type === "app.bsky.feed.defs#threadViewPost" &&
-    splitURL[1] != postThread.thread.post.author.did
+    splitUrl[1] != postThread.thread.post.author.did
   )
     profileRedirect(postThread.thread.post.author.did);
 

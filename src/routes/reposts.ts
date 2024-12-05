@@ -1,10 +1,10 @@
 import { statsPage } from "../elements/page/stats";
 import { profileCard, statProfile } from "../elements/ui/profile_card";
 
-export async function repostsRoute(currentURL: string, loadedURL: string) {
+export async function repostsRoute(currentUrl: string, loadedUrl: string) {
   statsPage(
-    currentURL,
-    loadedURL,
+    currentUrl,
+    loadedUrl,
     "Reposts",
     "app.bsky.feed.getRepostedBy",
     profileCard,

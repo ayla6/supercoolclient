@@ -1,8 +1,8 @@
 import { get } from "../elements/utils/cache";
 
 export async function notificationsRoute(
-  currentURL: string,
-  loadedURL: string,
+  currentUrl: string,
+  loadedUrl: string,
 ) {
   const container = document.getElementById("container");
   container.innerHTML = "";
