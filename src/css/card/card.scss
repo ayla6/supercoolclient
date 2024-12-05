@@ -14,6 +14,7 @@
     display: flex;
     scroll-margin: 48px;
     flex-grow: 1;
+    min-width: 0;
 
     .content {
         background: $white;
