@@ -21,10 +21,18 @@ export async function profileRoute(currentUrl: string, loadedUrl: string) {
       params: { actor: atId },
     })
   ).data;
+  // load this just for the media thingie on the sidebar
+  await get("app.bsky.feed.getAuthorFeed", {
+    params: {
+      actor: profile.did,
+      filter: "posts_with_media",
+      limit: 4,
+    },
+  });
   if (window.location.pathname === currentUrl) {
     if (atId != profile.did) profileRedirect(profile.did);
     if (splitLoaded[1] != atId || splitLoaded[2] === "post")
-      atId = profilePage(profile);
+      profilePage(profile);
 
     profileUrlChange(currentUrl, loadedUrl);
   }
@@ -33,9 +41,11 @@ export async function profileRoute(currentUrl: string, loadedUrl: string) {
 export async function profileUrlChange(currentUrl: string, loadedUrl: string) {
   const splitUrl = currentUrl.split("/");
   const splitLoaded = loadedUrl.split("/");
-  const atId = splitUrl[1];
   const currentPlace = splitUrl[2] ?? "posts";
   const lastPlace = splitLoaded[2] ?? "posts";
+
+  const did = splitUrl[1];
+
   const content = document.getElementById("content");
   document
     .querySelector(
@@ -54,7 +64,7 @@ export async function profileUrlChange(currentUrl: string, loadedUrl: string) {
   const feed = feedConfig[currentPlace] ?? feedConfig.default;
   posts = await hydrateFeed(
     feed.endpoint ?? urlEquivalents[currentPlace][0],
-    feed.params(atId, currentPlace),
+    feed.params(did, currentPlace),
     forceReload,
     feed.type,
   );
@@ -70,25 +80,25 @@ export function profileTrim(currentUrl: string, loadedUrl: string) {
 const feedConfig = {
   following: {
     endpoint: "app.bsky.graph.getFollows",
-    params: (atId: string) => ({ actor: atId }),
+    params: (did: string) => ({ actor: did }),
     type: profileCard,
   },
   followers: {
     endpoint: "app.bsky.graph.getFollowers",
-    params: (atId: string) => ({ actor: atId }),
+    params: (did: string) => ({ actor: did }),
     type: profileCard,
   },
   search: {
     endpoint: "app.bsky.feed.searchPosts",
-    params: (atId: string) => ({
-      author: atId,
+    params: (did: string) => ({
+      author: did,
       q: decodeURIComponent(window.location.search).slice(1),
     }),
   },
   default: {
     endpoint: null,
-    params: (atId: string, place: string) => ({
-      actor: atId,
+    params: (did: string, place: string) => ({
+      actor: did,
       filter: urlEquivalents[place][1],
     }),
   },

@@ -3,7 +3,7 @@ import { manager } from "../../login";
 import { idchoose } from "../utils/id";
 import { elem } from "../utils/elem";
 import { processText } from "../utils/text_processing";
-import { get } from "../utils/cache";
+import { inCache } from "../utils/cache";
 
 export function profilePage(profile: AppBskyActorDefs.ProfileViewDetailed) {
   const container = document.getElementById("container");
@@ -33,8 +33,8 @@ export function profilePage(profile: AppBskyActorDefs.ProfileViewDetailed) {
           : "",
         navButton("following", did, "Following"),
         navButton("followers", did, "Followers"),
-        navButton("media", did, "Media"),
-        //await mediaNavButton("media", did, "Media"),
+        //navButton("media", did, "Media"),
+        mediaNavButton("media", did, "Media"),
       ]),
       sccprofile?.pinnedSearches && sccprofile.pinnedSearches.length > 0
         ? elem(
@@ -66,7 +66,7 @@ export function header(
   sccprofile?: SCCProfile.Record,
 ) {
   const handle = idchoose(profile);
-  const did = "/" + profile.did;
+  const did = profile.did;
   let customCss = `background-image:
     url(${profile.banner?.replace("img/banner", "img/feed_fullsize")});`;
   if (sccprofile != undefined) {
@@ -117,7 +117,7 @@ function navButton(name: string, did: string, text: string) {
   return button;
 }
 
-async function mediaNavButton(name: string, did: string, text: string) {
+function mediaNavButton(name: string, did: string, text: string) {
   const button = elem("a", {
     href: `/${did}${name === "posts" ? "" : "/" + name}`,
     innerHTML: text,
@@ -126,25 +126,35 @@ async function mediaNavButton(name: string, did: string, text: string) {
   const images = document.createElement("div");
   images.className = "images";
   button.append(images);
-  if (did) {
-    const { data } = await get("app.bsky.feed.getAuthorFeed", {
-      params: {
-        actor: did,
-        filter: "posts_with_media",
-        limit: 4,
-      },
-    });
+  const { data } = inCache("app.bsky.feed.getAuthorFeed", {
+    actor: did,
+    filter: "posts_with_media",
+    limit: 4,
+  });
+  if (data) {
     let imageCount = 0;
     for (const post of data.feed) {
-      if (post.post.embed && "images" in post.post.embed)
-        for (const image of post.post.embed.images) {
+      const embed =
+        post.post.embed.$type === "app.bsky.embed.recordWithMedia#view"
+          ? post.post.embed.media
+          : post.post.embed;
+      const type = embed.$type;
+      if (type === "app.bsky.embed.images#view") {
+        for (const image of embed.images) {
           const img = document.createElement("img");
-          img.src = image.thumb;
+          img.src = image.thumb.replace("@jpeg", "@webp");
           images.append(img);
-          imageCount++;
-          if (imageCount === 4) break;
+          if (++imageCount === 4) break;
         }
-      if (imageCount === 4) break;
+        if (imageCount === 4) break;
+      } else if (
+        embed.$type === "app.bsky.embed.video#view" &&
+        embed.thumbnail
+      ) {
+        const img = document.createElement("img");
+        img.src = embed.thumbnail.replace("@jpeg", "@webp");
+        images.append(img);
+      }
     }
   }
   return button;

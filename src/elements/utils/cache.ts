@@ -36,33 +36,29 @@ export async function get<K extends keyof Queries>(
       !forceReload &&
       cache[nsid] &&
       cache[nsid][paramsKey] &&
-      (specificParamsKey === paramsKey ||
-        cache[nsid][paramsKey][specificParamsKey])
+      cache[nsid][paramsKey][specificParamsKey]
     ) {
-      if (specificParamsKey === paramsKey) return cache[nsid][paramsKey];
-      else return cache[nsid][paramsKey][specificParamsKey];
+      return cache[nsid][paramsKey][specificParamsKey];
     } else {
       const result = await rpc.get(nsid, params);
       if (!cache[nsid]) cache[nsid] = {};
-      if (specificParamsKey === paramsKey)
-        cache[String(nsid)][specificParamsKey] = result;
-      else {
-        if (!cache[nsid][paramsKey]) cache[String(nsid)][paramsKey] = {};
-        cache[nsid][paramsKey][specificParamsKey] = result;
-      }
+      if (!cache[nsid][paramsKey]) cache[String(nsid)][paramsKey] = {};
+      cache[nsid][paramsKey][specificParamsKey] = result;
       return result;
     }
   }
 }
 
-export function inCache(nsid: keyof Queries, params: any) {
-  const paramsKey = JSON.stringify(noCursor(params));
+export function inCache<K extends keyof Queries>(
+  nsid: K,
+  params: any,
+): XRPCResponse<OutputOf<Queries[K]>> | null {
   const specificParamsKey = JSON.stringify(params);
-  return (
-    cache[nsid] &&
-    cache[nsid][paramsKey] &&
-    cache[nsid][paramsKey][specificParamsKey]
-  );
+  const paramsKey =
+    "cursor" in params ? JSON.stringify(noCursor(params)) : specificParamsKey;
+  if (cache[nsid] && cache[nsid][paramsKey])
+    return cache[nsid][paramsKey][specificParamsKey];
+  else return null;
 }
 
 export function deleteCache(nsid: keyof Queries) {

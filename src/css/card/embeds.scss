@@ -78,6 +78,11 @@ $border-total-width: 2px;
             margin-right: 0;
         }
     }
+
+    scrollbar-width: none;
+    ::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .video-container.no-controls {
