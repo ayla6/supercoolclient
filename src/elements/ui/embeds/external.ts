@@ -1,7 +1,7 @@
 import { AppBskyEmbedExternal } from "@atcute/client/lexicons";
 import { elem } from "../../blocks/elem";
 import { escapeHTML } from "../../blocks/text_processing";
-import { getProperSize, singleImageHeight } from "../../blocks/get_proper_size";
+import { getProperSize } from "../../blocks/get_proper_size";
 
 function gifClick(e: MouseEvent) {
   //i saw this on aglais but like this is  basically the only option right
@@ -25,8 +25,8 @@ export function loadEmbedExternal(
   if (url.hostname === "media.tenor.com") {
     const urlParams = new URLSearchParams(url.search);
     const aspectRatio = {
-      width: Number(urlParams.get("ww")),
-      height: Number(urlParams.get("hh")),
+      width: Number(urlParams.get("ww") ?? 1600),
+      height: Number(urlParams.get("hh") ?? 900),
     };
     const splitPathname = url.pathname.split("/");
     const newURL = `https://t.gifs.bsky.app/${splitPathname[1].slice(0, -2)}P3/${splitPathname[2]}`;
@@ -36,8 +36,7 @@ export function loadEmbedExternal(
       loop: true,
       muted: true,
     });
-    const properSize = getProperSize(aspectRatio, singleImageHeight);
-    gif.style.cssText = `aspect-ratio: ${aspectRatio.width}/${aspectRatio.height}; width: ${properSize.width}px`;
+    gif.style.cssText = getProperSize(aspectRatio, true);
     gif.addEventListener("click", gifClick);
     return [elem("div", { className: "media-container" }, [gif])];
   } else {

@@ -1,10 +1,6 @@
 import { AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { elem } from "../../blocks/elem";
-import {
-  getProperSize,
-  multiImageHeight,
-  singleImageHeight,
-} from "../../blocks/get_proper_size";
+import { getProperSize } from "../../blocks/get_proper_size";
 
 const forcePngFileTypes = ["webp", "gif"];
 export function image(
@@ -32,20 +28,13 @@ export function image(
 
   let thumbFileType = "webp";
   let thumbSize = "thumbnail";
-  const aspectRatio = image.aspectRatio ?? {
-    width: 1600,
-    height: 900,
-  };
 
-  const properSize = getProperSize(
-    aspectRatio,
-    isSingleImage ? singleImageHeight : multiImageHeight,
-  );
-  imageHolder.style.cssText =
-    `aspect-ratio: ${aspectRatio.width}/${aspectRatio.height}; width: ${properSize.width}px;` +
-    (isSingleImage ? "" : `height: ${properSize.height}px`);
-
-  if (aspectRatio && aspectRatio.width <= 1000 && aspectRatio.height <= 1000) {
+  imageHolder.style.cssText = getProperSize(image.aspectRatio, isSingleImage);
+  if (
+    image.aspectRatio &&
+    image.aspectRatio.width <= 1000 &&
+    image.aspectRatio.height <= 1000
+  ) {
     thumbSize = "fullsize";
     thumbFileType = fullFileType;
   }

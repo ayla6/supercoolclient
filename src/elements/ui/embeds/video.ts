@@ -1,7 +1,7 @@
 import Hls from "hls.js";
 import { AppBskyEmbedDefs, AppBskyEmbedVideo } from "@atcute/client/lexicons";
 import { elem } from "../../blocks/elem";
-import { getProperSize, singleImageHeight } from "../../blocks/get_proper_size";
+import { getProperSize } from "../../blocks/get_proper_size";
 
 function loadVideo(embed: AppBskyEmbedVideo.View, style?: string) {
   // stole from aglais!!
@@ -47,12 +47,8 @@ export function loadEmbedVideo(
   ]);
 
   const aspectRatio = viewEmbed.aspectRatio;
-  let style: string;
-  if (aspectRatio) {
-    const properSize = getProperSize(aspectRatio, singleImageHeight);
-    style = `aspect-ratio: ${viewEmbed.aspectRatio.width}/${viewEmbed.aspectRatio.height}; width: ${properSize.width}px`;
-    thumbnail.style.cssText = style;
-  }
+  let style: string = getProperSize(aspectRatio, false);
+  thumbnail.style.cssText = style;
 
   thumbnail.addEventListener("click", () => {
     videoContainer.append(loadVideo(viewEmbed, style));
