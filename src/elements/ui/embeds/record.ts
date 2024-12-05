@@ -19,6 +19,10 @@ export function loadEmbedRecord(
         uri: record.uri,
         embed: record.embeds?.[0],
         labels: record.labels,
+        likeCount: record.likeCount,
+        replyCount: record.replyCount,
+        repostCount: record.repostCount,
+        quoteCount: record.quoteCount,
       };
       return [postCard(post, false, false, true)];
     }

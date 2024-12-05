@@ -37,11 +37,10 @@ $multi-image-height: 220px;
 $border-total-width: 2px;
 
 .media-container {
-    $height: $image-height + $border-total-width;
     display: block;
     border: none;
     border-radius: 0;
-    max-height: $height;
+    max-height: $image-height + $border-total-width;
     max-width: 100%;
     > a,
     > .video-thumbnail,
@@ -58,7 +57,7 @@ $border-total-width: 2px;
         min-height: 30px;
 
         max-width: calc(100% - 2px);
-        max-height: $height;
+        max-height: $image-height;
 
         img,
         video {
@@ -74,6 +73,7 @@ $border-total-width: 2px;
     overflow-x: scroll;
     max-height: $multi-image-height + $border-total-width;
     > a {
+        max-height: $multi-image-height;
         margin-right: 4px;
         &:last-child {
             margin-right: 0;
