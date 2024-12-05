@@ -46,8 +46,7 @@ export function loadEmbedVideo(
     thumbnail,
   ]);
 
-  const aspectRatio = viewEmbed.aspectRatio;
-  let style: string = getProperSize(aspectRatio, false);
+  let style: string = getProperSize(viewEmbed.aspectRatio, false);
   thumbnail.style.cssText = style;
 
   thumbnail.addEventListener("click", () => {

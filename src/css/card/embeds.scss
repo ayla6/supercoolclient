@@ -75,6 +75,9 @@ $border-total-width: 2px;
 }
 .video-thumbnail {
     cursor: pointer;
+    img {
+        object-fit: contain;
+    }
     .play-button {
         $size: 32px;
         $padding: 15px;
