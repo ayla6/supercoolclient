@@ -69,7 +69,7 @@ $border-total-width: 2px;
     display: flex;
     overflow-x: scroll;
     max-height: $multi-image-height + $border-total-width;
-    img {
+    > a {
         margin-right: 4px;
         &:last-child {
             margin-right: 0;
