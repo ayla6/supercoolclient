@@ -1,18 +1,23 @@
+@use "card_variables" as *;
+
 .profile {
+    .content {
+        min-height: $large-pfp-size + ($pfp-margin * 2) - ($content-padding * 2);
+    }
+
     .bio {
         font-size: 12px;
         line-height: 14px;
-        min-height: 42px;
-        max-height: 42px;
         overflow-y: hidden;
         text-overflow: ellipsis;
     }
 
-    .handle {
-        font-weight: 700;
-    }
-
     .header {
         font-size: 13px;
+        word-break: break-word;
+    }
+
+    .handle {
+        font-weight: 700;
     }
 }

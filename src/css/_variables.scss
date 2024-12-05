@@ -1,4 +1,4 @@
-@use "sass:math";
+$border-width: 1px;
 
 // Colors
 $white: #fff;
@@ -12,16 +12,6 @@ $container-color: rgba(255, 255, 255, 0.3);
 $serif: georgia, serif;
 $border-radius: 4px;
 $content-width: 520px;
-$border: 1px solid rgba(0, 0, 0, 0.1);
+$border: $border-width solid rgba(0, 0, 0, 0.1);
 
 $navbar-height: 40px;
-
-// Posts and replies
-$pfp-margin: 3px;
-$post-pfp-size: 48px;
-$reply-pfp-size: 32px;
-$speech-bubble-margin: 8px;
-$string-width: 2px;
-$string-margin: ($reply-pfp-size + $pfp-margin) * 0.5 +
-    math.div($string-width, 2);
-$speech-bubble-height: 16px;

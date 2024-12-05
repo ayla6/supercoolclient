@@ -2,7 +2,11 @@ import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { idchoose } from "../utils/id";
 import { manager, rpc } from "../../login";
 import { elem } from "../utils/elem";
-import { escapeHTML, processRichText } from "../utils/text_processing";
+import {
+  encodeQuery,
+  escapeHTML,
+  processRichText,
+} from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
 import { setPreloaded } from "../../routes/post";
 import { handleEmbed } from "./embeds/embed_handlers";
@@ -174,6 +178,17 @@ export function postCard(
   }
   content.append(postContent);
 
+  if (record.tags) {
+    const tags = record.tags.map((tag) =>
+      elem("a", {
+        className: "label",
+        innerHTML: "#" + escapeHTML(tag),
+        href: `/search?tag=${encodeQuery(tag)}`,
+      }),
+    );
+    content.append(elem("div", { className: "label-area" }, tags));
+  }
+
   if (fullView) {
     let warnings = [];
     if (
@@ -181,14 +196,14 @@ export function postCard(
       Math.abs(indexedAt.getTime() - createdAt.getTime()) > 250000
     ) {
       warnings.push(
-        elem("div", {
-          className: "warning",
-          innerText: `Archived from ${formatDate(createdAt)}`,
+        elem("span", {
+          className: "label",
+          innerHTML: `Archived from ${formatDate(createdAt)}`,
         }),
       );
     }
-    if (warnings)
-      content.append(elem("div", { className: "warnings" }, warnings));
+    if (warnings.length)
+      content.append(elem("div", { className: "label-area" }, warnings));
   }
 
   if (record.text && "langs" in record && record.langs[0] != "en")

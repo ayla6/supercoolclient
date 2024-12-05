@@ -1,6 +1,6 @@
 @use "icons" as icon;
 @use "../variables" as *;
-@use "sass:math";
+@use "card_variables" as *;
 
 .post {
     .left-area {
@@ -19,14 +19,26 @@
         content: "";
         display: block;
         position: relative;
-        width: 12px;
+        width: $large-pfp-right-margin;
         height: $speech-bubble-height;
-        left: 50px;
-        bottom: 32px;
+        left: $large-pfp-size + 2px;
+        bottom: ($large-pfp-size + $speech-bubble-height) * 0.5;
     }
 
     .timestamp {
         color: #999;
+    }
+
+    .label-area {
+        margin-top: 3px;
+    }
+
+    .label {
+        background-color: $lighter-grey;
+        border-radius: 8px;
+        display: inline-block;
+        font-size: 12px;
+        padding: 2px 6px;
     }
 }
 
@@ -119,7 +131,7 @@
 
     $size: 12px;
     font-size: $size;
-    margin-right: math.div($size, 2);
+    margin-right: $size * 0.5;
     .icon {
         display: inline-block;
         width: $size;
@@ -160,7 +172,7 @@
     .interaction {
         $size: 14px;
         font-size: 14px;
-        margin-right: math.div($size, 2);
+        margin-right: $size * 0.5;
         .icon {
             height: $size;
             width: $size;
@@ -236,7 +248,7 @@
     .interaction {
         $size: 14px;
         font-size: 14px;
-        margin-right: math.div($size, 2);
+        margin-right: $size * 0.5;
         .icon {
             height: $size;
             width: $size;
@@ -245,7 +257,7 @@
     .post.full .interaction {
         $size: 16px;
         font-size: 16px;
-        margin-right: math.div($size, 2);
+        margin-right: $size * 0.5;
         .icon {
             height: $size;
             width: $size;

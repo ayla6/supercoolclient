@@ -1,30 +1,9 @@
 @use "../variables" as *;
-@use "sass:math";
+@use "card_variables" as *;
 
-.post .reply-string {
+.left-area .reply-string {
     flex-grow: 1;
-    margin: 0 auto;
-}
-
-.reply-container {
-    display: flex;
-    flex-flow: row;
-
-    .pfp-holder {
-        margin: $pfp-margin $speech-bubble-margin $pfp-margin $pfp-margin;
-    }
-
-    .pfp-holder,
-    .pfp {
-        width: $reply-pfp-size;
-        height: $reply-pfp-size;
-    }
-
-    .pfp-holder::after {
-        width: $speech-bubble-margin;
-        left: $reply-pfp-size + $pfp-margin;
-        bottom: math.div(($reply-pfp-size + $speech-bubble-height), 2);
-    }
+    margin-left: $large-string-margin;
 }
 
 .string-container {
@@ -34,22 +13,44 @@
     }
 }
 .reply-string {
-    margin: 0 $string-margin;
-    border: math.div($string-width, 2) solid $lighter-grey;
+    margin-left: $reply-string-margin;
+    width: $string-width;
+    background-color: $lighter-grey;
     &.transparent {
         border-color: transparent;
     }
 }
 .reply-container .post .reply-string {
-    margin-left: $string-margin;
+    margin-left: $reply-string-margin;
+}
+
+.reply-container {
+    display: flex;
+    flex-flow: row;
+
+    .pfp-holder {
+        margin: $pfp-margin $reply-pfp-right-margin $pfp-margin $pfp-margin;
+    }
+
+    .pfp-holder,
+    .pfp {
+        width: $reply-pfp-size;
+        height: $reply-pfp-size;
+    }
+
+    .pfp-holder::after {
+        width: $reply-pfp-right-margin;
+        left: $reply-pfp-size + 2px;
+        bottom: ($reply-pfp-size + $speech-bubble-height) * 0.5;
+    }
 }
 
 .connect-string {
     position: absolute;
-    margin-left: $string-margin;
-    border: 1px solid $lighter-grey;
+    margin-left: $reply-string-margin;
+    border: $border-width solid $lighter-grey;
     border-width: 0 0 $string-width $string-width;
-    width: $string-margin;
-    height: math.div($reply-pfp-size, 2) + $pfp-margin;
-    border-radius: 0 0 0 $string-margin;
+    width: $reply-string-margin;
+    height: ($reply-pfp-size * 0.5) + $pfp-margin;
+    border-radius: 0 0 0 $reply-string-margin;
 }

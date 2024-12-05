@@ -8,9 +8,11 @@ const map: { [key: string]: string } = {
   "'": "&apos;",
   '"': "&quot;",
 };
+
 export function escapeHTML(input: string): string {
   return input.replaceAll(/[<>&"']/g, (m) => map[m]);
 }
+
 export function processText(input: string = ""): string {
   return input
     .replaceAll(/[<>&]/g, (m) => map[m])
@@ -18,6 +20,7 @@ export function processText(input: string = ""): string {
     .replaceAll(/`(.*?)`/g, "<code>$1</code>")
     .replaceAll(/\n/g, "<br/>");
 }
+
 export function processRichText(text: string, facets: Facet[]) {
   let processed: string = "";
   const segmentText = segmentize(text, facets);
@@ -43,4 +46,12 @@ export function processRichText(text: string, facets: Facet[]) {
     else processed += text;
   }
   return processed;
+}
+
+export function encodeQuery(query: string) {
+  return encodeURIComponent(query).replaceAll("%20", "+");
+}
+
+export function decodeQuery(query: string) {
+  return decodeURIComponent(query.replaceAll("+", "%20"));
 }
