@@ -2,7 +2,11 @@ import { elem } from "../../blocks/elem";
 import { escapeHTML } from "../../blocks/text_processing";
 import { AppBskyEmbedRecord } from "@atcute/client/lexicons";
 
-export function loadEmbedRecord(embed: AppBskyEmbedRecord.Main, did: string) {
+export function loadEmbedRecord(
+  embed: AppBskyEmbedRecord.Main,
+  viewEmbed: AppBskyEmbedRecord.View,
+  did: string,
+) {
   const uri = embed.record.uri.split("/");
   return [
     elem("a", {

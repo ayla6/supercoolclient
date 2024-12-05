@@ -138,21 +138,27 @@ export function postCard(
       ]),
     );
   }
-  if (record.text)
+  if (record.text) {
     content.append(
       elem("div", {
         className: "post-content",
         innerHTML: processRichText(record.text, record.facets),
       }),
     );
-  if (record.embed)
+  }
+  if (record.embed) {
     content.append(
       elem(
         "div",
         { className: "embeds" },
-        embedHandlers[record.embed.$type](record.embed as any, authorDid),
+        embedHandlers[record.embed.$type](
+          record.embed as any,
+          post.embed as any,
+          authorDid,
+        ),
       ),
     );
+  }
 
   if (fullView) {
     let warnings = [];

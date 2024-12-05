@@ -4,10 +4,15 @@ import { embedHandlers } from "./embed_handlers";
 
 export function loadEmbedRecordWithMedia(
   embed: AppBskyEmbedRecordWithMedia.Main,
+  viewEmbed: AppBskyEmbedRecordWithMedia.View,
   did: string,
 ) {
   return [
-    embedHandlers[embed.media.$type]?.(embed.media as any, did)[0],
-    loadEmbedRecord(embed.record, did)[0],
+    embedHandlers[embed.media.$type]?.(
+      embed.media as any,
+      viewEmbed.media as any,
+      did,
+    )[0],
+    loadEmbedRecord(embed.record, viewEmbed.record, did)[0],
   ];
 }
