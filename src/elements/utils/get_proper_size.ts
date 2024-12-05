@@ -1,7 +1,8 @@
 import { AppBskyEmbedDefs } from "@atcute/client/lexicons";
 
-const singleImageHeight = 322;
-const multiImageHeight = 222;
+const borderWidth = 2;
+const singleImageHeight = 320;
+const multiImageHeight = 220;
 
 export function getProperSize(
   size: AppBskyEmbedDefs.AspectRatio = {

@@ -26,9 +26,12 @@ function loadVideo(embed: AppBskyEmbedVideo.View, style?: string) {
     autoplay: true,
     loop: true,
   });
-  if (style) videoElem.style.cssText = style;
   hls.attachMedia(videoElem);
-  return videoElem;
+  const videoContainer = elem("div", { className: "video-container" }, [
+    videoElem,
+  ]);
+  if (style) videoContainer.style.cssText = style;
+  return videoContainer;
 }
 
 export function loadEmbedVideo(

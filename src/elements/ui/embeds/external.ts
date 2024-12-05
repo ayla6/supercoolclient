@@ -30,15 +30,18 @@ export function loadEmbedExternal(
     };
     const splitPathname = url.pathname.split("/");
     const newURL = `https://t.gifs.bsky.app/${splitPathname[1].slice(0, -2)}P3/${splitPathname[2]}`;
-    const gif = elem("video", {
+    const video = elem("video", {
       src: newURL,
       autoplay: true,
       loop: true,
       muted: true,
     });
-    gif.style.cssText = getProperSize(aspectRatio, true);
-    gif.addEventListener("click", gifClick);
-    return [elem("div", { className: "media-container" }, [gif])];
+    video.addEventListener("click", gifClick);
+    const videoContainer = elem("div", { className: "video-container" }, [
+      video,
+    ]);
+    videoContainer.style.cssText = getProperSize(aspectRatio, true);
+    return [elem("div", { className: "media-container" }, [videoContainer])];
   } else {
     const card = elem("a", { href: embed.external.uri, className: "external" });
     if (viewEmbed.external.thumb)

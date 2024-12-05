@@ -1,5 +1,6 @@
 @use "icons" as icon;
 @use "../variables" as *;
+@use "sass:math";
 
 .post {
     .left-area {
@@ -44,12 +45,6 @@
     }
 }
 
-.stats-buttons {
-    display: flex;
-    justify-content: space-between;
-    width: 80%;
-}
-
 .post .header {
     display: flex;
     flex-flow: row;
@@ -90,15 +85,17 @@
     }
 }
 
+.stats-buttons {
+    display: flex;
+}
+
 .interaction {
     background: none;
     border: none;
     color: $dark-grey;
     cursor: pointer;
     display: inline-block;
-    font-size: 12px;
     line-height: 14px;
-    margin-right: 6px;
     padding: 0;
 
     &:hover {
@@ -109,16 +106,18 @@
         vertical-align: middle;
     }
 
+    $size: 12px;
+    font-size: $size;
+    margin-right: math.div($size, 2);
     .icon {
+        display: inline-block;
+        width: $size;
+        height: $size;
         background-size: contain;
         background-position: center;
         background-repeat: no-repeat;
-        cursor: pointer;
-        display: inline-block;
-        height: 12px;
-        margin-right: 2px;
         vertical-align: sub;
-        width: 12px;
+        margin-right: 2px;
     }
 }
 
@@ -148,11 +147,12 @@
     }
 
     .interaction {
+        $size: 14px;
         font-size: 14px;
-
+        margin-right: math.div($size, 2);
         .icon {
-            height: 14px;
-            width: 14px;
+            height: $size;
+            width: $size;
         }
     }
 
@@ -223,12 +223,21 @@
 
 @media (max-width: 920px) {
     .interaction {
+        $size: 14px;
         font-size: 14px;
-        margin: 0;
-
+        margin-right: math.div($size, 2);
         .icon {
-            height: 14px;
-            width: 14px;
+            height: $size;
+            width: $size;
+        }
+    }
+    .post.full .interaction {
+        $size: 16px;
+        font-size: 16px;
+        margin-right: math.div($size, 2);
+        .icon {
+            height: $size;
+            width: $size;
         }
     }
 }

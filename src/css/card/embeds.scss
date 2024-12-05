@@ -40,19 +40,21 @@ $border-total-width: 2px;
     max-height: $height;
     max-width: 100%;
     > a,
-    > .video-thumbnail {
+    > .video-thumbnail,
+    > .video-container {
         position: relative;
         display: inline-block;
         line-height: 0;
         flex-shrink: 0;
         margin-right: 4px;
 
-        border-radius: $border-radius;
+        border: 1px solid $light-grey;
+        border-radius: $border-radius + 1px;
 
         min-width: 30px;
         min-height: 30px;
 
-        max-width: 100%;
+        max-width: calc(100% - 2px);
         max-height: $height;
 
         &:last-child {
@@ -61,24 +63,19 @@ $border-total-width: 2px;
     }
     img,
     video {
-        box-sizing: border-box;
-        border: 1px solid $light-grey;
         border-radius: $border-radius;
         width: 100%;
         height: 100%;
+        object-fit: contain;
     }
 }
 .media-container.multi {
     display: flex;
     overflow-x: scroll;
-    $height: $multi-image-height + $border-total-width;
-    max-height: $height;
+    max-height: $multi-image-height + $border-total-width;
 }
 .video-thumbnail {
     cursor: pointer;
-    img {
-        object-fit: contain;
-    }
     .play-button {
         $size: 32px;
         $padding: 15px;
