@@ -1,4 +1,5 @@
 @use "../variables" as *;
+@use "sass:math";
 
 .embeds {
     display: block;
@@ -81,7 +82,7 @@ $border-total-width: 2px;
     .play-button {
         $size: 32px;
         $padding: 15px;
-        $half-size: $size / 2 + $padding;
+        $half-size: math.div($size, 2) + $padding;
 
         display: block;
 

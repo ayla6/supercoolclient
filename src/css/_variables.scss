@@ -1,4 +1,6 @@
-//Colors
+@use "sass:math";
+
+// Colors
 $white: #fff;
 $dark-grey: #333;
 $darkish-grey: #666;
@@ -14,11 +16,12 @@ $border: 1px solid rgba(0, 0, 0, 0.1);
 
 $navbar-height: 40px;
 
-//Posts and replies
+// Posts and replies
 $pfp-margin: 3px;
 $post-pfp-size: 48px;
 $reply-pfp-size: 32px;
 $speech-bubble-margin: 8px;
 $string-width: 2px;
-$string-margin: ($reply-pfp-size + $pfp-margin) * 0.5 + ($string-width / 2);
+$string-margin: ($reply-pfp-size + $pfp-margin) * 0.5 +
+    math.div($string-width, 2);
 $speech-bubble-height: 16px;

@@ -1,4 +1,5 @@
 @use "../variables" as *;
+@use "sass:math";
 
 .post .reply-string {
     flex-grow: 1;
@@ -22,7 +23,7 @@
     .pfp-holder::after {
         width: $speech-bubble-margin;
         left: $reply-pfp-size + $pfp-margin;
-        bottom: ($reply-pfp-size + $speech-bubble-height) / 2;
+        bottom: math.div(($reply-pfp-size + $speech-bubble-height), 2);
     }
 }
 
@@ -34,7 +35,7 @@
 }
 .reply-string {
     margin: 0 $string-margin;
-    border: ($string-width / 2) solid $lighter-grey;
+    border: math.div($string-width, 2) solid $lighter-grey;
     &.transparent {
         border-color: transparent;
     }
@@ -49,6 +50,6 @@
     border: 1px solid $lighter-grey;
     border-width: 0 0 $string-width $string-width;
     width: $string-margin;
-    height: ($reply-pfp-size / 2) + $pfp-margin;
+    height: math.div($reply-pfp-size, 2) + $pfp-margin;
     border-radius: 0 0 0 $string-margin;
 }
