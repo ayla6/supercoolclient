@@ -46,9 +46,10 @@ export async function postRoute(currentUrl: string, loadedUrl: string) {
   if ("post" in postThread.thread) {
     if (preloadedPost) Object.assign(preloadedPost, postThread.thread.post);
     if (!cache["app.bsky.feed.getPosts"]) cache["app.bsky.feed.getPosts"] = {};
-    cache["app.bsky.feed.getPosts"][
-      `{"uris":["at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}"]}`
-    ] = { data: { posts: [postThread.thread.post] } };
+    const params = `{"uris":["at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}"]}`;
+    cache["app.bsky.feed.getPosts"][params] = {
+      [params]: { data: { posts: [postThread.thread.post] } },
+    };
   }
   preloadedPost = null;
 
