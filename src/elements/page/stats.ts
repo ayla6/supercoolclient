@@ -1,5 +1,5 @@
-import { get } from "../blocks/cache";
-import { elem } from "../blocks/elem";
+import { get } from "../utils/cache";
+import { elem } from "../utils/elem";
 import { feedNSID, hydrateFeed } from "../content/feed";
 import { postCard } from "../ui/post_card";
 import { stickyHeader } from "../ui/sticky_header";

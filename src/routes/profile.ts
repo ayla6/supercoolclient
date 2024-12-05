@@ -1,4 +1,4 @@
-import { get } from "../elements/blocks/cache";
+import { get } from "../elements/utils/cache";
 import { profileRedirect } from "../router";
 import { feedNSID, hydrateFeed } from "../elements/content/feed";
 import { profilePage } from "../elements/page/profile";

@@ -1,4 +1,4 @@
-import { elem } from "../blocks/elem";
+import { elem } from "../utils/elem";
 
 export function stickyHeader(title: string) {
   return elem("div", { className: "sticky-header" }, [

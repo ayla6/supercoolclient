@@ -1,6 +1,6 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
-import { cache, get } from "../elements/blocks/cache";
-import { elem } from "../elements/blocks/elem";
+import { cache, get } from "../elements/utils/cache";
+import { elem } from "../elements/utils/elem";
 import { postCard } from "../elements/ui/post_card";
 import { rpc } from "../login";
 import { loadThread } from "../elements/page/thread";

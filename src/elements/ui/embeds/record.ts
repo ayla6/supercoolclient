@@ -1,5 +1,5 @@
-import { elem } from "../../blocks/elem";
-import { escapeHTML } from "../../blocks/text_processing";
+import { elem } from "../../utils/elem";
+import { escapeHTML } from "../../utils/text_processing";
 import { AppBskyEmbedRecord } from "@atcute/client/lexicons";
 
 export function loadEmbedRecord(

@@ -1,7 +1,7 @@
 import { AppBskyActorDefs, Brand } from "@atcute/client/lexicons";
-import { elem } from "../blocks/elem";
-import { idchoose } from "../blocks/id";
-import { processText } from "../blocks/text_processing";
+import { elem } from "../utils/elem";
+import { idchoose } from "../utils/id";
+import { processText } from "../utils/text_processing";
 
 export function profileCard(profile: AppBskyActorDefs.ProfileView) {
   const profileDid = profile.did;
@@ -13,7 +13,6 @@ export function profileCard(profile: AppBskyActorDefs.ProfileView) {
         elem("img", {
           className: "pfp",
           src: profile.avatar,
-          loading: "lazy",
         }),
       ]),
     ]),

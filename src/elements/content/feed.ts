@@ -1,4 +1,4 @@
-import { get, inCache } from "../blocks/cache";
+import { get, inCache } from "../utils/cache";
 import { postCard } from "../ui/post_card";
 
 export type feedNSID =

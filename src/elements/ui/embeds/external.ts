@@ -1,7 +1,7 @@
 import { AppBskyEmbedExternal } from "@atcute/client/lexicons";
-import { elem } from "../../blocks/elem";
-import { escapeHTML } from "../../blocks/text_processing";
-import { getProperSize } from "../../blocks/get_proper_size";
+import { elem } from "../../utils/elem";
+import { escapeHTML } from "../../utils/text_processing";
+import { getProperSize } from "../../utils/get_proper_size";
 
 function gifClick(e: MouseEvent) {
   //i saw this on aglais but like this is  basically the only option right

@@ -1,7 +1,7 @@
 import Hls from "hls.js";
 import { AppBskyEmbedDefs, AppBskyEmbedVideo } from "@atcute/client/lexicons";
-import { elem } from "../../blocks/elem";
-import { getProperSize } from "../../blocks/get_proper_size";
+import { elem } from "../../utils/elem";
+import { getProperSize } from "../../utils/get_proper_size";
 
 function loadVideo(embed: AppBskyEmbedVideo.View, style?: string) {
   // stole from aglais!!

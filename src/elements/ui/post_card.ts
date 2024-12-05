@@ -1,9 +1,9 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
-import { idchoose } from "../blocks/id";
+import { idchoose } from "../utils/id";
 import { manager, rpc } from "../../login";
-import { elem } from "../blocks/elem";
-import { escapeHTML, processRichText } from "../blocks/text_processing";
-import { formatDate, formatTimeDifference } from "../blocks/date";
+import { elem } from "../utils/elem";
+import { escapeHTML, processRichText } from "../utils/text_processing";
+import { formatDate, formatTimeDifference } from "../utils/date";
 import { setPreloaded } from "../../routes/post";
 import { embedHandlers } from "./embeds/embed_handlers";
 
@@ -41,7 +41,6 @@ export function postCard(
       elem("img", {
         className: "pfp",
         src: post.author.avatar,
-        loading: "lazy",
       }),
     ]),
   ]);

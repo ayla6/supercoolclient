@@ -1,6 +1,6 @@
-import { get } from "../elements/blocks/cache";
-import { elem } from "../elements/blocks/elem";
-import { escapeHTML } from "../elements/blocks/text_processing";
+import { get } from "../elements/utils/cache";
+import { elem } from "../elements/utils/elem";
+import { escapeHTML } from "../elements/utils/text_processing";
 import { hydrateFeed } from "../elements/content/feed";
 
 let currentFeed: string;

@@ -1,6 +1,6 @@
 import { AppBskyEmbedImages } from "@atcute/client/lexicons";
-import { elem } from "../../blocks/elem";
-import { getProperSize } from "../../blocks/get_proper_size";
+import { elem } from "../../utils/elem";
+import { getProperSize } from "../../utils/get_proper_size";
 
 const forcePngFileTypes = ["webp", "gif"];
 export function image(

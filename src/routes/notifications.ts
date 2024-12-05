@@ -1,4 +1,4 @@
-import { get } from "../elements/blocks/cache";
+import { get } from "../elements/utils/cache";
 
 export async function notificationsRoute(
   currentURL: string,

@@ -1,5 +1,5 @@
 import { manager, rpc } from "../../login";
-import { elem } from "../blocks/elem";
+import { elem } from "../utils/elem";
 
 function navButton(text: string, link: string, icon?: string) {
   const button = document.createElement("a");

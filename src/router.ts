@@ -18,12 +18,12 @@
 import { profileRoute, profileTrim, profileURLChange } from "./routes/profile";
 import { homeRoute, homeURLChange } from "./routes/home";
 import { postRoute } from "./routes/post";
-import { elem } from "./elements/blocks/elem";
+import { elem } from "./elements/utils/elem";
 import { notificationsRoute } from "./routes/notifications";
 import { likesRoute } from "./routes/likes";
 import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
-import { deleteCache } from "./elements/blocks/cache";
+import { deleteCache } from "./elements/utils/cache";
 
 let loadedURL: string = "";
 

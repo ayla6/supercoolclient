@@ -3,7 +3,7 @@ import {
   AppBskyFeedGetPostThread,
 } from "@atcute/client/lexicons";
 import { postCard } from "../ui/post_card";
-import { elem } from "../blocks/elem";
+import { elem } from "../utils/elem";
 import { Brand } from "@atcute/client/lexicons";
 import { setPreloaded } from "../../routes/post";
 
