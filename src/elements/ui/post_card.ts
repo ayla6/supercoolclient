@@ -14,7 +14,7 @@ export function postCard(
     | AppBskyFeedDefs.ThreadViewPost,
   fullView = false,
   hasReplies = false,
-  embed = false,
+  isEmbed = false,
 ) {
   const post: AppBskyFeedDefs.PostView =
     "post" in postHousing ? postHousing.post : postHousing;
@@ -46,14 +46,14 @@ export function postCard(
     ]),
   ]);
 
-  if (embed) {
+  if (isEmbed) {
     header.append(
-      elem("div", {}, [
-        profilePicture,
-        elem("a", { className: "handle-area", href: authorHref }, [
-          elem("span", { className: "handle", innerHTML: atId }),
-        ]),
+      //elem("div", {}, [
+      //profilePicture,
+      elem("a", { className: "handle-area", href: authorHref }, [
+        elem("span", { className: "handle", innerHTML: atId }),
       ]),
+      //]),
       elem("a", {
         className: "timestamp",
         href: href,
@@ -138,7 +138,7 @@ export function postCard(
   if ("reply" in postHousing) {
     const replyTo = postHousing.reply.parent;
     content.append(
-      elem("span", { className: "small", innerHTML: "Reply to " }, [
+      elem("span", { className: "small reply-to", innerHTML: "Reply to " }, [
         elem("a", {
           innerHTML:
             replyTo.$type === "app.bsky.feed.defs#postView"
@@ -153,16 +153,18 @@ export function postCard(
       ]),
     );
   }
+
+  const postContent = elem("div", { className: "post-content" });
   if (record.text) {
-    content.append(
+    postContent.append(
       elem("div", {
-        className: "post-content",
+        className: "text-content",
         innerHTML: processRichText(record.text, record.facets),
       }),
     );
   }
   if (record.embed) {
-    content.append(
+    postContent.append(
       elem(
         "div",
         { className: "embeds" },
@@ -170,6 +172,7 @@ export function postCard(
       ),
     );
   }
+  content.append(postContent);
 
   if (fullView) {
     let warnings = [];
@@ -199,7 +202,7 @@ export function postCard(
           ),
       }),
     );
-  content.append(footer);
+  if (!isEmbed) content.append(footer);
 
   if (fullView) {
     const stats = [
