@@ -44,12 +44,12 @@ export function loadEmbedExternal(
     return [elem("div", { className: "media-container" }, [videoContainer])];
   } else {
     const card = elem("a", { href: embed.external.uri, className: "external" });
-    if (viewEmbed.external.thumb)
-      card.append(
-        elem("div", { className: "image" }, [
-          elem("img", { src: viewEmbed.external.thumb }),
-        ]),
-      );
+    if (viewEmbed.external.thumb) {
+      const image = elem("div", { className: "image" }, [
+        elem("img", { src: viewEmbed.external.thumb }),
+      ]);
+      card.append(image);
+    }
     card.append(
       elem("div", { className: "text" }, [
         elem("span", {
