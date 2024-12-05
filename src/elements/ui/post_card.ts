@@ -215,7 +215,7 @@ export function postCard(
       content.append(elem("div", { className: "stats" }, stats));
   }
 
-  if (post.viewer)
+  if (!isEmbed)
     content.append(
       elem("div", { className: "stats-buttons" }, [
         interactionButton("reply", post),
@@ -264,6 +264,7 @@ function interactionButton(
   type: "reply" | "like" | "repost" | "quote",
   post: AppBskyFeedDefs.PostView,
 ) {
+  const hasViewer = "viewer" in post;
   let count: number = post[type + "Count"];
 
   const countSpan = elem("span", { innerHTML: count.toLocaleString() });
@@ -275,18 +276,19 @@ function interactionButton(
   button.setAttribute("role", "button");
 
   if (type === "like" || type === "repost") {
-    let isActive = Boolean(manager.session && post.viewer[type]);
+    let isActive = Boolean(hasViewer ? post.viewer[type] : false);
     button.classList.toggle("active", isActive);
 
-    button.addEventListener(
-      "click",
-      manager.session
-        ? async () => {
-            isActive = !isActive;
-            await updateInteraction(isActive, post, type, countSpan, button);
-          }
-        : async () => {},
-    );
+    if (hasViewer)
+      button.addEventListener(
+        "click",
+        manager.session
+          ? async () => {
+              isActive = !isActive;
+              await updateInteraction(isActive, post, type, countSpan, button);
+            }
+          : async () => {},
+      );
   }
 
   return button;

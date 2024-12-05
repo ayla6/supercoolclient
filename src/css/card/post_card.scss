@@ -60,7 +60,7 @@
     flex-flow: row;
     justify-content: space-between;
     font-size: 12px;
-    line-height: 12px;
+    //line-height: 12px;
     //margin-bottom: 2px;
 
     .handle {
@@ -88,10 +88,11 @@
         border-radius: 2px;
         display: inline-block;
         height: 11px;
+        line-height: 12px;
         margin-right: 3px;
         padding: 0px 4px;
         padding-top: 1px;
-        vertical-align: top;
+        //vertical-align: top;
     }
 }
 
