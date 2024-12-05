@@ -1,6 +1,6 @@
 import { AppBskyEmbedRecordWithMedia } from "@atcute/client/lexicons";
 import { loadEmbedRecord } from "./record";
-import { embedHandlers } from "./embed_handlers";
+import { handleEmbed } from "./embed_handlers";
 
 export function loadEmbedRecordWithMedia(
   embed: AppBskyEmbedRecordWithMedia.Main,
@@ -8,11 +8,7 @@ export function loadEmbedRecordWithMedia(
   did: string,
 ) {
   return [
-    embedHandlers[embed.media.$type]?.(
-      embed.media as any,
-      viewEmbed.media as any,
-      did,
-    )[0],
+    handleEmbed(embed.media as any, viewEmbed.media as any, did)[0],
     loadEmbedRecord(embed.record, viewEmbed.record, did)[0],
   ];
 }

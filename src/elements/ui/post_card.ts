@@ -5,7 +5,7 @@ import { elem } from "../utils/elem";
 import { escapeHTML, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
 import { setPreloaded } from "../../routes/post";
-import { embedHandlers } from "./embeds/embed_handlers";
+import { handleEmbed } from "./embeds/embed_handlers";
 
 export function postCard(
   postHousing:
@@ -166,11 +166,7 @@ export function postCard(
       elem(
         "div",
         { className: "embeds" },
-        embedHandlers[record.embed.$type](
-          record.embed as any,
-          post.embed as any,
-          authorDid,
-        ),
+        handleEmbed(record.embed as any, post.embed as any, authorDid),
       ),
     );
   }
