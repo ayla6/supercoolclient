@@ -135,7 +135,8 @@ export function loadThread(
           } else if (post.post.replyCount && !post.replies) {
             const splitURI = post.post.uri.split("/");
             const continueThreadContainer = elem("div", {
-              className: "reply-container",
+              className:
+                "reply-container" + (stringMargin ? " added-margin" : ""),
             });
             continueThreadContainer.append(
               ...strings.map(getString),
