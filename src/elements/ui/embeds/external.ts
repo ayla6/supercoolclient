@@ -24,10 +24,12 @@ export function loadEmbedExternal(
           innerHTML: escapeHTML(embed.external.title || embed.external.uri),
           className: "title",
         }),
-        elem("span", {
-          innerHTML: escapeHTML(embed.external.description),
-          className: "description",
-        }),
+        embed.external.description
+          ? elem("span", {
+              innerHTML: escapeHTML(embed.external.description),
+              className: "description",
+            })
+          : "",
         elem("span", {
           innerHTML: escapeHTML(new URL(embed.external.uri).host),
           className: "small",
