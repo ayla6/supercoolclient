@@ -27,9 +27,7 @@ export function loadThread(
         currentThread.parent.$type === "app.bsky.feed.defs#threadViewPost"
       ) {
         currentThread = currentThread.parent;
-        mainThreadPosts.prepend(
-          postCard(currentThread.post, false, currentThread !== thread.parent),
-        );
+        mainThreadPosts.prepend(postCard(currentThread.post, false, true));
       }
       if (
         currentThread.parent &&

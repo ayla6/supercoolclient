@@ -137,10 +137,14 @@ $border-total-width: 2px;
         width: 100%;
         height: 100%;
         object-fit: cover;
+        vertical-align: bottom;
     }
 
     .text {
         padding: 6px;
+        display: flex;
+        flex-flow: column;
+        gap: 3px;
     }
 
     span {
@@ -155,11 +159,9 @@ $border-total-width: 2px;
 
     .description {
         font-size: 13px;
-        margin: 3px 0;
     }
 
     .small {
-        margin-top: 3px;
         border-top: 1px solid $light-grey;
     }
 }
