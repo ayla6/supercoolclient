@@ -1,12 +1,13 @@
 @use "../variables" as *;
 
 // Posts and replies
-$pfp-margin: 3px;
+$pfp-margin: 0px;
 $large-pfp-size: 48px;
 $reply-pfp-size: 32px;
 $large-pfp-right-margin: 10px;
 $reply-pfp-right-margin: 8px;
 $string-width: 2px;
+$string-pfp-margin: 3px;
 $large-string-margin: ($large-pfp-size - $string-width) * 0.5 +
     ($border-width + $pfp-margin);
 $reply-string-margin: ($reply-pfp-size - $string-width) * 0.5 +

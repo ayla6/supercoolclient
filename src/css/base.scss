@@ -37,7 +37,7 @@ a {
 #content {
     display: flex;
     flex-flow: column;
-    width: 595px;
+    width: 594px;
     margin-left: auto;
 }
 
@@ -150,15 +150,13 @@ code {
             padding: 8px 12px;
             border-bottom: 1px solid #e8e8e8;
             .images {
+                display: flex;
+                gap: 4px;
                 margin-top: 4px;
                 img {
                     width: 66px;
                     height: 66px;
                     object-fit: cover;
-                    margin-right: 4px;
-                    &:last-of-type {
-                        margin: 0;
-                    }
                 }
             }
             &::before {
@@ -203,6 +201,7 @@ code {
         display: block;
         position: fixed;
         top: 0;
+        left: 0;
         background-color: #fff;
         width: 100vw;
         height: 40px;
@@ -247,14 +246,14 @@ code {
     #container {
         min-width: unset;
         width: 100vw;
-        padding: 8px 0;
+        padding: 8px;
         padding-bottom: 40px;
     }
 
     #content {
         margin-left: auto;
         margin-right: auto;
-        width: 100vw;
+        width: 100%;
     }
 
     .side-bar {

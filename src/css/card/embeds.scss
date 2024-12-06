@@ -1,22 +1,18 @@
 @use "../variables" as *;
 
 .embeds {
-    display: block;
+    display: flex;
     width: 100%;
     max-width: 100%;
     overflow: hidden;
     position: relative;
+    gap: 4px;
 
     > * {
         display: block;
         border: $border-width solid $light-grey;
         box-sizing: border-box;
         border-radius: $border-radius;
-
-        margin-bottom: 4px;
-        &:last-child {
-            margin-bottom: 0;
-        }
     }
 
     a {
@@ -70,12 +66,9 @@ $border-total-width: 2px;
     display: flex;
     overflow-x: scroll;
     max-height: $multi-image-height + $border-total-width;
+    gap: 4px;
     > a {
         max-height: $multi-image-height;
-        margin-right: 4px;
-        &:last-child {
-            margin-right: 0;
-        }
     }
 
     scrollbar-width: none;

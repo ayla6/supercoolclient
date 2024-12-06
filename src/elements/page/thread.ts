@@ -100,7 +100,8 @@ export function loadThread(
           );
 
           const replyContainer = elem("div", {
-            className: "reply-container",
+            className:
+              "reply-container" + (stringMargin ? " added-margin" : ""),
           });
           replyContainer.append(...previousStrings.map(getString));
 

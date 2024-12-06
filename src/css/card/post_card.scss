@@ -44,12 +44,9 @@
 
 .post-content {
     margin-top: 2px;
-    > * {
-        margin-bottom: 4px;
-        &:last-child {
-            margin-bottom: 0;
-        }
-    }
+    display: flex;
+    flex-flow: column;
+    gap: 4px;
 }
 
 .text-content {

@@ -38,7 +38,8 @@
         float: left;
         flex-shrink: 1;
         line-height: 0;
-        margin: $pfp-margin $large-pfp-right-margin $pfp-margin $pfp-margin;
+        margin: $string-pfp-margin $large-pfp-right-margin $string-pfp-margin
+            $pfp-margin;
         border-radius: 3px;
         a {
             display: block;
