@@ -5,6 +5,8 @@
     // i would use width and background color but firefox mobile messes stuff up
     width: 0;
     border: ($string-width * 0.5) solid $lighter-grey;
+    border-top: none;
+    border-bottom: none;
     &.transparent {
         border-color: transparent;
     }
