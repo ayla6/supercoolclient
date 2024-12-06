@@ -24,8 +24,8 @@ export function image(
 
   imageHolder.style.cssText = getProperSize(image.aspectRatio, isSingleImage);
   if (image.aspectRatio && image.aspectRatio.height <= 350) {
-    img.src = fullsize + "png";
-  } else img.src = image.fullsize.split("@")[0] + "@webp";
+    img.src = fullsize;
+  } else img.src = image.thumb.split("@")[0] + "@webp";
 
   imageHolder.href = fullsize;
 

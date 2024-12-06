@@ -40,7 +40,6 @@ $border-total-width: 2px;
     > a,
     > .video-thumbnail,
     > .video-container {
-        background-color: #000;
         position: relative;
         display: inline-block;
         line-height: 0;
@@ -69,6 +68,7 @@ $border-total-width: 2px;
     &.has-controls {
         .video-container,
         .video-thumbnail {
+            background-color: #000;
             aspect-ratio: 16 / 9;
             width: 100%;
         }
