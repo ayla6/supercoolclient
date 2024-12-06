@@ -106,64 +106,65 @@
 }
 
 .stats-buttons {
-    display: flex;
-}
-
-.interaction {
-    background: none;
-    border: none;
-    color: $dark-grey;
-    cursor: pointer;
-    display: inline-block;
-    line-height: 14px;
-    padding: 0;
-
-    &:hover {
-        text-decoration: none;
-    }
-
-    span {
-        vertical-align: middle;
-    }
-
     $size: 12px;
-    font-size: $size;
-    margin-right: $size * 0.5;
-    .icon {
+    display: flex;
+    gap: $size * 0.5;
+
+    .interaction {
+        background: none;
+        border: none;
+        color: $dark-grey;
+        cursor: pointer;
         display: inline-block;
-        width: $size;
-        height: $size;
-        background-size: contain;
-        background-position: center;
-        background-repeat: no-repeat;
-        vertical-align: sub;
-        margin-right: 2px;
+        line-height: 14px;
+        padding: 0;
+
+        &:hover {
+            text-decoration: none;
+        }
+
+        span {
+            vertical-align: middle;
+        }
+
+        font-size: $size;
+        .icon {
+            display: inline-block;
+            width: $size;
+            height: $size;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            vertical-align: sub;
+            margin-right: 2px;
+        }
     }
 }
 
-.post.full {
+.post.full > .content > {
     .header {
         justify-content: left;
         font-size: 15px;
         line-height: 16px;
+
+        .handle-area {
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+        }
+
+        .pfp-holder {
+            margin: 0 8px 0 1px;
+        }
+
+        .pfp-holder::after {
+            display: none;
+        }
     }
 
-    .handle-area {
-        display: flex;
-        flex-flow: column;
-        justify-content: center;
-    }
-
-    .pfp-holder {
-        margin: 0 8px 0 1px;
-    }
-
-    .pfp-holder::after {
-        display: none;
-    }
-
-    .content {
-        margin-left: 0;
+    .post-content > .text-content {
+        font-family: $serif;
+        font-size: 18px;
     }
 
     .interaction {
@@ -174,11 +175,6 @@
             height: $size;
             width: $size;
         }
-    }
-
-    .text-content {
-        font-family: $serif;
-        font-size: 18px;
     }
 
     .stat {
@@ -242,22 +238,26 @@
 }
 
 @media (max-width: 920px) {
-    .interaction {
+    .stats-buttons {
         $size: 14px;
-        font-size: 14px;
-        margin-right: $size * 0.5;
-        .icon {
-            height: $size;
-            width: $size;
+        gap: $size * 0.5;
+        .interaction {
+            font-size: $size;
+            .icon {
+                height: $size;
+                width: $size;
+            }
         }
     }
-    .post.full .interaction {
+    .post.full .stats-buttons {
         $size: 16px;
-        font-size: 16px;
-        margin-right: $size * 0.5;
-        .icon {
-            height: $size;
-            width: $size;
+        gap: $size * 0.5;
+        .interaction {
+            font-size: $size;
+            .icon {
+                height: $size;
+                width: $size;
+            }
         }
     }
 }

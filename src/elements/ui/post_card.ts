@@ -52,12 +52,12 @@ export function postCard(
 
   if (isEmbed) {
     header.append(
-      //elem("div", {}, [
-      //profilePicture,
-      elem("a", { className: "handle-area", href: authorHref }, [
-        elem("span", { className: "handle", innerHTML: atId }),
+      elem("div", {}, [
+        profilePicture,
+        elem("a", { className: "handle-area", href: authorHref }, [
+          elem("span", { className: "handle", innerHTML: atId }),
+        ]),
       ]),
-      //]),
       elem("a", {
         className: "timestamp",
         href: href,
