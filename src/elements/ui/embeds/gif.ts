@@ -52,7 +52,7 @@ export function loadEmbedGif(url: URL) {
     elem("div", { className: "play-button" }),
   ]);
 
-  let style: string = getProperSize(aspectRatio, true);
+  let style: string = getProperSize(aspectRatio);
   thumbnail.style.cssText = style;
 
   const mediaContainer = elem("div", { className: "media-container" }, [

@@ -6,6 +6,7 @@ import { postCard } from "../ui/post_card";
 import { elem } from "../utils/elem";
 import { Brand } from "@atcute/client/lexicons";
 import { setPreloaded } from "../../routes/post";
+import { getUrlFromUri } from "../utils/link_processing";
 
 export function loadThread(
   postThread: AppBskyFeedGetPostThread.Output,
@@ -26,17 +27,21 @@ export function loadThread(
         currentThread.parent.$type === "app.bsky.feed.defs#threadViewPost"
       ) {
         currentThread = currentThread.parent;
-        mainThreadPosts.prepend(postCard(currentThread.post, false, true));
+        mainThreadPosts.prepend(
+          postCard(currentThread.post, false, currentThread !== thread.parent),
+        );
       }
       if (
         currentThread.parent &&
         currentThread.parent.$type !== "app.bsky.feed.defs#threadViewPost"
       ) {
+        const post = currentThread.parent;
         mainThreadPosts.prepend(
-          elem("div", {
+          elem("a", {
             className: "simple-card",
+            href: getUrlFromUri(post.uri),
             innerHTML:
-              currentThread.parent.$type === "app.bsky.feed.defs#blockedPost"
+              post.$type === "app.bsky.feed.defs#blockedPost"
                 ? "Blocked post"
                 : "Post not found",
           }),
@@ -133,7 +138,6 @@ export function loadThread(
               outputElement,
             );
           } else if (post.post.replyCount && !post.replies) {
-            const splitURI = post.post.uri.split("/");
             const continueThreadContainer = elem("div", {
               className:
                 "reply-container" + (stringMargin ? " added-margin" : ""),
@@ -143,7 +147,7 @@ export function loadThread(
               elem("a", {
                 className: "simple-card",
                 innerHTML: "Continue thread...",
-                href: `/${splitURI[2]}/post/${splitURI[4]}`,
+                href: getUrlFromUri(post.post.uri),
                 onclick: () => setPreloaded(post.post),
               }),
             );

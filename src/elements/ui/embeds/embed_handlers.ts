@@ -12,21 +12,15 @@ import {
 } from "@atcute/client/lexicons";
 
 const embedHandlers = {
-  "app.bsky.embed.external": loadEmbedExternal,
-  "app.bsky.embed.images": loadEmbedImages,
-  "app.bsky.embed.record": loadEmbedRecord,
-  "app.bsky.embed.recordWithMedia": loadEmbedRecordWithMedia,
-  "app.bsky.embed.video": loadEmbedVideo,
+  "app.bsky.embed.external#view": loadEmbedExternal,
+  "app.bsky.embed.images#view": loadEmbedImages,
+  "app.bsky.embed.record#view": loadEmbedRecord,
+  "app.bsky.embed.recordWithMedia#view": loadEmbedRecordWithMedia,
+  "app.bsky.embed.video#view": loadEmbedVideo,
 };
 
 export function handleEmbed(
   embed:
-    | AppBskyEmbedVideo.Main
-    | AppBskyEmbedImages.Main
-    | AppBskyEmbedRecord.Main
-    | AppBskyEmbedExternal.Main
-    | AppBskyEmbedRecordWithMedia.Main,
-  viewEmbed:
     | AppBskyEmbedVideo.View
     | AppBskyEmbedImages.View
     | AppBskyEmbedRecord.View
@@ -34,6 +28,5 @@ export function handleEmbed(
     | AppBskyEmbedRecordWithMedia.View,
   did: string,
 ) {
-  if (embed && viewEmbed)
-    return embedHandlers[(embed as any).$type](embed, viewEmbed, did);
+  if (embed) return embedHandlers[(embed as any).$type](embed, did);
 }

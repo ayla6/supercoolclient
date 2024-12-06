@@ -4,7 +4,7 @@ import { getProperSize } from "../../utils/get_proper_size";
 
 const forcePngFileTypes = ["webp", "gif"];
 export function image(
-  image: AppBskyEmbedImages.Image,
+  image: AppBskyEmbedImages.ViewImage,
   did: string,
   isSingleImage: boolean,
 ) {
@@ -21,35 +21,17 @@ export function image(
     [img],
   );
 
-  const ogFileType = image.image.mimeType.split("/")[1];
-  const fullFileType = forcePngFileTypes.includes(ogFileType)
-    ? "png"
-    : ogFileType;
-
-  let thumbFileType = "webp";
-  let thumbSize = "thumbnail";
-
   imageHolder.style.cssText = getProperSize(image.aspectRatio, isSingleImage);
-  if (
-    image.aspectRatio &&
-    image.aspectRatio.width <= 1000 &&
-    image.aspectRatio.height <= 1000
-  ) {
-    thumbSize = "fullsize";
-    thumbFileType = fullFileType;
-  }
+  if (image.aspectRatio && image.aspectRatio.height <= 350) {
+    img.src = image.fullsize.replace("@jpeg", "@png");
+  } else img.src = image.thumb.replace("@jpeg", "@webp");
 
-  img.src = `https://cdn.bsky.app/img/feed_${thumbSize}/plain/${did}/${image.image.ref.$link}@${thumbFileType}`;
-  imageHolder.href = `https://cdn.bsky.app/img/feed_fullsize/plain/${did}/${image.image.ref.$link}@${fullFileType}`;
+  imageHolder.href = image.fullsize.replace("@jpeg", "@png");
 
   return imageHolder;
 }
 
-export function loadEmbedImages(
-  embed: AppBskyEmbedImages.Main,
-  viewEmbed: AppBskyEmbedImages.View,
-  did: string,
-) {
+export function loadEmbedImages(embed: AppBskyEmbedImages.View, did: string) {
   return [
     elem(
       "div",

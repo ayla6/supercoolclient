@@ -2,6 +2,7 @@
 
 .embeds {
     display: flex;
+    flex-flow: column;
     width: 100%;
     max-width: 100%;
     overflow: hidden;
@@ -39,6 +40,7 @@ $border-total-width: 2px;
     > a,
     > .video-thumbnail,
     > .video-container {
+        background-color: #000;
         position: relative;
         display: inline-block;
         line-height: 0;
@@ -53,12 +55,22 @@ $border-total-width: 2px;
         max-width: calc(100% - 2px);
         max-height: $image-height;
 
+        width: fit-content;
+        height: fit-content;
+
         img,
         video {
             border-radius: $border-radius;
             width: 100%;
             height: 100%;
             object-fit: contain;
+        }
+    }
+    &.has-controls {
+        .video-container,
+        .video-thumbnail {
+            aspect-ratio: 16 / 9;
+            width: 100%;
         }
     }
 }
@@ -71,10 +83,10 @@ $border-total-width: 2px;
         max-height: $multi-image-height;
     }
 
-    scrollbar-width: none;
-    ::-webkit-scrollbar {
+    scrollbar-width: thin;
+    /*::-webkit-scrollbar {
         display: none;
-    }
+        }*/
 }
 
 .video-container.no-controls {

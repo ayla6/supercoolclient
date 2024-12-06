@@ -9,15 +9,12 @@ export function getProperSize(
     width: 1600,
     height: 900,
   },
-  isSingleImage: boolean,
+  isSingleImage: boolean = true,
 ) {
   const height = Math.min(
     isSingleImage ? singleImageHeight : multiImageHeight,
     size.height,
   );
   const width = Math.round(height * (size.width / size.height));
-  return (
-    `aspect-ratio: ${size.width} / ${size.height}; width: ${width}px;` +
-    (isSingleImage ? "" : `height: ${height}px`)
-  );
+  return `aspect-ratio: ${size.width} / ${size.height}; width: ${width}px;`;
 }

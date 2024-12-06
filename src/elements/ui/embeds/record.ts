@@ -1,12 +1,10 @@
 import { AppBskyEmbedRecord, AppBskyFeedDefs } from "@atcute/client/lexicons";
 import { postCard } from "../post_card";
+import { elem } from "../../utils/elem";
+import { getUrlFromUri } from "../../utils/link_processing";
 
-export function loadEmbedRecord(
-  embed: AppBskyEmbedRecord.Main,
-  viewEmbed: AppBskyEmbedRecord.View,
-  did: string,
-) {
-  const record = viewEmbed.record;
+export function loadEmbedRecord(embed: AppBskyEmbedRecord.View, did: string) {
+  const record = embed.record;
   if (record.$type === "app.bsky.embed.record#viewRecord") {
     const value = record.value as { $type?: string };
     const valueType = "$type" in value ? value.$type : "";
@@ -26,5 +24,26 @@ export function loadEmbedRecord(
       };
       return [postCard(post, false, false, true)];
     }
+  } else if (
+    record.$type === "app.bsky.embed.record#viewBlocked" ||
+    record.$type === "app.bsky.embed.record#viewDetached" ||
+    record.$type === "app.bsky.embed.record#viewNotFound"
+  ) {
+    console;
+    let text: string;
+    if (record.$type === "app.bsky.embed.record#viewBlocked") {
+      text = "Blocked post";
+    } else if (record.$type === "app.bsky.embed.record#viewDetached") {
+      text = "Post detached";
+    } else {
+      text = "Post not found";
+    }
+    return [
+      elem("a", {
+        className: "simple-card",
+        href: getUrlFromUri(record.uri),
+        innerHTML: text,
+      }),
+    ];
   } else return [];
 }

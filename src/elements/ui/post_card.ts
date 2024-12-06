@@ -1,5 +1,5 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
-import { idchoose } from "../utils/id";
+import { getUrlFromUri, idChoose } from "../utils/link_processing.ts";
 import { manager, rpc } from "../../login";
 import { elem } from "../utils/elem";
 import {
@@ -25,11 +25,11 @@ export function postCard(
   const record = post.record as AppBskyFeedPost.Record;
 
   const author = post.author;
-  const atId = idchoose(author);
+  const atId = idChoose(author);
   const authorDid = author.did;
 
   const authorHref = `/${authorDid}`;
-  const href = `/${authorDid}/post/${post.uri.split("/")[4]}`;
+  const href = getUrlFromUri(post.uri);
 
   const indexedAt = new Date(post.indexedAt);
   const createdAt = new Date(record.createdAt);
@@ -101,7 +101,7 @@ export function postCard(
         elem("a", {
           className: "handle",
           href: "/" + repostedBy.did,
-          innerHTML: idchoose(repostedBy),
+          innerHTML: idChoose(repostedBy),
         }),
         new Text(" reposted "),
         elem("a", {
@@ -146,7 +146,7 @@ export function postCard(
         elem("a", {
           innerHTML:
             replyTo.$type === "app.bsky.feed.defs#postView"
-              ? idchoose(replyTo.author)
+              ? idChoose(replyTo.author)
               : replyTo.uri.split("/")[2],
           href:
             "/" +
@@ -172,7 +172,7 @@ export function postCard(
       elem(
         "div",
         { className: "embeds" },
-        handleEmbed(record.embed as any, post.embed as any, authorDid),
+        handleEmbed(post.embed as any, authorDid),
       ),
     );
   }

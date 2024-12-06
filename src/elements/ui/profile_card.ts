@@ -1,11 +1,11 @@
 import { AppBskyActorDefs, Brand } from "@atcute/client/lexicons";
 import { elem } from "../utils/elem";
-import { idchoose } from "../utils/id";
+import { idChoose } from "../utils/link_processing.ts";
 import { processText } from "../utils/text_processing";
 
 export function profileCard(profile: AppBskyActorDefs.ProfileView) {
   const profileDid = profile.did;
-  const atId = idchoose(profile);
+  const atId = idChoose(profile);
 
   return elem("div", { className: "card profile" }, [
     elem("div", { className: "pfp-holder" }, [

@@ -4,8 +4,7 @@ import { escapeHTML } from "../../utils/text_processing";
 import { loadEmbedGif } from "./gif";
 
 export function loadEmbedExternal(
-  embed: AppBskyEmbedExternal.Main,
-  viewEmbed: AppBskyEmbedExternal.View,
+  embed: AppBskyEmbedExternal.View,
   did: string,
 ) {
   const url = new URL(embed.external.uri);
@@ -13,9 +12,9 @@ export function loadEmbedExternal(
     return loadEmbedGif(url);
   } else {
     const card = elem("a", { href: embed.external.uri, className: "external" });
-    if (viewEmbed.external.thumb) {
+    if (embed.external.thumb) {
       const image = elem("div", { className: "image" }, [
-        elem("img", { src: viewEmbed.external.thumb }),
+        elem("img", { src: embed.external.thumb }),
       ]);
       card.append(image);
     }

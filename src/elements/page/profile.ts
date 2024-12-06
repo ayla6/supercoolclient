@@ -1,6 +1,6 @@
 import { AppBskyActorDefs, SCCProfile } from "@atcute/client/lexicons";
 import { manager } from "../../login";
-import { idchoose } from "../utils/id";
+import { idChoose } from "../utils/link_processing.ts";
 import { elem } from "../utils/elem";
 import { processText } from "../utils/text_processing";
 import { inCache } from "../utils/cache";
@@ -65,7 +65,7 @@ export function header(
   profile: AppBskyActorDefs.ProfileViewDetailed,
   sccprofile?: SCCProfile.Record,
 ) {
-  const handle = idchoose(profile);
+  const handle = idChoose(profile);
   const did = profile.did;
   let customCss = `background-image:
     url(${profile.banner?.replace("img/banner", "img/feed_fullsize")});`;
