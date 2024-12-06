@@ -44,11 +44,14 @@ export async function postRoute(currentUrl: string, loadedUrl: string) {
   ).data;
 
   if ("post" in postThread.thread) {
-    if (preloadedPost) Object.assign(preloadedPost, postThread.thread.post);
+    const post = postThread.thread.post;
+    document.title = `${post.author.handle}: “${(post.record as AppBskyFeedPost.Record).text}” — SuperCoolClient`;
+
+    if (preloadedPost) Object.assign(preloadedPost, post);
     if (!cache["app.bsky.feed.getPosts"]) cache["app.bsky.feed.getPosts"] = {};
     const params = `{"uris":["at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}"]}`;
     cache["app.bsky.feed.getPosts"][params] = {
-      [params]: { data: { posts: [postThread.thread.post] } },
+      [params]: { data: { posts: [post] } },
     };
   }
   preloadedPost = null;

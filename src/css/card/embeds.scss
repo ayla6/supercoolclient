@@ -80,6 +80,7 @@ $border-total-width: 2px;
     max-height: $multi-image-height + $border-total-width;
     gap: 4px;
     > a {
+        max-width: unset;
         max-height: $multi-image-height;
     }
 
