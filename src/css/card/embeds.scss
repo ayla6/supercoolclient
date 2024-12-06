@@ -164,8 +164,12 @@ $border-total-width: 2px;
     }
 }
 
+.embeds .simple-card {
+    margin-bottom: 0;
+}
+
 .embeds .post {
-    .content {
+    .card {
         border: none;
         padding: 4px;
         margin: 0;

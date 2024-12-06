@@ -7,7 +7,7 @@ export function profileCard(profile: AppBskyActorDefs.ProfileView) {
   const profileDid = profile.did;
   const atId = idChoose(profile);
 
-  return elem("div", { className: "card profile" }, [
+  return elem("div", { className: "card-holder profile" }, [
     elem("div", { className: "pfp-holder" }, [
       elem("a", { href: "/" + profileDid }, [
         elem("img", {
@@ -16,7 +16,7 @@ export function profileCard(profile: AppBskyActorDefs.ProfileView) {
         }),
       ]),
     ]),
-    elem("div", { className: "content" }, [
+    elem("div", { className: "card" }, [
       elem("a", { className: "header", href: "/" + profileDid }, [
         elem("span", { className: "handle", innerHTML: atId }),
         profile.displayName

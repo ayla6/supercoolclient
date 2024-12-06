@@ -183,7 +183,7 @@ function mutedPostsButton(outputElement: HTMLElement, posts: DocumentFragment) {
   const button = elem(
     "div",
     {
-      className: "card show-muted",
+      className: "card-holder show-muted",
       onclick: () => {
         outputElement.removeChild(button);
         outputElement.append(posts);

@@ -35,10 +35,9 @@ export function postCard(
   const createdAt = new Date(record.createdAt);
 
   const postElem = elem("div", {
-    className: "card post" + (fullView ? " full" : ""),
+    className: "card-holder post" + (fullView ? " full" : ""),
   });
-  const content = elem("div", { className: "content" });
-  const footer = elem("div", { className: "footer" });
+  const card = elem("div", { className: "card" });
 
   const profilePicture = elem(
     "a",
@@ -52,7 +51,7 @@ export function postCard(
   );
 
   if (isEmbed) {
-    content.append(
+    card.append(
       elem("div", { className: "header" }, [
         elem("a", { href: authorHref }, [
           profilePicture,
@@ -69,7 +68,7 @@ export function postCard(
       ]),
     );
   } else if (fullView) {
-    content.append(
+    card.append(
       elem("a", { className: "header", href: authorHref }, [
         profilePicture,
         elem("a", { className: "handle-area", href: authorHref }, [
@@ -121,7 +120,7 @@ export function postCard(
       ]),
     );
 
-    content.append(
+    card.append(
       elem("div", { className: "header" }, [
         elem("span", { className: "handle-area" }, handleElem),
         elem("a", {
@@ -136,7 +135,7 @@ export function postCard(
 
   if ("reply" in postHousing) {
     const replyTo = postHousing.reply.parent;
-    content.append(
+    card.append(
       elem("span", { className: "small reply-to", innerHTML: "Reply to " }, [
         elem("a", {
           innerHTML:
@@ -153,9 +152,9 @@ export function postCard(
     );
   }
 
-  const postContent = elem("div", { className: "post-content" });
+  const content = elem("div", { className: "post-content" });
   if (record.text) {
-    postContent.append(
+    content.append(
       elem("div", {
         className: "text-content",
         innerHTML: processRichText(record.text, record.facets),
@@ -163,7 +162,7 @@ export function postCard(
     );
   }
   if (record.embed) {
-    postContent.append(
+    content.append(
       elem(
         "div",
         { className: "embeds" },
@@ -171,7 +170,7 @@ export function postCard(
       ),
     );
   }
-  content.append(postContent);
+  card.append(content);
 
   if (record.tags) {
     const tags = record.tags.map((tag) =>
@@ -181,7 +180,7 @@ export function postCard(
         href: `/search?tag=${encodeQuery(tag)}`,
       }),
     );
-    content.append(elem("div", { className: "label-area" }, tags));
+    card.append(elem("div", { className: "label-area" }, tags));
   }
 
   if (fullView) {
@@ -198,7 +197,7 @@ export function postCard(
       );
     }
     if (warnings.length)
-      content.append(elem("div", { className: "label-area" }, warnings));
+      card.append(elem("div", { className: "label-area" }, warnings));
   }
 
   let translateButton: HTMLElement;
@@ -216,7 +215,7 @@ export function postCard(
           "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
         ),
     });
-    if (!fullView) footer.append(translateButton);
+    if (!fullView) card.append(translateButton);
   }
   if (fullView) {
     const postData = elem("div", { className: "post-data" });
@@ -229,7 +228,7 @@ export function postCard(
       }),
     );
     if (translateButton) postData.append(translateButton);
-    footer.append(postData);
+    card.append(postData);
   }
   if (fullView) {
     const stats = [
@@ -239,10 +238,10 @@ export function postCard(
     ].filter(Boolean);
 
     if (stats.length > 0)
-      footer.append(elem("div", { className: "stats" }, stats));
+      card.append(elem("div", { className: "stats" }, stats));
   }
   if (!isEmbed)
-    footer.append(
+    card.append(
       elem("div", { className: "stats-buttons" }, [
         interactionButton("reply", post),
         interactionButton("repost", post),
@@ -250,9 +249,8 @@ export function postCard(
         interactionButton("quote", post),
       ]),
     );
-  content.append(footer);
 
-  postElem.append(content);
+  postElem.append(card);
 
   return postElem;
 }

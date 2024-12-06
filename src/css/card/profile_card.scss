@@ -1,7 +1,7 @@
 @use "card_variables" as *;
 
 .profile {
-    .content {
+    .card {
         min-height: $large-pfp-size + ($pfp-margin * 2) - ($content-padding * 2);
     }
 
