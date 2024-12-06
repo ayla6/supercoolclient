@@ -2,7 +2,6 @@ import { AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
 
-const forcePngFileTypes = ["webp", "gif"];
 export function image(
   image: AppBskyEmbedImages.ViewImage,
   did: string,
@@ -21,12 +20,14 @@ export function image(
     [img],
   );
 
+  const fullsize = image.fullsize.split("@")[0] + "@png";
+
   imageHolder.style.cssText = getProperSize(image.aspectRatio, isSingleImage);
   if (image.aspectRatio && image.aspectRatio.height <= 350) {
-    img.src = image.fullsize.replace("@jpeg", "@png");
-  } else img.src = image.thumb.replace("@jpeg", "@webp");
+    img.src = fullsize + "png";
+  } else img.src = image.fullsize.split("@")[0] + "@webp";
 
-  imageHolder.href = image.fullsize.replace("@jpeg", "@png");
+  imageHolder.href = fullsize;
 
   return imageHolder;
 }
