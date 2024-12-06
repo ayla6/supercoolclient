@@ -38,53 +38,47 @@ export function postCard(
     className: "card post" + (fullView ? " full" : ""),
   });
   const content = elem("div", { className: "content" });
-  const header = elem("div", { className: "header" });
   const footer = elem("div", { className: "footer" });
 
-  const profilePicture = elem("div", { className: "pfp-holder" }, [
-    elem("a", { href: authorHref }, [
+  const profilePicture = elem(
+    "a",
+    { className: "pfp-holder", href: authorHref },
+    [
       elem("img", {
         className: "pfp",
         src: post.author.avatar,
       }),
-    ]),
-  ]);
+    ],
+  );
 
   if (isEmbed) {
-    header.append(
-      elem("div", {}, [
-        profilePicture,
-        elem("a", { className: "handle-area", href: authorHref }, [
-          elem("span", { className: "handle", innerHTML: atId }),
+    content.append(
+      elem("div", { className: "header" }, [
+        elem("a", { href: authorHref }, [
+          profilePicture,
+          elem("a", { className: "handle-area" }, [
+            elem("span", { className: "handle", innerHTML: atId }),
+          ]),
         ]),
-      ]),
-      elem("a", {
-        className: "timestamp",
-        href: href,
-        innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
-        onclick: () => setPreloaded(post),
-      }),
-    );
-  } else if (fullView) {
-    header.append(
-      profilePicture,
-      elem("a", { className: "handle-area", href: authorHref }, [
-        elem("span", { className: "handle", innerHTML: atId }),
-        elem("span", {
-          className: "",
-          innerHTML: escapeHTML(post.author.displayName),
-        }),
-      ]),
-    );
-
-    footer.append(
-      elem("div", { className: "post-data" }, [
         elem("a", {
           className: "timestamp",
           href: href,
-          innerHTML: formatDate(indexedAt ?? createdAt),
+          innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
           onclick: () => setPreloaded(post),
         }),
+      ]),
+    );
+  } else if (fullView) {
+    content.append(
+      elem("a", { className: "header", href: authorHref }, [
+        profilePicture,
+        elem("a", { className: "handle-area", href: authorHref }, [
+          elem("span", { className: "handle", innerHTML: atId }),
+          elem("span", {
+            className: "",
+            innerHTML: escapeHTML(post.author.displayName),
+          }),
+        ]),
       ]),
     );
   } else {
@@ -127,17 +121,18 @@ export function postCard(
       ]),
     );
 
-    header.append(
-      elem("span", { className: "handle-area" }, handleElem),
-      elem("a", {
-        className: "timestamp",
-        href: href,
-        innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
-        onclick: () => setPreloaded(post),
-      }),
+    content.append(
+      elem("div", { className: "header" }, [
+        elem("span", { className: "handle-area" }, handleElem),
+        elem("a", {
+          className: "timestamp",
+          href: href,
+          innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
+          onclick: () => setPreloaded(post),
+        }),
+      ]),
     );
   }
-  content.append(header);
 
   if ("reply" in postHousing) {
     const replyTo = postHousing.reply.parent;
@@ -206,19 +201,36 @@ export function postCard(
       content.append(elem("div", { className: "label-area" }, warnings));
   }
 
-  if (record.text && "langs" in record && record.langs[0] != "en")
-    footer.append(
+  let translateButton: HTMLElement;
+  if (
+    record.text &&
+    record.langs &&
+    record.langs[0] != "en" &&
+    record.langs[0].slice(0, 2) != "en"
+  ) {
+    translateButton = elem("a", {
+      className: "small-link",
+      innerHTML: "Translate",
+      onclick: () =>
+        window.open(
+          "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
+        ),
+    });
+    if (!fullView) footer.append(translateButton);
+  }
+  if (fullView) {
+    const postData = elem("div", { className: "post-data" });
+    postData.append(
       elem("a", {
-        className: "small-link",
-        innerHTML: "Translate",
-        onclick: () =>
-          window.open(
-            "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
-          ),
+        className: "timestamp",
+        href: href,
+        innerHTML: formatDate(indexedAt ?? createdAt),
+        onclick: () => setPreloaded(post),
       }),
     );
-  if (!isEmbed) content.append(footer);
-
+    if (translateButton) postData.append(translateButton);
+    footer.append(postData);
+  }
   if (fullView) {
     const stats = [
       stat("like", post, href),
@@ -227,11 +239,10 @@ export function postCard(
     ].filter(Boolean);
 
     if (stats.length > 0)
-      content.append(elem("div", { className: "stats" }, stats));
+      footer.append(elem("div", { className: "stats" }, stats));
   }
-
   if (!isEmbed)
-    content.append(
+    footer.append(
       elem("div", { className: "stats-buttons" }, [
         interactionButton("reply", post),
         interactionButton("repost", post),
@@ -239,6 +250,7 @@ export function postCard(
         interactionButton("quote", post),
       ]),
     );
+  content.append(footer);
 
   postElem.append(content);
 

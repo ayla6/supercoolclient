@@ -40,9 +40,9 @@ $border-total-width: 2px;
     > a,
     > .video-thumbnail,
     > .video-container {
+        vertical-align: bottom;
         position: relative;
         display: inline-block;
-        line-height: 0;
         flex-shrink: 0;
 
         border: $border-width solid $light-grey;
@@ -127,7 +127,6 @@ $border-total-width: 2px;
     }
 
     .image {
-        line-height: 0;
         width: 100%;
         aspect-ratio: 1.91 / 1;
     }

@@ -11,7 +11,6 @@
     .footer {
         display: flex;
         flex-flow: column;
-        margin-top: 2px;
     }
 
     .pfp-holder::after {
@@ -29,10 +28,6 @@
         color: #999;
     }
 
-    .label-area {
-        margin-top: 3px;
-    }
-
     .label {
         background-color: $lighter-grey;
         border-radius: 8px;
@@ -43,7 +38,6 @@
 }
 
 .post-content {
-    margin-top: 2px;
     display: flex;
     flex-flow: column;
     gap: 4px;
@@ -59,9 +53,7 @@
     flex-flow: row;
     font-size: 12px;
     vertical-align: middle;
-    > * {
-        margin-right: 3px;
-    }
+    gap: 6px;
 }
 
 .post .header {
@@ -143,6 +135,8 @@
 
 .post.full > .content > {
     .header {
+        width: fit-content;
+
         justify-content: left;
         font-size: 15px;
         line-height: 16px;
@@ -160,6 +154,14 @@
         .pfp-holder::after {
             display: none;
         }
+
+        &:hover {
+            text-decoration: none;
+            a {
+                color: $dark-grey;
+                text-decoration: none;
+            }
+        }
     }
 
     .post-content > .text-content {
@@ -176,7 +178,9 @@
             width: $size;
         }
     }
+}
 
+.post {
     .stat {
         margin-right: 4px;
     }

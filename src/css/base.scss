@@ -77,7 +77,7 @@ a.handle:hover,
 a.timestamp:hover {
     text-decoration: underline;
     text-decoration-thickness: 1px;
-    color: var(--accent-color) !important;
+    color: var(--accent-color);
 }
 
 .bio a,
@@ -119,6 +119,7 @@ code {
 .small-link {
     font-size: 12px;
     color: var(--accent-color);
+    width: fit-content;
 
     &:hover {
         cursor: pointer;
