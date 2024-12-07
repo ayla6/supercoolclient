@@ -74,14 +74,14 @@ function computeRoutes(routes: { [key: string]: string }) {
 }
 
 function matchRoute(path: string) {
-  const splitUrl = path.split("/");
+  const splitPath = path.split("/");
   for (const route of routes) {
-    if (splitUrl.length !== route.key.length) continue;
+    if (splitPath.length !== route.key.length) continue;
 
     let match = true;
     for (let i = 0; i < route.key.length; i++) {
       if (route.key[i] === ":") continue;
-      if (route.key[i] !== splitUrl[i]) {
+      if (route.key[i] !== splitPath[i]) {
         match = false;
         break;
       }
