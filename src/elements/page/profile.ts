@@ -1,6 +1,6 @@
 import { AppBskyActorDefs, SCCProfile } from "@atcute/client/lexicons";
 import { manager } from "../../login";
-import { idChoose } from "../utils/link_processing.ts";
+import { changeToWebp, idChoose } from "../utils/link_processing.ts";
 import { elem } from "../utils/elem";
 import { processText } from "../utils/text_processing";
 import { inCache } from "../utils/cache";
@@ -75,7 +75,7 @@ export function header(
   document.body.style.cssText = customCss;
   return elem("div", { className: "profile-header" }, [
     elem("a", { className: "pfp-holder" }, [
-      elem("img", { className: "pfp", src: profile.avatar }),
+      elem("img", { className: "pfp", src: changeToWebp(profile.avatar) }),
     ]),
     elem("div", { className: "header" }, [
       elem("span", {
@@ -141,7 +141,7 @@ function mediaNavButton(name: string, did: string, text: string) {
       if (type === "app.bsky.embed.images#view") {
         for (const image of embed.images) {
           const img = document.createElement("img");
-          img.src = image.thumb.replace("@jpeg", "@webp");
+          img.src = changeToWebp(image.thumb);
           images.append(img);
           if (++imageCount === 4) break;
         }
@@ -151,7 +151,7 @@ function mediaNavButton(name: string, did: string, text: string) {
         embed.thumbnail
       ) {
         const img = document.createElement("img");
-        img.src = embed.thumbnail.replace("@jpeg", "@webp");
+        img.src = changeToWebp(embed.thumbnail);
         images.append(img);
       }
     }

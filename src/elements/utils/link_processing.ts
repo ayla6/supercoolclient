@@ -6,3 +6,7 @@ export function getUrlFromUri(uri: string) {
   const splitURI = uri.split("/");
   return `/${splitURI[2]}/post/${splitURI[4]}`;
 }
+
+export function changeToWebp(uri: string) {
+  return uri.slice(0, -4) + "webp";
+}
