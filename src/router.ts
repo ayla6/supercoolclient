@@ -37,7 +37,7 @@ const routesBase: { [key: string]: string } = {
   "/notifications": "notifications",
   "/:/": "profileTrim",
   "/:": "profile",
-  "/:/:location": "profile",
+  "/:/:": "profile",
   "/:/post/:": "post",
   "/:/post/:/likes": "postLikes",
   "/:/post/:/reposts": "postReposts",
