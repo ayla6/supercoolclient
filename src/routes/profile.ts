@@ -3,6 +3,10 @@ import { profileRedirect } from "../router";
 import { feedNSID, hydrateFeed } from "../elements/content/feed";
 import { profilePage } from "../elements/page/profile";
 import { profileCard } from "../elements/ui/profile_card";
+import {
+  getAtIdFromPath,
+  getLocationFromPath,
+} from "../elements/utils/link_processing";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -11,11 +15,9 @@ const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   likes: ["app.bsky.feed.getActorLikes"],
 };
 
-export async function profileRoute(currentUrl: string, loadedUrl: string) {
-  const splitUrl = currentUrl.split("/");
-  const splitLoaded = loadedUrl.split("/");
+export async function profileRoute(currentPath: string, loadedPath: string) {
+  const atId = getAtIdFromPath(currentPath);
 
-  let atId = splitUrl[1];
   const profile = (
     await get("app.bsky.actor.getProfile", {
       params: { actor: atId },
@@ -29,51 +31,52 @@ export async function profileRoute(currentUrl: string, loadedUrl: string) {
       limit: 4,
     },
   });
-  if (window.location.pathname === currentUrl) {
+  if (window.location.pathname === currentPath) {
     if (atId != profile.did) profileRedirect(profile.did);
-    if (splitLoaded[1] != atId || splitLoaded[2] === "post")
-      profilePage(profile);
+    profilePage(profile);
 
-    profileUrlChange(currentUrl, loadedUrl);
+    profileUrlChange(currentPath, loadedPath);
   }
 }
 
-export async function profileUrlChange(currentUrl: string, loadedUrl: string) {
-  const splitUrl = currentUrl.split("/");
-  const splitLoaded = loadedUrl.split("/");
-  const currentPlace = splitUrl[2] ?? "posts";
-  const lastPlace = splitLoaded[2] ?? "posts";
+export async function profileUrlChange(
+  currentPath: string,
+  loadedPath: string,
+) {
+  const currentLocation = getLocationFromPath(currentPath);
+  const lastLocation = getLocationFromPath(loadedPath);
 
-  const did = splitUrl[1];
+  const did = getAtIdFromPath(currentPath);
 
   const content = document.getElementById("content");
   document
     .querySelector(
-      `[value="${(lastPlace ?? "posts") + (lastPlace === "search" ? splitLoaded[3] : "")}"]`,
+      `[value="${lastLocation + (lastLocation === "search" ? "" : "")}"]`,
     )
     ?.classList.remove("active");
   document
     .querySelector(
-      `[value="${currentPlace + (currentPlace === "search" ? window.location.search : "")}"]`,
+      `[value="${currentLocation + (currentLocation === "search" ? window.location.search : "")}"]`,
     )
     ?.classList.add("active");
-  if (splitLoaded[2] != splitUrl[2]) content.replaceChildren();
+
+  if (currentLocation !== lastLocation) content.replaceChildren();
   let posts: HTMLElement[];
-  let forceReload =
-    currentPlace === lastPlace && splitLoaded[1]?.slice(0, 3) === "did:";
-  const feed = feedConfig[currentPlace] ?? feedConfig.default;
+  let forceReload = lastLocation !== "post";
+  const feed = feedConfig[currentLocation] ?? feedConfig.default;
   posts = await hydrateFeed(
-    feed.endpoint ?? urlEquivalents[currentPlace][0],
-    feed.params(did, currentPlace),
+    feed.endpoint ?? urlEquivalents[currentLocation][0],
+    feed.params(did, currentLocation),
     forceReload,
     feed.type,
   );
   content.replaceChildren(...posts);
 }
 
-export function profileTrim(currentUrl: string, loadedUrl: string) {
-  history.pushState(null, "", new URL(window.location.href.slice(0, -1)));
-  profileRoute(currentUrl.slice(0, -1), loadedUrl);
+export function profileTrim(currentPath: string, loadedPath: string) {
+  const newPath = currentPath.slice(0, -1);
+  history.pushState(null, "", newPath);
+  profileRoute(newPath, loadedPath);
 }
 
 const feedConfig = {

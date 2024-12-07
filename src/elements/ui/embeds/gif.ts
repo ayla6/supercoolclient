@@ -39,15 +39,15 @@ export function loadEmbedGif(url: URL) {
     width: Number(urlParams.get("ww") ?? 1600),
     height: Number(urlParams.get("hh") ?? 900),
   };
-  const splitPathname = url.pathname.split("/");
-  const gifId = splitPathname[1].slice(0, -2);
-  const gifName = splitPathname[2];
+  const gifId = url.pathname.slice(1, url.pathname.indexOf("/", 2) - 2);
+  const gifName = url.pathname.slice(url.pathname.lastIndexOf("/") + 1);
   const videoUrl = `https://t.gifs.bsky.app/${gifId}P3/${gifName}`;
   const thumbnailUrl = `https://t.gifs.bsky.app/${gifId}AF/${gifName}`;
 
   const thumbnail = elem("div", { className: "video-thumbnail" }, [
     elem("img", {
       src: thumbnailUrl,
+      loading: "lazy",
     }),
     elem("div", { className: "play-button" }),
   ]);

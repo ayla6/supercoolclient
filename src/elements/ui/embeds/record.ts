@@ -1,7 +1,7 @@
 import { AppBskyEmbedRecord, AppBskyFeedDefs } from "@atcute/client/lexicons";
 import { postCard } from "../post_card";
 import { elem } from "../../utils/elem";
-import { getUrlFromUri } from "../../utils/link_processing";
+import { getPathFromUri } from "../../utils/link_processing";
 
 export function loadEmbedRecord(embed: AppBskyEmbedRecord.View, did: string) {
   const record = embed.record;
@@ -41,7 +41,7 @@ export function loadEmbedRecord(embed: AppBskyEmbedRecord.View, did: string) {
     return [
       elem("a", {
         className: "simple-card",
-        href: getUrlFromUri(record.uri),
+        href: getPathFromUri(record.uri),
         innerHTML: text,
       }),
     ];

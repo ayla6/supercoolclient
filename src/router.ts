@@ -25,23 +25,23 @@ import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
 import { deleteCache } from "./elements/utils/cache";
 
-let loadedUrl: string = "";
+let loadedPath: string = "";
 
 function saveLastLocation() {
-  loadedUrl = window.location.pathname;
-  if (window.location.search) loadedUrl += "/" + window.location.search;
+  loadedPath = window.location.pathname;
+  if (window.location.search) loadedPath += "/" + window.location.search;
 }
 
-const routes: { [key: string]: string } = {
+const routesBase: { [key: string]: string } = {
   "/": "home",
   "/notifications": "notifications",
-  "/:did/": "profileTrim",
-  "/:did": "profile",
-  "/:did/:location": "profile",
-  "/:did/post/:rkey": "post",
-  "/:did/post/:rkey/likes": "postLikes",
-  "/:did/post/:rkey/reposts": "postReposts",
-  "/:did/post/:rkey/quotes": "postQuotes",
+  "/:/": "profileTrim",
+  "/:": "profile",
+  "/:/:location": "profile",
+  "/:/post/:": "post",
+  "/:/post/:/likes": "postLikes",
+  "/:/post/:/reposts": "postReposts",
+  "/:/post/:/quotes": "postQuotes",
 };
 const changeRoutes: { [key: string]: Function } = {
   home: homeRoute,
@@ -61,55 +61,87 @@ const localRoutes: { [key: string]: Function } = {
   postReposts: repostsRoute,
   postQuotes: quotesRoute,
 };
-function matchRoute(url: string) {
-  const splitUrl = url.split("/");
+
+type computedRoutes = [{ key: string[]; routeName: string }];
+
+const routes = computeRoutes(routesBase);
+function computeRoutes(routes: { [key: string]: string }) {
+  const computedRoutes = [];
   for (const route of Object.keys(routes)) {
-    const routeParts = route.split("/");
-    if (routeParts.length !== splitUrl.length) continue;
+    computedRoutes.push({ key: route.split("/"), routeName: routes[route] });
+  }
+  return computedRoutes as computedRoutes;
+}
+
+function matchRoute(path: string) {
+  const splitUrl = path.split("/");
+  for (const route of routes) {
+    if (splitUrl.length !== route.key.length) continue;
 
     let match = true;
-    for (let i = 0; i < routeParts.length; i++) {
-      if (routeParts[i].startsWith(":")) continue;
-      if (routeParts[i] !== splitUrl[i]) {
+    for (let i = 0; i < route.key.length; i++) {
+      if (route.key[i] === ":") continue;
+      if (route.key[i] !== splitUrl[i]) {
         match = false;
         break;
       }
     }
 
-    if (match) return routes[route];
+    if (match) return route.routeName;
   }
   return null;
 }
 
 export async function updatePage() {
   window.onscroll = null;
-  const currentUrl = window.location.pathname;
-  const splitUrl = window.location.pathname.split("/");
-  const splitLoaded = loadedUrl.split("/");
+  const currentPath = window.location.pathname;
+
+  const curFirstSlash = currentPath.indexOf("/", 1);
+  const curSecondSlash = currentPath.indexOf("/", curFirstSlash) + 1;
+  const curThirdSlash = currentPath.indexOf("/", curSecondSlash);
+
+  const curFirstSubdir = currentPath.slice(1, curFirstSlash);
+  const curSecondSubdir = curThirdSlash
+    ? currentPath.slice(curSecondSlash, curThirdSlash)
+    : currentPath.slice(curSecondSlash);
+
+  const loaFirstSlash = loadedPath.indexOf("/", 1);
+  const loaSecondSlash = loadedPath.indexOf("/", loaFirstSlash) + 1;
+  const loaThirdSlash = loadedPath.indexOf("/", loaSecondSlash);
+
+  const loaFirstSubdir = loadedPath.slice(1, loaFirstSlash);
+  const loaSecondSubdir = loaThirdSlash
+    ? loadedPath.slice(loaSecondSlash, loaThirdSlash)
+    : loadedPath.slice(loaSecondSlash);
+
   let ableToLocal = true;
-  if (splitUrl[1] != splitLoaded[1]) {
+  if (curFirstSubdir !== loaFirstSubdir) {
     document.body.setAttribute("style", "");
     ableToLocal = false;
   }
-  const route = matchRoute(currentUrl);
-  if (ableToLocal && route === matchRoute(loadedUrl)) {
-    localRoutes[route](currentUrl, loadedUrl);
+  const route = matchRoute(currentPath);
+  if (ableToLocal && route === matchRoute(loadedPath)) {
+    localRoutes[route](currentPath, loadedPath);
   } else {
-    if (loadedUrl[2] === "post" && currentUrl[2] !== "post")
+    if (loaSecondSubdir === "post" && curSecondSubdir !== "post")
       deleteCache("app.bsky.feed.getPostThread");
     document.title = "SuperCoolClient";
     window.scrollTo({ top: 0 });
     document.body.removeChild(document.getElementById("container"));
     document.body.append(elem("div", { id: "container" }));
-    changeRoutes[route](currentUrl, loadedUrl);
+    changeRoutes[route](currentPath, loadedPath);
   }
   saveLastLocation();
 }
 
 export function profileRedirect(did: string) {
-  let splitUrl = window.location.href.split("/");
-  splitUrl[3] = did;
-  history.pushState(null, "", new URL(splitUrl.join("/")));
+  const path = window.location.pathname;
+  const indexOfSlash = path.indexOf("/", 1);
+  history.pushState(
+    null,
+    "",
+    "/" + did + (indexOfSlash === -1 ? "" : path.slice(indexOfSlash)),
+  );
 }
 
 export function navigateTo(url: URL | string) {

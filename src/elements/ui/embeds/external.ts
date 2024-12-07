@@ -14,7 +14,7 @@ export function loadEmbedExternal(
     const card = elem("a", { href: embed.external.uri, className: "external" });
     if (embed.external.thumb) {
       const image = elem("div", { className: "image" }, [
-        elem("img", { src: embed.external.thumb }),
+        elem("img", { src: embed.external.thumb, loading: "lazy" }),
       ]);
       card.append(image);
     }
@@ -31,7 +31,7 @@ export function loadEmbedExternal(
             })
           : "",
         elem("span", {
-          innerHTML: escapeHTML(new URL(embed.external.uri).host),
+          innerHTML: escapeHTML(url.host),
           className: "small",
         }),
       ]),

@@ -21,9 +21,9 @@ function navButton(feed: string, title: string) {
 }
 export async function homeRoute(
   currentUrl: Array<string>,
-  loadedUrl: Array<string>,
+  loadedPath: Array<string>,
 ) {
-  if (loadedUrl[1] != "") {
+  if (loadedPath[1] != "") {
     const container = document.getElementById("container");
     const leftBar = document.createElement("div");
     leftBar.className = "side-bar sticky";
@@ -103,13 +103,13 @@ async function loadHomeFeed(
   }
 }
 
-export async function homeUrlChange(currentUrl?: string, loadedUrl?: string) {
+export async function homeUrlChange(currentUrl?: string, loadedPath?: string) {
   const url = new URL(window.location.href);
   const params = url.searchParams;
   let feedgen = params.get("feed");
   let title = params.get("title");
 
-  history.replaceState({}, "", window.location.href.split("?")[0]);
+  history.replaceState({}, "", url.pathname);
 
-  loadHomeFeed(feedgen, title, loadedUrl?.split("/")[1] === "");
+  loadHomeFeed(feedgen, title, loadedPath === "/");
 }

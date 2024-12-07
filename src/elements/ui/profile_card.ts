@@ -13,6 +13,7 @@ export function profileCard(profile: AppBskyActorDefs.ProfileView) {
         elem("img", {
           className: "pfp",
           src: profile.avatar,
+          loading: "lazy",
         }),
       ]),
     ]),

@@ -6,7 +6,7 @@ import { postCard } from "../ui/post_card";
 import { elem } from "../utils/elem";
 import { Brand } from "@atcute/client/lexicons";
 import { setPreloaded } from "../../routes/post";
-import { getUrlFromUri } from "../utils/link_processing";
+import { getPathFromUri } from "../utils/link_processing";
 
 export function loadThread(
   postThread: AppBskyFeedGetPostThread.Output,
@@ -37,7 +37,7 @@ export function loadThread(
         mainThreadPosts.prepend(
           elem("a", {
             className: "simple-card",
-            href: getUrlFromUri(post.uri),
+            href: getPathFromUri(post.uri),
             innerHTML:
               post.$type === "app.bsky.feed.defs#blockedPost"
                 ? "Blocked post"
@@ -145,7 +145,7 @@ export function loadThread(
               elem("a", {
                 className: "simple-card",
                 innerHTML: "Continue thread...",
-                href: getUrlFromUri(post.post.uri),
+                href: getPathFromUri(post.post.uri),
                 onclick: () => setPreloaded(post.post),
               }),
             );

@@ -35,7 +35,6 @@ export async function hydrateFeed(
   let { items, cursor } = await _load(forceReload);
   params.cursor = cursor;
   if (cursor && inCache(nsid, params)) {
-    console.log("maaaa");
     while (inCache(nsid, params)) {
       const { items: newItems, cursor } = await _load();
       params.cursor = cursor;

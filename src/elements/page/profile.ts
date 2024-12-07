@@ -1,6 +1,6 @@
 import { AppBskyActorDefs, SCCProfile } from "@atcute/client/lexicons";
 import { manager } from "../../login";
-import { changeToWebp, idChoose } from "../utils/link_processing.ts";
+import { changeImageFormat, idChoose } from "../utils/link_processing.ts";
 import { elem } from "../utils/elem";
 import { processText } from "../utils/text_processing";
 import { inCache } from "../utils/cache";
@@ -75,7 +75,7 @@ export function header(
   document.body.style.cssText = customCss;
   return elem("div", { className: "profile-header" }, [
     elem("a", { className: "pfp-holder" }, [
-      elem("img", { className: "pfp", src: changeToWebp(profile.avatar) }),
+      elem("img", { className: "pfp", src: changeImageFormat(profile.avatar) }),
     ]),
     elem("div", { className: "header" }, [
       elem("span", {
@@ -141,7 +141,7 @@ function mediaNavButton(name: string, did: string, text: string) {
       if (type === "app.bsky.embed.images#view") {
         for (const image of embed.images) {
           const img = document.createElement("img");
-          img.src = changeToWebp(image.thumb);
+          img.src = changeImageFormat(image.thumb);
           images.append(img);
           if (++imageCount === 4) break;
         }
@@ -153,6 +153,7 @@ function mediaNavButton(name: string, did: string, text: string) {
         const img = document.createElement("img");
         img.src = embed.thumbnail;
         images.append(img);
+        imageCount++;
       }
     }
   }

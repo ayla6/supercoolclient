@@ -1,5 +1,10 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
-import { getUrlFromUri, idChoose } from "../utils/link_processing.ts";
+import {
+  getAtIdFromPath,
+  getDidFromUri,
+  getPathFromUri,
+  idChoose,
+} from "../utils/link_processing.ts";
 import { manager, rpc } from "../../login";
 import { elem } from "../utils/elem";
 import {
@@ -29,7 +34,7 @@ export function postCard(
   const authorDid = author.did;
 
   const authorHref = `/${authorDid}`;
-  const href = getUrlFromUri(post.uri);
+  const href = getPathFromUri(post.uri);
 
   const indexedAt = new Date(post.indexedAt);
   const createdAt = new Date(record.createdAt);
@@ -46,6 +51,7 @@ export function postCard(
       elem("img", {
         className: "pfp",
         src: post.author.avatar,
+        loading: "lazy",
       }),
     ],
   );
@@ -135,18 +141,15 @@ export function postCard(
 
   if ("reply" in postHousing) {
     const replyTo = postHousing.reply.parent;
+    const atId =
+      replyTo.$type === "app.bsky.feed.defs#postView"
+        ? idChoose(replyTo.author)
+        : getDidFromUri(replyTo.uri);
     card.append(
       elem("span", { className: "small reply-to", innerHTML: "Reply to " }, [
         elem("a", {
-          innerHTML:
-            replyTo.$type === "app.bsky.feed.defs#postView"
-              ? idChoose(replyTo.author)
-              : replyTo.uri.split("/")[2],
-          href:
-            "/" +
-            (replyTo.$type === "app.bsky.feed.defs#postView"
-              ? replyTo.author.did
-              : replyTo.uri.split("/")[2]),
+          innerHTML: atId,
+          href: "/" + atId,
         }),
       ]),
     );
@@ -184,7 +187,7 @@ export function postCard(
   }
 
   if (fullView) {
-    let warnings = [];
+    const warnings = [];
     if (
       post.indexedAt &&
       Math.abs(indexedAt.getTime() - createdAt.getTime()) > 250000
@@ -348,7 +351,8 @@ async function updateInteraction(
     } else {
       const recordUri = post.viewer[type];
       if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
-      const [, , did, , rkey] = recordUri.split("/");
+      const did = recordUri.slice(5, recordUri.indexOf("/", 6));
+      const rkey = recordUri.slice(recordUri.lastIndexOf("/") + 1);
       await rpc.call("com.atproto.repo.deleteRecord", {
         data: { rkey, collection, repo: did },
       });

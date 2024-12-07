@@ -1,7 +1,7 @@
 import { AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
-import { changeToWebp } from "../../utils/link_processing";
+import { changeImageFormat } from "../../utils/link_processing";
 
 export function image(
   image: AppBskyEmbedImages.ViewImage,
@@ -11,6 +11,7 @@ export function image(
   const img = elem("img", {
     title: image.alt,
     alt: image.alt,
+    loading: "lazy",
   });
   const imageHolder = elem(
     "a",
@@ -21,12 +22,12 @@ export function image(
     [img],
   );
 
-  const fullsize = image.fullsize.split("@")[0] + "@png";
+  const fullsize = changeImageFormat(image.fullsize, "png");
 
   imageHolder.style.cssText = getProperSize(image.aspectRatio, isSingleImage);
   if (image.aspectRatio && image.aspectRatio.height <= 350) {
     img.src = fullsize;
-  } else img.src = changeToWebp(image.thumb);
+  } else img.src = changeImageFormat(image.thumb);
 
   imageHolder.href = fullsize;
 

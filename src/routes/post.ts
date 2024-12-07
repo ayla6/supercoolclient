@@ -6,22 +6,25 @@ import { rpc } from "../login";
 import { loadThread } from "../elements/page/thread";
 import { profileRedirect } from "../router";
 import { stickyHeader } from "../elements/ui/sticky_header";
+import {
+  getAtIdFromPath,
+  getLocationFromPath,
+  getUriFromPath,
+} from "../elements/utils/link_processing";
 
 let preloadedPost: AppBskyFeedDefs.PostView;
 export function setPreloaded(post: AppBskyFeedDefs.PostView) {
   preloadedPost = post;
 }
-export async function postRoute(currentUrl: string, loadedUrl: string) {
-  const splitUrl = currentUrl.split("/");
-  const splitLoaded = loadedUrl.split("/");
+export async function postRoute(currentUrl: string, loadedPath: string) {
   const container = document.getElementById("container");
   const content = elem("div", { id: "content" });
 
-  if (
-    preloadedPost &&
-    preloadedPost.uri.split("/")[4] === splitUrl[3] &&
-    splitUrl[1] === preloadedPost.author.did
-  ) {
+  const atId = getAtIdFromPath(currentUrl);
+  const uri = getUriFromPath(currentUrl);
+  const lastLocation = getLocationFromPath(loadedPath);
+
+  if (preloadedPost && atId === preloadedPost.author.did) {
     const mainPost = postCard(preloadedPost, true);
     mainPost.classList.add("full");
     content.append(mainPost);
@@ -34,11 +37,9 @@ export async function postRoute(currentUrl: string, loadedUrl: string) {
     await get(
       "app.bsky.feed.getPostThread",
       {
-        params: {
-          uri: `at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}`,
-        },
+        params: { uri },
       },
-      splitLoaded[2] !== "post",
+      lastLocation !== "post",
     )
   ).data;
 
@@ -48,7 +49,7 @@ export async function postRoute(currentUrl: string, loadedUrl: string) {
 
     if (preloadedPost) Object.assign(preloadedPost, post);
     if (!cache["app.bsky.feed.getPosts"]) cache["app.bsky.feed.getPosts"] = {};
-    const params = `{"uris":["at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}"]}`;
+    const params = `{"uris":["${uri}"]}`;
     cache["app.bsky.feed.getPosts"][params] = {
       [params]: { data: { posts: [post] } },
     };
@@ -70,7 +71,7 @@ export async function postRoute(currentUrl: string, loadedUrl: string) {
 
   if (
     postThread.thread.$type === "app.bsky.feed.defs#threadViewPost" &&
-    splitUrl[1] != postThread.thread.post.author.did
+    atId != postThread.thread.post.author.did
   )
     profileRedirect(postThread.thread.post.author.did);
 

@@ -3,26 +3,26 @@ import { elem } from "../utils/elem";
 import { feedNSID, hydrateFeed } from "../content/feed";
 import { postCard } from "../ui/post_card";
 import { stickyHeader } from "../ui/sticky_header";
+import { getUriFromPath } from "../utils/link_processing";
 
 export async function statsPage(
-  currentUrl: string,
-  loadedUrl: string,
+  currentPath: string,
   title: string,
   nsid: feedNSID,
   func?: Function,
 ) {
-  const splitUrl = currentUrl.split("/");
   const container = document.getElementById("container");
-  let content = document.getElementById("content");
+  const content = elem("div", { id: "content" });
 
-  content = elem("div", { id: "content" });
+  const uri = getUriFromPath(currentPath);
+
   container.replaceChildren(stickyHeader(title), content);
   content.append(
     postCard(
       (
         await get("app.bsky.feed.getPosts", {
           params: {
-            uris: [`at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}`],
+            uris: [uri],
           },
         })
       ).data.posts[0],
@@ -33,7 +33,7 @@ export async function statsPage(
     ...(await hydrateFeed(
       nsid,
       {
-        uri: `at://${splitUrl[1]}/app.bsky.feed.post/${splitUrl[3]}`,
+        uri: uri,
       },
       true,
       func,

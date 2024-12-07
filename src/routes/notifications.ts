@@ -2,7 +2,7 @@ import { get } from "../elements/utils/cache";
 
 export async function notificationsRoute(
   currentUrl: string,
-  loadedUrl: string,
+  loadedPath: string,
 ) {
   const container = document.getElementById("container");
   const content = document.createElement("div");
