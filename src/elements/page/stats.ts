@@ -15,10 +15,8 @@ export async function statsPage(
   const container = document.getElementById("container");
   let content = document.getElementById("content");
 
-  container.innerHTML = "";
-  container.append(stickyHeader(title));
   content = elem("div", { id: "content" });
-  container.append(content);
+  container.replaceChildren(stickyHeader(title), content);
   content.append(
     postCard(
       (

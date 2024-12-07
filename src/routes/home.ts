@@ -25,7 +25,6 @@ export async function homeRoute(
 ) {
   if (loadedUrl[1] != "") {
     const container = document.getElementById("container");
-    container.innerHTML = "";
     const leftBar = document.createElement("div");
     leftBar.className = "side-bar sticky";
     const feedNav = document.createElement("div");
@@ -52,11 +51,10 @@ export async function homeRoute(
       feedNav.append(navButton(feed.uri, feed.displayName));
     }
     leftBar.append(feedNav);
-    container.append(leftBar);
 
     const content = document.createElement("div");
     content.id = "content";
-    container.append(content);
+    container.replaceChildren(leftBar, content);
     homeUrlChange();
   }
 }
@@ -88,7 +86,7 @@ async function loadHomeFeed(
       ?.classList.add("active");
   }
   const content = document.getElementById("content");
-  if (currentFeed !== lastFeed) content.innerHTML = "";
+  if (currentFeed !== lastFeed) content.replaceChildren();
   if (currentFeed === feedgen) {
     const forceReload = currentFeed === lastFeed && wasAtHome;
     const items = await hydrateFeed(
@@ -99,8 +97,7 @@ async function loadHomeFeed(
       forceReload,
     );
     if (currentFeed === feedgen) {
-      content.innerHTML = "";
-      content.append(...items);
+      content.replaceChildren(...items);
       if (!forceReload) window.scrollTo({ top: currentScroll[currentFeed] });
     }
   }

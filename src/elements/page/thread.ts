@@ -16,9 +16,9 @@ export function loadThread(
   if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
     const thread = postThread.thread;
 
-    let mainThreadPosts = document.createDocumentFragment();
-    let replyPosts = document.createDocumentFragment();
-    let mutedPosts = document.createDocumentFragment();
+    const mainThreadPosts = document.createDocumentFragment();
+    const replyPosts = document.createDocumentFragment();
+    //let mutedPosts = document.createDocumentFragment();
 
     if (thread.parent) {
       let currentThread = thread;
@@ -157,15 +157,16 @@ export function loadThread(
     if (Boolean(thread.replies?.length))
       loadReplies(thread.replies, 0, [], false, true);
 
-    outputElement.innerHTML = "";
-    outputElement.append(mainThreadPosts);
+    outputElement.replaceChildren(
+      mainThreadPosts,
+      replyPosts,
+      elem("div", { className: "buffer" }),
+    );
     mainPost.scrollIntoView();
-    outputElement.append(replyPosts);
-    if (mutedPosts.hasChildNodes())
-      outputElement.append(mutedPostsButton(outputElement, mutedPosts));
-    outputElement.append(elem("div", { className: "buffer" }));
+    //if (mutedPosts.hasChildNodes())
+    //  outputElement.append(mutedPostsButton(outputElement, mutedPosts));
   } else {
-    outputElement.append(
+    outputElement.replaceChildren(
       elem("div", {
         className: "simple-card",
         innerHTML:

@@ -7,7 +7,6 @@ import { inCache } from "../utils/cache";
 
 export function profilePage(profile: AppBskyActorDefs.ProfileViewDetailed) {
   const container = document.getElementById("container");
-  container.innerHTML = "";
   document.title = profile.handle + " — SuperCoolClient";
   const did = profile.did;
   let sccprofile: any;
@@ -22,7 +21,7 @@ export function profilePage(profile: AppBskyActorDefs.ProfileViewDetailed) {
       })
     )?.data.value;
     } catch (error) {}*/
-  container.append(
+  container.replaceChildren(
     header(profile, sccprofile),
     elem("div", { className: "side-bar" }, [
       elem("div", { className: "side-nav" }, [

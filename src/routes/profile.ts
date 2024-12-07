@@ -57,7 +57,7 @@ export async function profileUrlChange(currentUrl: string, loadedUrl: string) {
       `[value="${currentPlace + (currentPlace === "search" ? window.location.search : "")}"]`,
     )
     ?.classList.add("active");
-  if (splitLoaded[2] != splitUrl[2]) content.innerHTML = "";
+  if (splitLoaded[2] != splitUrl[2]) content.replaceChildren();
   let posts: HTMLElement[];
   let forceReload =
     currentPlace === lastPlace && splitLoaded[1]?.slice(0, 3) === "did:";
@@ -68,8 +68,7 @@ export async function profileUrlChange(currentUrl: string, loadedUrl: string) {
     forceReload,
     feed.type,
   );
-  content.innerHTML = "";
-  content.append(...posts);
+  content.replaceChildren(...posts);
 }
 
 export function profileTrim(currentUrl: string, loadedUrl: string) {

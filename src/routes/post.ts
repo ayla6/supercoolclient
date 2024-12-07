@@ -15,10 +15,7 @@ export async function postRoute(currentUrl: string, loadedUrl: string) {
   const splitUrl = currentUrl.split("/");
   const splitLoaded = loadedUrl.split("/");
   const container = document.getElementById("container");
-  container.innerHTML = "";
-  container.append(stickyHeader("Post"));
   const content = elem("div", { id: "content" });
-  container.append(content);
 
   if (
     preloadedPost &&
@@ -30,6 +27,8 @@ export async function postRoute(currentUrl: string, loadedUrl: string) {
     content.append(mainPost);
     mainPost.scrollIntoView();
   }
+
+  container.replaceChildren(stickyHeader("Post"), content);
 
   const postThread = (
     await get(
