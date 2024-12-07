@@ -26,7 +26,6 @@ export function handleEmbed(
     | AppBskyEmbedRecord.View
     | AppBskyEmbedExternal.View
     | AppBskyEmbedRecordWithMedia.View,
-  did: string,
 ) {
-  if (embed) return embedHandlers[(embed as any).$type](embed, did);
+  if (embed) return embedHandlers[(embed as any).$type](embed);
 }

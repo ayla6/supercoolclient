@@ -3,10 +3,7 @@ import { elem } from "../../utils/elem";
 import { escapeHTML } from "../../utils/text_processing";
 import { loadEmbedGif } from "./gif";
 
-export function loadEmbedExternal(
-  embed: AppBskyEmbedExternal.View,
-  did: string,
-) {
+export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
   const url = new URL(embed.external.uri);
   if (url.hostname === "media.tenor.com") {
     return loadEmbedGif(url);

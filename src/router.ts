@@ -96,6 +96,8 @@ export async function updatePage() {
   window.onscroll = null;
   const currentPath = window.location.pathname;
 
+  // this looks really ugly damn  maybe i should put it in a function
+
   const curFirstSlash = currentPath.indexOf("/", 1);
   const curSecondSlash = currentPath.indexOf("/", curFirstSlash) + 1;
   const curThirdSlash = currentPath.indexOf("/", curSecondSlash);

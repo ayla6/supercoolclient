@@ -37,7 +37,7 @@ function loadVideo(embed: AppBskyEmbedVideo.View) {
   return videoContainer;
 }
 
-export function loadEmbedVideo(embed: AppBskyEmbedVideo.View, did: string) {
+export function loadEmbedVideo(embed: AppBskyEmbedVideo.View) {
   const thumbnail = elem("div", { className: "video-thumbnail" }, [
     elem("img", {
       src: embed.thumbnail,

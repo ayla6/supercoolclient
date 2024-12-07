@@ -5,7 +5,6 @@ import { changeImageFormat } from "../../utils/link_processing";
 
 export function image(
   image: AppBskyEmbedImages.ViewImage,
-  did: string,
   isSingleImage: boolean,
 ) {
   const img = elem("img", {
@@ -43,7 +42,7 @@ export function loadEmbedImages(embed: AppBskyEmbedImages.View, did: string) {
           "media-container" + (embed.images.length === 1 ? "" : " multi"),
       },
       embed.images.map((img, index) => {
-        return image(img, did, embed.images.length === 1);
+        return image(img, embed.images.length === 1);
       }),
     ),
   ];

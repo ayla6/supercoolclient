@@ -3,7 +3,7 @@ import { postCard } from "../post_card";
 import { elem } from "../../utils/elem";
 import { getPathFromUri } from "../../utils/link_processing";
 
-export function loadEmbedRecord(embed: AppBskyEmbedRecord.View, did: string) {
+export function loadEmbedRecord(embed: AppBskyEmbedRecord.View) {
   const record = embed.record;
   if (record.$type === "app.bsky.embed.record#viewRecord") {
     const value = record.value as { $type?: string };

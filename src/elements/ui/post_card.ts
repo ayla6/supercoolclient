@@ -166,11 +166,7 @@ export function postCard(
   }
   if (record.embed) {
     content.append(
-      elem(
-        "div",
-        { className: "embeds" },
-        handleEmbed(post.embed as any, authorDid),
-      ),
+      elem("div", { className: "embeds" }, handleEmbed(post.embed as any)),
     );
   }
   card.append(content);

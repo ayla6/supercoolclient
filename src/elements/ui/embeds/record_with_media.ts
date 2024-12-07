@@ -4,10 +4,6 @@ import { handleEmbed } from "./embed_handlers";
 
 export function loadEmbedRecordWithMedia(
   embed: AppBskyEmbedRecordWithMedia.View,
-  did: string,
 ) {
-  return [
-    handleEmbed(embed.media as any, did)[0],
-    loadEmbedRecord(embed.record, did)[0],
-  ];
+  return [handleEmbed(embed.media as any)[0], loadEmbedRecord(embed.record)[0]];
 }
