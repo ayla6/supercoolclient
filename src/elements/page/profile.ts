@@ -151,7 +151,7 @@ function mediaNavButton(name: string, did: string, text: string) {
         embed.thumbnail
       ) {
         const img = document.createElement("img");
-        img.src = changeToWebp(embed.thumbnail);
+        img.src = embed.thumbnail;
         images.append(img);
       }
     }

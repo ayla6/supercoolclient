@@ -10,15 +10,15 @@ const map: { [key: string]: string } = {
 };
 
 export function escapeHTML(input: string): string {
-  return input.replaceAll(/[<>&"']/g, (m) => map[m]);
+  return input.replace(/[<>&"']/g, (m) => map[m]);
 }
 
 export function processText(input: string = ""): string {
   return input
-    .replaceAll(/[<>&]/g, (m) => map[m])
-    .replaceAll(emojiRegex, '<span class="emoji">$1</span>')
-    .replaceAll(/`(.*?)`/g, "<code>$1</code>")
-    .replaceAll(/\n/g, "<br/>");
+    .replace(/[<>&]/g, (m) => map[m])
+    .replace(emojiRegex, '<span class="emoji">$1</span>')
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    .replace(/\n/g, "<br/>");
 }
 
 export function processRichText(text: string, facets: Facet[]) {
