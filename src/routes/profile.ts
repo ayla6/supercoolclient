@@ -52,7 +52,7 @@ export async function profileUrlChange(
 
   if (currentLocation !== previousLocation) content.replaceChildren();
   let posts: HTMLElement[];
-  let reload = previousLocation !== "post";
+  let reload = previousLocation === currentLocation;
   const feed = feedConfig[currentLocation] ?? feedConfig.default;
   posts = await hydrateFeed(
     feed.endpoint ?? urlEquivalents[currentLocation][0],
