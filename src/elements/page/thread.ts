@@ -66,10 +66,34 @@ export function loadThread(
       const lastChild = replies[replies.length - 1];
       for (const post of replies) {
         if (
-          post?.$type === "app.bsky.feed.defs#threadViewPost" &&
-          !(lockToAuthor && post.post.author.did !== thread.post.author.did)
-        ) {
-          const isLastChild = post === lastChild;
+          lockToAuthor &&
+          (post.$type !== "app.bsky.feed.defs#threadViewPost" ||
+            post.post.author.did !== thread.post.author.did)
+        )
+          continue;
+        const isLastChild = post === lastChild;
+
+        const replyContainer = elem("div", {
+          className: "reply-container" + (stringMargin ? " added-margin" : ""),
+        });
+        replyContainer.append(...previousStrings.map(getString));
+        let strings: boolean[] = previousStrings;
+        if (stringMargin && replies?.length > 1) {
+          const stringContainer = elem("div", {
+            className: "string-container",
+          });
+          strings = previousStrings.slice();
+          strings.push(isLastChild);
+          stringContainer.append(
+            elem("div", { className: "connect-string" }),
+            elem("div", {
+              className: "reply-string" + (isLastChild ? " transparent" : ""),
+            }),
+          );
+          replyContainer.append(stringContainer);
+        }
+
+        if (post.$type === "app.bsky.feed.defs#threadViewPost") {
           const isMainThread =
             wasMainThread && post.post.author.did === thread.post.author.did;
 
@@ -102,27 +126,6 @@ export function loadThread(
             ),
           );
 
-          const replyContainer = elem("div", {
-            className:
-              "reply-container" + (stringMargin ? " added-margin" : ""),
-          });
-          replyContainer.append(...previousStrings.map(getString));
-
-          let strings: boolean[] = previousStrings;
-          if (stringMargin && replies?.length > 1) {
-            const stringContainer = elem("div", {
-              className: "string-container",
-            });
-            strings = previousStrings.slice();
-            strings.push(isLastChild);
-            stringContainer.append(
-              elem("div", { className: "connect-string" }),
-              elem("div", {
-                className: "reply-string" + (isLastChild ? " transparent" : ""),
-              }),
-            );
-            replyContainer.append(stringContainer);
-          }
           replyContainer.append(replyElem);
           outputElement.append(replyContainer);
 
@@ -151,6 +154,15 @@ export function loadThread(
             );
             outputElement.append(continueThreadContainer);
           }
+        } else if (post.$type === "app.bsky.feed.defs#blockedPost") {
+          replyContainer.append(
+            elem("a", {
+              className: "simple-card",
+              href: getPathFromUri(post.uri),
+              textContent: "Blocked post",
+            }),
+          );
+          outputElement.append(replyContainer);
         }
       }
     }
