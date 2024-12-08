@@ -5,11 +5,11 @@ import { profilePage } from "../elements/page/profile";
 import { profileCard } from "../elements/ui/profile_card";
 import {
   getAtIdFromPath,
-  getLocationFromPath,
+  getFirstAndSecondSubdirs,
 } from "../elements/utils/link_processing";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
-  posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
+  "": ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
   media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
   replies: ["app.bsky.feed.getAuthorFeed", "posts_with_replies"],
   likes: ["app.bsky.feed.getActorLikes"],
@@ -40,8 +40,11 @@ export async function profileUrlChange(
   currentPath: string,
   previousPath: string,
 ) {
-  const currentLocation = getLocationFromPath(currentPath);
-  const previousLocation = getLocationFromPath(previousPath);
+  const [currentProfile, currentFeed] = getFirstAndSecondSubdirs(currentPath);
+  const [previousProfile, previousFeed] =
+    getFirstAndSecondSubdirs(previousPath);
+  const atSameProfile = currentProfile === previousProfile;
+  const atSameFeed = currentFeed === previousFeed;
 
   const did = getAtIdFromPath(currentPath);
 
@@ -50,14 +53,14 @@ export async function profileUrlChange(
   sideBar.querySelector(".active")?.classList.remove("active");
   sideBar.querySelector(`[href="${currentPath}"]`)?.classList.add("active");
 
-  if (currentLocation !== previousLocation) content.replaceChildren();
+  if (atSameProfile && !atSameFeed) content.replaceChildren();
   let posts: HTMLElement[];
-  let reload = previousLocation === currentLocation;
-  const feed = feedConfig[currentLocation] ?? feedConfig.default;
+  console.log(currentPath, previousPath);
+  const feed = feedConfig[currentFeed] ?? feedConfig.default;
   posts = await hydrateFeed(
-    feed.endpoint ?? urlEquivalents[currentLocation][0],
-    feed.params(did, currentLocation),
-    reload,
+    feed.endpoint ?? urlEquivalents[currentFeed][0],
+    feed.params(did, currentFeed),
+    atSameProfile && atSameFeed,
     feed.type,
   );
   if (currentPath === loadedPath) content.replaceChildren(...posts);

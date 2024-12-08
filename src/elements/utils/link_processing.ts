@@ -32,11 +32,6 @@ export function getAtIdFromPath(uri: string) {
     : uri.slice(1, secondSlashIndex);
 }
 
-export function getLocationFromPath(uri: string) {
-  const secondSlashIndex = uri.indexOf("/", 1) + 1;
-  return secondSlashIndex === 0 ? "posts" : uri.slice(secondSlashIndex);
-}
-
 export function getFirstAndSecondSubdirs(path: string) {
   const firstSlashIndex = path.indexOf("/", 1);
   const secondSlashIndex = path.indexOf("/", firstSlashIndex) + 1;

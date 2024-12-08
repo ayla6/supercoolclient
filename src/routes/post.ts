@@ -8,7 +8,6 @@ import { loadedPath, profileRedirect } from "../router";
 import { stickyHeader } from "../elements/ui/sticky_header";
 import {
   getAtIdFromPath,
-  getLocationFromPath,
   getUriFromPath,
 } from "../elements/utils/link_processing";
 
