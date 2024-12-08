@@ -104,7 +104,7 @@ export function postCard(
           href: "/" + repostedBy.did,
           textContent: idChoose(repostedBy),
         }),
-        " reposted ",
+        "reposted",
         elem("a", {
           className: "handle",
           href: authorHref,

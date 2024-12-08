@@ -71,7 +71,9 @@
 
     .handle-area {
         line-break: anywhere;
-        display: inline-block;
+        display: flex;
+        gap: 3px;
+        align-items: center;
     }
 
     .icon {
@@ -91,7 +93,6 @@
         display: inline-block;
         height: 11px;
         line-height: 12px;
-        margin-right: 3px;
         padding: 0px 4px;
         padding-top: 1px;
         //vertical-align: top;
@@ -137,6 +138,7 @@
         justify-content: left;
         font-size: 15px;
         line-height: 16px;
+        gap: 8px;
 
         .handle-area {
             display: flex;
@@ -145,7 +147,7 @@
         }
 
         .pfp-holder {
-            margin: 0 8px 0 1px;
+            margin: 0 0 0 1px;
         }
 
         .pfp-holder::after {

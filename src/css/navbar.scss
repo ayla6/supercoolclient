@@ -14,23 +14,20 @@
     $font-size: 14px;
     $padding-vertical: (($navbar-height - $font-size) * 0.5);
     a {
-        display: block;
+        display: flex;
+        flex-flow: row;
+        align-items: center;
         max-width: fit-content;
-        padding: $padding-vertical 12px;
-        vertical-align: middle;
+        padding: 0 12px;
         color: #fff;
         font-size: $font-size;
-        height: $font-size;
+        height: $navbar-height;
+        gap: 4px;
+        max-width: unset;
 
         svg {
             $height: 24px;
-            float: left;
-            position: relative;
             top: ($font-size - $height) * 0.5;
-        }
-
-        span {
-            margin-left: 4px;
         }
 
         &.active {
@@ -43,16 +40,15 @@
 @media (max-width: 920px) {
     #navbar {
         justify-content: space-between;
-        a {
-            padding-left: 0;
-            padding-right: 0;
-        }
         span {
             display: none;
         }
-        svg,
+        a,
         button {
-            width: 25vw;
+            padding: 0;
+            min-width: 0;
+            justify-content: center;
+            flex-grow: 1;
         }
     }
 }
