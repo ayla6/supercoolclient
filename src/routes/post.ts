@@ -16,13 +16,16 @@ let preloadedPost: AppBskyFeedDefs.PostView;
 export function setPreloaded(post: AppBskyFeedDefs.PostView) {
   preloadedPost = post;
 }
-export async function postRoute(currentUrl: string, loadedPath: string) {
+export async function postRoute(
+  currentPath: string,
+  loadedPath: string,
+  reload: boolean = true,
+) {
   const container = document.getElementById("container");
   const content = elem("div", { id: "content" });
 
-  const atId = getAtIdFromPath(currentUrl);
-  const uri = getUriFromPath(currentUrl);
-  const lastLocation = getLocationFromPath(loadedPath);
+  const atId = getAtIdFromPath(currentPath);
+  const uri = getUriFromPath(currentPath);
 
   if (preloadedPost && atId === preloadedPost.author.did) {
     const mainPost = postCard(preloadedPost, true);
@@ -33,17 +36,16 @@ export async function postRoute(currentUrl: string, loadedPath: string) {
 
   container.replaceChildren(stickyHeader("Post"), content);
 
-  const postThread = (
-    await get(
-      "app.bsky.feed.getPostThread",
-      {
-        params: { uri },
-      },
-      lastLocation !== "post",
-    )
-  ).data;
+  const { data: postThread } = await get(
+    "app.bsky.feed.getPostThread",
+    {
+      params: { uri },
+    },
+    reload,
+  );
 
-  if ("post" in postThread.thread) {
+  let rootPost: AppBskyFeedDefs.PostView;
+  if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
     const post = postThread.thread.post;
     document.title = `${post.author.handle}: “${(post.record as AppBskyFeedPost.Record).text}” — SuperCoolClient`;
 
@@ -53,19 +55,19 @@ export async function postRoute(currentUrl: string, loadedPath: string) {
     cache["app.bsky.feed.getPosts"][params] = {
       [params]: { data: { posts: [post] } },
     };
-  }
-  preloadedPost = null;
-
-  let rootPost: AppBskyFeedDefs.PostView;
-  if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
+    preloadedPost = null;
     const record = postThread.thread.post.record as AppBskyFeedPost.Record;
     if (record.reply)
       rootPost = (
-        await rpc.get("app.bsky.feed.getPosts", {
-          params: {
-            uris: [record.reply.root.uri],
+        await get(
+          "app.bsky.feed.getPosts",
+          {
+            params: {
+              uris: [record.reply.root.uri],
+            },
           },
-        })
+          reload,
+        )
       ).data.posts[0];
   }
 

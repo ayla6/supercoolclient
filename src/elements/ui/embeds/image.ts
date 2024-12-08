@@ -18,7 +18,7 @@ export function image(
       className: "image",
       target: " ",
     },
-    [img],
+    img,
   );
 
   const fullsize = changeImageFormat(image.fullsize, "png");
@@ -33,7 +33,11 @@ export function image(
   return imageHolder;
 }
 
-export function loadEmbedImages(embed: AppBskyEmbedImages.View, did: string) {
+export function loadEmbedImages(embed: AppBskyEmbedImages.View) {
+  const isSingleImage = embed.images.length === 1;
+  const func = (img: AppBskyEmbedImages.ViewImage) => {
+    return image(img, isSingleImage);
+  };
   return [
     elem(
       "div",
@@ -41,9 +45,8 @@ export function loadEmbedImages(embed: AppBskyEmbedImages.View, did: string) {
         className:
           "media-container" + (embed.images.length === 1 ? "" : " multi"),
       },
-      embed.images.map((img, index) => {
-        return image(img, embed.images.length === 1);
-      }),
+      null,
+      embed.images.map(func),
     ),
   ];
 }

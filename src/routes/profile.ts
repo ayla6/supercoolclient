@@ -1,6 +1,6 @@
 import { get } from "../elements/utils/cache";
 import { profileRedirect } from "../router";
-import { feedNSID, hydrateFeed } from "../elements/content/feed";
+import { feedNSID, hydrateFeed } from "../elements/ui/feed";
 import { profilePage } from "../elements/page/profile";
 import { profileCard } from "../elements/ui/profile_card";
 import {
@@ -18,13 +18,10 @@ const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
 export async function profileRoute(currentPath: string, loadedPath: string) {
   const atId = getAtIdFromPath(currentPath);
 
-  const profile = (
-    await get("app.bsky.actor.getProfile", {
-      params: { actor: atId },
-    })
-  ).data;
-  // load this just for the media thingie on the sidebar
-  await get("app.bsky.feed.getAuthorFeed", {
+  const { data: profile } = await get("app.bsky.actor.getProfile", {
+    params: { actor: atId },
+  });
+  const { data: lastMedia } = await get("app.bsky.feed.getAuthorFeed", {
     params: {
       actor: profile.did,
       filter: "posts_with_media",
@@ -33,7 +30,7 @@ export async function profileRoute(currentPath: string, loadedPath: string) {
   });
   if (window.location.pathname === currentPath) {
     if (atId != profile.did) profileRedirect(profile.did);
-    profilePage(profile);
+    profilePage(profile, lastMedia);
 
     profileUrlChange(currentPath, loadedPath);
   }
@@ -62,12 +59,12 @@ export async function profileUrlChange(
 
   if (currentLocation !== lastLocation) content.replaceChildren();
   let posts: HTMLElement[];
-  let forceReload = lastLocation !== "post";
+  let reload = lastLocation !== "post";
   const feed = feedConfig[currentLocation] ?? feedConfig.default;
   posts = await hydrateFeed(
     feed.endpoint ?? urlEquivalents[currentLocation][0],
     feed.params(did, currentLocation),
-    forceReload,
+    reload,
     feed.type,
   );
   content.replaceChildren(...posts);

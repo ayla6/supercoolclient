@@ -1,7 +1,7 @@
 import { get } from "../elements/utils/cache";
 
 export async function notificationsRoute(
-  currentUrl: string,
+  currentPath: string,
   loadedPath: string,
 ) {
   const container = document.getElementById("container");

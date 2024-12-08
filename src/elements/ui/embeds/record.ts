@@ -42,7 +42,7 @@ export function loadEmbedRecord(embed: AppBskyEmbedRecord.View) {
       elem("a", {
         className: "simple-card",
         href: getPathFromUri(record.uri),
-        innerHTML: text,
+        textContent: text,
       }),
     ];
   } else return [];

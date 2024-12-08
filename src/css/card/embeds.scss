@@ -172,6 +172,10 @@ $border-total-width: 2px;
 }
 
 .embeds .post {
+    .user-area {
+        display: flex;
+    }
+
     .card {
         border: none;
         padding: 4px;

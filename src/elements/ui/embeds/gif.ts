@@ -26,7 +26,7 @@ function loadVideo(videoUrl: string, style: string) {
   const videoContainer = elem(
     "div",
     { className: "video-container no-controls" },
-    [videoElem],
+    videoElem,
   );
   if (style) videoContainer.style.cssText = style;
 
@@ -44,7 +44,7 @@ export function loadEmbedGif(url: URL) {
   const videoUrl = `https://t.gifs.bsky.app/${gifId}P3/${gifName}`;
   const thumbnailUrl = `https://t.gifs.bsky.app/${gifId}AF/${gifName}`;
 
-  const thumbnail = elem("div", { className: "video-thumbnail" }, [
+  const thumbnail = elem("div", { className: "video-thumbnail" }, null, [
     elem("img", {
       src: thumbnailUrl,
       loading: "lazy",
@@ -55,9 +55,11 @@ export function loadEmbedGif(url: URL) {
   let style: string = getProperSize(aspectRatio);
   thumbnail.style.cssText = style;
 
-  const mediaContainer = elem("div", { className: "media-container" }, [
+  const mediaContainer = elem(
+    "div",
+    { className: "media-container" },
     thumbnail,
-  ]);
+  );
 
   thumbnail.addEventListener("click", () => {
     mediaContainer.append(loadVideo(videoUrl, style));

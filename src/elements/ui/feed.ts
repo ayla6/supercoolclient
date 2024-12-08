@@ -24,15 +24,15 @@ const dataLocations = {
 
 export async function hydrateFeed(
   nsid: feedNSID,
-  params: any,
-  forceReload: boolean = false,
-  type: Function = postCard,
+  params: { [key: string]: any },
+  reload: boolean = false,
+  func: (item: any) => HTMLElement = postCard,
 ): Promise<HTMLElement[]> {
   const dataLocation = dataLocations[nsid] ?? "feed";
-  async function _load(forceReload: boolean = false) {
-    return await loadFeed(nsid, params, dataLocation, type, forceReload);
+  async function _load(reload: boolean = false) {
+    return await loadFeed(nsid, params, dataLocation, func, reload);
   }
-  let { items, cursor } = await _load(forceReload);
+  let { items, cursor } = await _load(reload);
   params.cursor = cursor;
   if (cursor && inCache(nsid, params)) {
     while (inCache(nsid, params)) {
@@ -49,23 +49,20 @@ export async function hydrateFeed(
 
 async function loadFeed(
   nsid: feedNSID,
-  params: any,
+  params: { [key: string]: any },
   dataLocation: string,
-  func: Function,
-  forceReload: boolean = false,
+  func: (item: any) => HTMLElement,
+  reload: boolean = false,
 ): Promise<{ items: HTMLElement[]; cursor: string }> {
-  let items = [];
-  const { data } = await get(nsid, { params: params }, forceReload);
-  const array = data[dataLocation];
-  const cursor = data.cursor;
-  for (const item of array) {
-    items.push(func(item));
-  }
-  return { items, cursor };
+  const { data } = await get(nsid, { params: params }, reload);
+  const _func = (item: any) => func(item);
+  const items = data[dataLocation].map(_func);
+  return { items, cursor: data.cursor };
 }
 
 let feedBeingLoaded = false;
 export async function loadOnScroll(load: Function, params: any) {
+  const content = document.getElementById("content");
   return async function (ev) {
     if (
       !feedBeingLoaded &&
@@ -73,7 +70,6 @@ export async function loadOnScroll(load: Function, params: any) {
         document.body.offsetHeight
     ) {
       feedBeingLoaded = true;
-      const content = document.getElementById("content");
       const { items, cursor } = await load();
       content.append(...items);
       params.cursor = cursor;

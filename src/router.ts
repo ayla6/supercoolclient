@@ -24,13 +24,10 @@ import { likesRoute } from "./routes/likes";
 import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
 import { deleteCache } from "./elements/utils/cache";
+import { getFirstAndSecondSubdirs } from "./elements/utils/link_processing";
 
-let loadedPath: string = "";
-
-function saveLastLocation() {
-  loadedPath = window.location.pathname;
-  if (window.location.search) loadedPath += "/" + window.location.search;
-}
+export let loadedPath: string = "";
+export let loadedRoute: string = "";
 
 const routesBase: { [key: string]: string } = {
   "/": "home",
@@ -96,36 +93,21 @@ export async function updatePage() {
   window.onscroll = null;
   const currentPath = window.location.pathname;
 
-  // this looks really ugly damn  maybe i should put it in a function
-
-  const curFirstSlash = currentPath.indexOf("/", 1);
-  const curSecondSlash = currentPath.indexOf("/", curFirstSlash) + 1;
-  const curThirdSlash = currentPath.indexOf("/", curSecondSlash);
-
-  const curFirstSubdir = currentPath.slice(1, curFirstSlash);
-  const curSecondSubdir = curThirdSlash
-    ? currentPath.slice(curSecondSlash, curThirdSlash)
-    : currentPath.slice(curSecondSlash);
-
-  const loaFirstSlash = loadedPath.indexOf("/", 1);
-  const loaSecondSlash = loadedPath.indexOf("/", loaFirstSlash) + 1;
-  const loaThirdSlash = loadedPath.indexOf("/", loaSecondSlash);
-
-  const loaFirstSubdir = loadedPath.slice(1, loaFirstSlash);
-  const loaSecondSubdir = loaThirdSlash
-    ? loadedPath.slice(loaSecondSlash, loaThirdSlash)
-    : loadedPath.slice(loaSecondSlash);
+  const [currentFirstSubdir, currentSecondSubdir] =
+    getFirstAndSecondSubdirs(currentPath);
+  const [loadedFirstSubdir, loadedSecondSubdir] =
+    getFirstAndSecondSubdirs(loadedPath);
 
   let ableToLocal = true;
-  if (curFirstSubdir !== loaFirstSubdir) {
+  if (currentFirstSubdir !== loadedFirstSubdir) {
     document.body.setAttribute("style", "");
     ableToLocal = false;
   }
   const route = matchRoute(currentPath);
-  if (ableToLocal && route === matchRoute(loadedPath)) {
+  if (ableToLocal && route === loadedRoute) {
     localRoutes[route](currentPath, loadedPath);
   } else {
-    if (loaSecondSubdir === "post" && curSecondSubdir !== "post")
+    if (currentSecondSubdir === "post" && loadedSecondSubdir !== "post")
       deleteCache("app.bsky.feed.getPostThread");
     document.title = "SuperCoolClient";
     window.scrollTo({ top: 0 });
@@ -133,7 +115,10 @@ export async function updatePage() {
     document.body.append(elem("div", { id: "container" }));
     changeRoutes[route](currentPath, loadedPath);
   }
-  saveLastLocation();
+
+  loadedPath = window.location.pathname;
+  loadedRoute = route;
+  if (window.location.search) loadedPath += "/" + window.location.search;
 }
 
 export function profileRedirect(did: string) {

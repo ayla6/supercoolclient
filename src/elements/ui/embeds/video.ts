@@ -31,14 +31,16 @@ function loadVideo(embed: AppBskyEmbedVideo.View) {
     };
   });
   hls.attachMedia(videoElem);
-  const videoContainer = elem("div", { className: "video-container" }, [
+  const videoContainer = elem(
+    "div",
+    { className: "video-container" },
     videoElem,
-  ]);
+  );
   return videoContainer;
 }
 
 export function loadEmbedVideo(embed: AppBskyEmbedVideo.View) {
-  const thumbnail = elem("div", { className: "video-thumbnail" }, [
+  const thumbnail = elem("div", { className: "video-thumbnail" }, null, [
     elem("img", {
       src: embed.thumbnail,
     }),
@@ -47,7 +49,7 @@ export function loadEmbedVideo(embed: AppBskyEmbedVideo.View) {
   const mediaContainer = elem(
     "div",
     { className: "media-container has-controls" },
-    [thumbnail],
+    thumbnail,
   );
 
   thumbnail.addEventListener("click", () => {

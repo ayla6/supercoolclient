@@ -1,8 +1,8 @@
 import { elem } from "../utils/elem";
 
 export function stickyHeader(title: string) {
-  return elem("div", { className: "sticky-header" }, [
+  return elem("div", { className: "sticky-header" }, null, [
     elem("div", { className: "return-button", onclick: () => history.back() }),
-    elem("span", { innerHTML: title }),
+    elem("span", { textContent: title }),
   ]);
 }

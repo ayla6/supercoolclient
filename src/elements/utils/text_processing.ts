@@ -9,10 +9,6 @@ const map: { [key: string]: string } = {
   '"': "&quot;",
 };
 
-export function escapeHTML(input: string): string {
-  return input.replace(/[<>&"']/g, (m) => map[m]);
-}
-
 export function processText(input: string = ""): string {
   return input
     .replace(/[<>&]/g, (m) => map[m])
@@ -28,19 +24,15 @@ export function processRichText(text: string, facets: Facet[]) {
     const text = processText(segment.text);
     if (segment.features)
       for (const feat of segment.features) {
-        switch (feat.$type) {
-          case "app.bsky.richtext.facet#tag":
-            processed += `<a href="/search/#${escapeHTML(feat.tag)}">${text}</a>`;
-            break;
-          case "app.bsky.richtext.facet#link":
-            processed += `<a href="${escapeHTML(feat.uri)}">${text}</a>`;
-            break;
-          case "app.bsky.richtext.facet#mention":
-            processed += `<a href="/${escapeHTML(feat.did)}">${text}</a>`;
-            break;
-          default:
-            processed += text;
-            break;
+        const type = feat.$type;
+        if (type === "app.bsky.richtext.facet#tag") {
+          processed += `<a href="/search/#${escapeHTML(feat.tag)}">${text}</a>`;
+        } else if (type === "app.bsky.richtext.facet#link") {
+          processed += `<a href="${escapeHTML(feat.uri)}">${text}</a>`;
+        } else if (type === "app.bsky.richtext.facet#mention") {
+          processed += `<a href="/${escapeHTML(feat.did)}">${text}</a>`;
+        } else {
+          processed += text;
         }
       }
     else processed += text;
@@ -49,9 +41,9 @@ export function processRichText(text: string, facets: Facet[]) {
 }
 
 export function encodeQuery(query: string) {
-  return encodeURIComponent(query).replaceAll("%20", "+");
+  return encodeURIComponent(query).replace("%20", "+");
 }
 
 export function decodeQuery(query: string) {
-  return decodeURIComponent(query.replaceAll("+", "%20"));
+  return decodeURIComponent(query.replace("+", "%20"));
 }

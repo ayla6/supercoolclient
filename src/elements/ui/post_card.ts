@@ -7,11 +7,7 @@ import {
 } from "../utils/link_processing.ts";
 import { manager, rpc } from "../../login";
 import { elem } from "../utils/elem";
-import {
-  encodeQuery,
-  escapeHTML,
-  processRichText,
-} from "../utils/text_processing";
+import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
 import { setPreloaded } from "../../routes/post";
 import { handleEmbed } from "./embeds/embed_handlers";
@@ -45,43 +41,47 @@ export function postCard(
   const card = elem("div", { className: "card" });
 
   const profilePicture = elem(
-    "a",
-    { className: "pfp-holder", href: authorHref },
-    [
+    "div",
+    { className: "pfp-holder" },
+    elem(
+      "a",
+      { href: authorHref },
       elem("img", {
         className: "pfp",
         src: post.author.avatar,
         loading: "lazy",
       }),
-    ],
+    ),
   );
 
   if (isEmbed) {
     card.append(
-      elem("div", { className: "header" }, [
-        elem("a", { href: authorHref }, [
+      elem("div", { className: "header" }, null, [
+        elem("a", { className: "user-area", href: authorHref }, null, [
           profilePicture,
-          elem("a", { className: "handle-area" }, [
-            elem("span", { className: "handle", innerHTML: atId }),
-          ]),
+          elem(
+            "a",
+            { className: "handle-area" },
+            elem("span", { className: "handle", textContent: atId }),
+          ),
         ]),
         elem("a", {
           className: "timestamp",
           href: href,
-          innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
+          textContent: formatTimeDifference(new Date(), indexedAt || createdAt),
           onclick: () => setPreloaded(post),
         }),
       ]),
     );
   } else if (fullView) {
     card.append(
-      elem("a", { className: "header", href: authorHref }, [
+      elem("a", { className: "header", href: authorHref }, null, [
         profilePicture,
-        elem("a", { className: "handle-area", href: authorHref }, [
-          elem("span", { className: "handle", innerHTML: atId }),
+        elem("a", { className: "handle-area", href: authorHref }, null, [
+          elem("span", { className: "handle", textContent: atId }),
           elem("span", {
             className: "",
-            innerHTML: escapeHTML(post.author.displayName),
+            textContent: post.author.displayName,
           }),
         ]),
       ]),
@@ -94,19 +94,21 @@ export function postCard(
     ) {
       const repostedBy = postHousing.reason.by;
       handleElem = [
-        elem("div", { className: "repost" }, [
+        elem(
+          "div",
+          { className: "repost" },
           elem("div", { className: "icon" }),
-        ]),
+        ),
         elem("a", {
           className: "handle",
           href: "/" + repostedBy.did,
-          innerHTML: idChoose(repostedBy),
+          textContent: idChoose(repostedBy),
         }),
-        new Text(" reposted "),
+        " reposted ",
         elem("a", {
           className: "handle",
           href: authorHref,
-          innerHTML: atId,
+          textContent: atId,
         }),
       ];
     } else {
@@ -114,25 +116,25 @@ export function postCard(
         elem("a", {
           className: "handle",
           href: authorHref,
-          innerHTML: atId,
+          textContent: atId,
         }),
       ];
     }
 
     postElem.append(
-      elem("div", { className: "left-area" }, [
+      elem("div", { className: "left-area" }, null, [
         profilePicture,
         hasReplies ? elem("div", { className: "reply-string" }) : "",
       ]),
     );
 
     card.append(
-      elem("div", { className: "header" }, [
-        elem("span", { className: "handle-area" }, handleElem),
+      elem("div", { className: "header" }, null, [
+        elem("span", { className: "handle-area" }, null, handleElem),
         elem("a", {
           className: "timestamp",
           href: href,
-          innerHTML: formatTimeDifference(new Date(), indexedAt || createdAt),
+          textContent: formatTimeDifference(new Date(), indexedAt || createdAt),
           onclick: () => setPreloaded(post),
         }),
       ]),
@@ -141,17 +143,20 @@ export function postCard(
 
   if ("reply" in postHousing) {
     const replyTo = postHousing.reply.parent;
+    const did = getDidFromUri(replyTo.uri);
     const atId =
       replyTo.$type === "app.bsky.feed.defs#postView"
         ? idChoose(replyTo.author)
-        : getDidFromUri(replyTo.uri);
+        : did;
     card.append(
-      elem("span", { className: "small reply-to", innerHTML: "Reply to " }, [
+      elem(
+        "span",
+        { className: "small reply-to", textContent: "Reply to " },
         elem("a", {
-          innerHTML: atId,
-          href: "/" + atId,
+          textContent: atId,
+          href: "/" + did,
         }),
-      ]),
+      ),
     );
   }
 
@@ -166,7 +171,12 @@ export function postCard(
   }
   if (record.embed) {
     content.append(
-      elem("div", { className: "embeds" }, handleEmbed(post.embed as any)),
+      elem(
+        "div",
+        { className: "embeds" },
+        null,
+        handleEmbed(post.embed as any),
+      ),
     );
   }
   card.append(content);
@@ -175,11 +185,11 @@ export function postCard(
     const tags = record.tags.map((tag) =>
       elem("a", {
         className: "label",
-        innerHTML: "#" + escapeHTML(tag),
+        textContent: "#" + tag,
         href: `/search?tag=${encodeQuery(tag)}`,
       }),
     );
-    card.append(elem("div", { className: "label-area" }, tags));
+    card.append(elem("div", { className: "label-area" }, null, tags));
   }
 
   if (fullView) {
@@ -191,12 +201,12 @@ export function postCard(
       warnings.push(
         elem("span", {
           className: "label",
-          innerHTML: `Archived from ${formatDate(createdAt)}`,
+          textContent: `Archived from ${formatDate(createdAt)}`,
         }),
       );
     }
     if (warnings.length)
-      card.append(elem("div", { className: "label-area" }, warnings));
+      card.append(elem("div", { className: "label-area" }, null, warnings));
   }
 
   let translateButton: HTMLElement;
@@ -208,11 +218,8 @@ export function postCard(
   ) {
     translateButton = elem("a", {
       className: "small-link",
-      innerHTML: "Translate",
-      onclick: () =>
-        window.open(
-          "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
-        ),
+      textContent: "Translate",
+      href: "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
     });
     if (!fullView) card.append(translateButton);
   }
@@ -222,7 +229,7 @@ export function postCard(
       elem("a", {
         className: "timestamp",
         href: href,
-        innerHTML: formatDate(indexedAt ?? createdAt),
+        textContent: formatDate(indexedAt ?? createdAt),
         onclick: () => setPreloaded(post),
       }),
     );
@@ -237,11 +244,11 @@ export function postCard(
     ].filter(Boolean);
 
     if (stats.length > 0)
-      card.append(elem("div", { className: "stats" }, stats));
+      card.append(elem("div", { className: "stats" }, null, stats));
   }
   if (!isEmbed)
     card.append(
-      elem("div", { className: "stats-buttons" }, [
+      elem("div", { className: "stats-buttons" }, null, [
         interactionButton("reply", post),
         interactionButton("repost", post),
         interactionButton("like", post),
@@ -270,15 +277,13 @@ function stat(
   if (count === 0) return "";
   return elem(
     "a",
-    {
-      className: "stat",
-      href: `${href}/${plural[type]}`,
-    },
+    { className: "stat", href: `${href}/${plural[type]}` },
+    null,
     [
-      elem("span", { innerHTML: count.toLocaleString() }),
+      elem("span", { textContent: count.toLocaleString() }),
       elem("span", {
         className: "stat-name",
-        innerHTML: " " + (count === 1 ? type : plural[type]),
+        textContent: " " + (count === 1 ? type : plural[type]),
       }),
     ],
   );
@@ -291,10 +296,11 @@ function interactionButton(
   const hasViewer = "viewer" in post;
   let count: number = post[type + "Count"];
 
-  const countSpan = elem("span", { innerHTML: count.toLocaleString() });
+  const countSpan = elem("span", { textContent: count.toLocaleString() });
   const button = elem(
     "button",
     { className: "interaction " + type + "-button" },
+    null,
     [elem("div", { className: "icon" }), countSpan],
   );
   button.setAttribute("role", "button");
@@ -329,10 +335,10 @@ async function updateInteraction(
   try {
     const collection = "app.bsky.feed." + type;
     count += active ? 1 : -1;
-    countSpan.innerHTML = count.toLocaleString();
+    countSpan.textContent = count.toLocaleString();
     if (active) {
       const { cid, uri } = post;
-      const response = await rpc.call("com.atproto.repo.createRecord", {
+      const { data } = await rpc.call("com.atproto.repo.createRecord", {
         data: {
           record: {
             $type: collection,
@@ -343,7 +349,7 @@ async function updateInteraction(
           repo: manager.session.did,
         },
       });
-      post.viewer[type] = response.data.uri;
+      post.viewer[type] = data.uri;
     } else {
       const recordUri = post.viewer[type];
       if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
@@ -359,6 +365,6 @@ async function updateInteraction(
   } catch (err) {
     console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
     count += active ? -1 : 1;
-    countSpan.innerHTML = count.toLocaleString();
+    countSpan.textContent = count.toLocaleString();
   }
 }

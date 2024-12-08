@@ -1,14 +1,13 @@
 import { get } from "../elements/utils/cache";
 import { elem } from "../elements/utils/elem";
-import { escapeHTML } from "../elements/utils/text_processing";
-import { hydrateFeed } from "../elements/content/feed";
+import { hydrateFeed } from "../elements/ui/feed";
 
 let currentFeed: string;
 let currentScroll: { [key: string]: number } = {};
 
 function navButton(feed: string, title: string) {
   const button = elem("a", {
-    innerHTML: escapeHTML(title),
+    textContent: title,
     href: `?feed=${feed}&title=${title}`,
     onclick: (e) => {
       e.preventDefault();
@@ -19,37 +18,35 @@ function navButton(feed: string, title: string) {
   button.setAttribute("ignore", "");
   return button;
 }
-export async function homeRoute(
-  currentUrl: Array<string>,
-  loadedPath: Array<string>,
-) {
-  if (loadedPath[1] != "") {
+
+export async function homeRoute(currentPath: string, loadedPath: string) {
+  if (loadedPath !== "home") {
     const container = document.getElementById("container");
     const leftBar = document.createElement("div");
     leftBar.className = "side-bar sticky";
     const feedNav = document.createElement("div");
     feedNav.className = "side-nav";
     const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
-    const feeds = prefs.data.preferences.find((e) => {
+    const { items: feeds } = prefs.data.preferences.find((e) => {
       return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
-    }).items;
-    const feedGens = (
-      await get("app.bsky.feed.getFeedGenerators", {
-        params: {
-          feeds: (() => {
-            let pinned = [];
-            for (const feed of feeds.slice(1)) {
-              if (feed.pinned) pinned.push(feed.value);
-            }
-            return pinned;
-          })(),
-        },
-      })
-    ).data.feeds;
+    });
+    const { data: feedGens } = await get("app.bsky.feed.getFeedGenerators", {
+      params: {
+        feeds: (() => {
+          let pinned = [];
+          for (const feed of feeds.slice(1)) {
+            if (feed.pinned) pinned.push(feed.value);
+          }
+          return pinned;
+        })(),
+      },
+    });
+
     feedNav.append(navButton("following", "Following"));
-    for (const feed of feedGens) {
+    for (const feed of feedGens.feeds) {
       feedNav.append(navButton(feed.uri, feed.displayName));
     }
+
     leftBar.append(feedNav);
 
     const content = document.createElement("div");
@@ -88,28 +85,27 @@ async function loadHomeFeed(
   const content = document.getElementById("content");
   if (currentFeed !== lastFeed) content.replaceChildren();
   if (currentFeed === feedgen) {
-    const forceReload = currentFeed === lastFeed && wasAtHome;
+    const reload = currentFeed === lastFeed && wasAtHome;
     const items = await hydrateFeed(
       feedgen === "following"
         ? "app.bsky.feed.getTimeline"
         : "app.bsky.feed.getFeed",
       { feed: feedgen },
-      forceReload,
+      reload,
     );
     if (currentFeed === feedgen) {
       content.replaceChildren(...items);
-      if (!forceReload) window.scrollTo({ top: currentScroll[currentFeed] });
+      if (!reload) window.scrollTo({ top: currentScroll[currentFeed] });
     }
   }
 }
 
-export async function homeUrlChange(currentUrl?: string, loadedPath?: string) {
+export async function homeUrlChange(currentPath?: string, loadedPath?: string) {
   const url = new URL(window.location.href);
   const params = url.searchParams;
   let feedgen = params.get("feed");
   let title = params.get("title");
 
   history.replaceState({}, "", url.pathname);
-
   loadHomeFeed(feedgen, title, loadedPath === "/");
 }

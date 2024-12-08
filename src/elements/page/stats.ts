@@ -1,6 +1,6 @@
 import { get } from "../utils/cache";
 import { elem } from "../utils/elem";
-import { feedNSID, hydrateFeed } from "../content/feed";
+import { feedNSID, hydrateFeed } from "../ui/feed";
 import { postCard } from "../ui/post_card";
 import { stickyHeader } from "../ui/sticky_header";
 import { getUriFromPath } from "../utils/link_processing";
@@ -9,7 +9,7 @@ export async function statsPage(
   currentPath: string,
   title: string,
   nsid: feedNSID,
-  func?: Function,
+  func: (item: any) => HTMLElement,
 ) {
   const container = document.getElementById("container");
   const content = elem("div", { id: "content" });

@@ -17,7 +17,7 @@ export function loadNavbar() {
     navButton("Notifications", "/notifications"),
     manager.session ? navButton("Profile", "/" + manager.session.did) : "",
     elem("button", {
-      innerHTML: "Post",
+      textContent: "Post",
     }),
   );
 }

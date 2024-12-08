@@ -38,7 +38,7 @@ export function loadThread(
           elem("a", {
             className: "simple-card",
             href: getPathFromUri(post.uri),
-            innerHTML:
+            textContent:
               post.$type === "app.bsky.feed.defs#blockedPost"
                 ? "Blocked post"
                 : "Post not found",
@@ -144,7 +144,7 @@ export function loadThread(
               ...strings.map(getString),
               elem("a", {
                 className: "simple-card",
-                innerHTML: "Continue thread...",
+                textContent: "Continue thread...",
                 href: getPathFromUri(post.post.uri),
                 onclick: () => setPreloaded(post.post),
               }),
@@ -169,7 +169,7 @@ export function loadThread(
     outputElement.replaceChildren(
       elem("div", {
         className: "simple-card",
-        innerHTML:
+        textContent:
           postThread.thread.$type === "app.bsky.feed.defs#blockedPost"
             ? "Blocked post"
             : "Post not found",
@@ -188,13 +188,16 @@ function mutedPostsButton(outputElement: HTMLElement, posts: DocumentFragment) {
         outputElement.append(posts);
       },
     },
+    null,
     [
-      elem("div", { className: "pfp-holder" }, [
+      elem(
+        "div",
+        { className: "pfp-holder" },
         elem("div", { className: "pfp" }),
-      ]),
+      ),
       elem("div", {
         className: "outputElement",
-        innerHTML: "Show muted replies",
+        textContent: "Show muted replies",
       }),
     ],
   );
@@ -202,9 +205,11 @@ function mutedPostsButton(outputElement: HTMLElement, posts: DocumentFragment) {
 }
 
 function getString(isLastChild: boolean) {
-  return elem("div", { className: "string-container" }, [
+  return elem(
+    "div",
+    { className: "string-container" },
     elem("div", {
       className: "reply-string" + (isLastChild ? " transparent" : ""),
     }),
-  ]);
+  );
 }
