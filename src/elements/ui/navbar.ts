@@ -8,7 +8,6 @@ import postSVG from "../../svg/pencil.svg?raw";
 
 function navButton(text: string, link: string, icon: string) {
   const button = document.createElement("a");
-  console.log(icon);
   button.innerHTML = `${icon}<span>${text}</span>`;
   button.href = link;
   return button;
@@ -23,7 +22,7 @@ export function loadNavbar() {
       ? navButton("Profile", "/" + manager.session.did, profileSVG)
       : "",
     elem("button", {
-      textContent: "Post",
+      innerHTML: `${postSVG}<span>Post</span>`,
     }),
   );
 }

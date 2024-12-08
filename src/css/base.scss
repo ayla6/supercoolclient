@@ -41,7 +41,7 @@ a {
     margin-left: auto;
 }
 
-.button {
+button {
     font-size: 13px;
     padding: 4px 12px;
     cursor: pointer;
@@ -56,7 +56,7 @@ a {
         background: linear-gradient(#f8f8f8, #d8d8d8);
     }
 }
-.button.active {
+button.active {
     background-color: var(--accent-color);
 }
 
@@ -87,12 +87,11 @@ a.timestamp:hover {
     color: var(--accent-color) !important;
 }
 
-.button,
+button,
 .handle,
 .display-name,
 .bio,
 .timestamp,
-.interaction,
 .side-nav {
     text-shadow: 0 1px 0 #fff;
 }

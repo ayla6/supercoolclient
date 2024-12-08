@@ -106,13 +106,16 @@
     gap: $size * 0.5;
 
     .interaction {
+        display: flex;
+        border-radius: 0;
+        font-weight: 400;
         background: none;
         border: none;
         color: $dark-grey;
         cursor: pointer;
-        display: inline-block;
         line-height: 14px;
         padding: 0;
+        align-items: center;
 
         &:hover {
             text-decoration: none;
@@ -120,13 +123,11 @@
 
         font-size: $size;
         .icon {
-            display: inline-block;
             width: $size;
             height: $size;
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            vertical-align: sub;
             margin-right: 2px;
         }
     }
