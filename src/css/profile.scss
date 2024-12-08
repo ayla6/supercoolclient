@@ -8,6 +8,7 @@
     border-radius: 4px;
     margin: 0 auto 8px;
     padding: 8px;
+    gap: 8px;
     .pfp-holder {
         display: flex;
         margin-right: 8px;
@@ -20,6 +21,11 @@
             border-radius: 4px;
             object-fit: contain;
         }
+    }
+    .info {
+        display: flex;
+        flex-flow: row;
+        flex-grow: 1;
     }
     .header {
         display: flex;
@@ -45,14 +51,12 @@
             color: #777;
             line-height: 14px;
             font-style: italic;
-            flex-grow: 1;
         }
     }
     .stats {
         display: flex;
         flex-flow: column;
         flex-shrink: 0;
-        margin-left: 8px;
         a,
         button {
             display: block;
@@ -77,6 +81,7 @@
 
 @media (max-width: 920px) {
     .profile-header {
+        flex-flow: column;
         .pfp-holder .pfp {
             width: 72px;
             height: 72px;
@@ -84,7 +89,7 @@
         .header {
             .display-name,
             .handle {
-                font-size: 18px;
+                font-size: 16px;
             }
         }
         .bio {
@@ -93,6 +98,8 @@
             height: 100%;
         }
         .stats {
+            flex-flow: row;
+            justify-content: space-between;
             a,
             button {
                 display: inline-block;

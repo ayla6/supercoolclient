@@ -82,34 +82,41 @@ export function header(
   }
   document.body.style.cssText = customCss;
   return elem("div", { className: "profile-header" }, null, [
-    elem(
-      "a",
-      { className: "pfp-holder" },
-      elem("img", { className: "pfp", src: changeImageFormat(profile.avatar) }),
-    ),
-    elem("div", { className: "header" }, null, [
-      elem("span", {
-        className: "display-name",
-        textContent: profile.displayName,
-      }),
-      elem("span", { className: "handle", innerHTML: "@" + handle }),
-      elem("div", {
-        className: "bio",
-        innerHTML: profile.description ? processText(profile.description) : "",
-      }),
+    elem("div", { className: "info" }, null, [
+      elem(
+        "a",
+        { className: "pfp-holder" },
+        elem("img", {
+          className: "pfp",
+          src: changeImageFormat(profile.avatar),
+        }),
+      ),
+      elem("div", { className: "header" }, null, [
+        elem("span", {
+          className: "display-name",
+          textContent: profile.displayName,
+        }),
+        elem("span", { className: "handle", innerHTML: "@" + handle }),
+        elem("div", {
+          className: "bio",
+          innerHTML: profile.description
+            ? processText(profile.description)
+            : "",
+        }),
+      ]),
     ]),
 
     elem("div", { className: "stats" }, null, [
       elem("button", { className: "button follow", textContent: "+ Follow" }),
-      elem("a", { href: did }, null, [
+      elem("a", { href: `/${did}` }, null, [
         elem("b", { textContent: profile.postsCount.toLocaleString() }),
         " Posts",
       ]),
-      elem("a", { href: did + "/following" }, null, [
+      elem("a", { href: `/${did}/following` }, null, [
         elem("b", { textContent: profile.followsCount.toLocaleString() }),
         " Following",
       ]),
-      elem("a", { href: did + "/followers" }, null, [
+      elem("a", { href: `/${did}/followers` }, null, [
         elem("b", { textContent: profile.followersCount.toLocaleString() }),
         " Followers",
       ]),
