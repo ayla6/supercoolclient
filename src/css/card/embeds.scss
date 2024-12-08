@@ -149,9 +149,7 @@ $border-total-width: 2px;
     }
 
     span {
-        max-height: 100px;
         overflow: hidden;
-        text-overflow: ellipsis;
         white-space: pre-wrap;
     }
 
@@ -163,10 +161,15 @@ $border-total-width: 2px;
 
     .title {
         font-weight: 700;
+        line-height: $font-size * 1.14;
+        max-height: $font-size * 1.14 * 3;
     }
 
     .description {
-        font-size: 13px;
+        $font-size: 13px;
+        font-size: $font-size;
+        line-height: $font-size * 1.14;
+        max-height: $font-size * 1.14 * 4;
     }
 
     .small {
