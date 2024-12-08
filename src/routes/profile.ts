@@ -46,16 +46,9 @@ export async function profileUrlChange(
   const did = getAtIdFromPath(currentPath);
 
   const content = document.getElementById("content");
-  document
-    .querySelector(
-      `[value="${previousLocation + (previousLocation === "search" ? "" : "")}"]`,
-    )
-    ?.classList.remove("active");
-  document
-    .querySelector(
-      `[value="${currentLocation + (currentLocation === "search" ? window.location.search : "")}"]`,
-    )
-    ?.classList.add("active");
+  const sideBar = document.getElementById("side-bar");
+  sideBar.querySelector(".active")?.classList.remove("active");
+  sideBar.querySelector(`[href="${currentPath}"]`)?.classList.add("active");
 
   if (currentLocation !== previousLocation) content.replaceChildren();
   let posts: HTMLElement[];

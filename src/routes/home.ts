@@ -23,7 +23,8 @@ export async function homeRoute(currentPath: string, loadedPath: string) {
   if (loadedPath !== "home") {
     const container = document.getElementById("container");
     const leftBar = document.createElement("div");
-    leftBar.className = "side-bar sticky";
+    leftBar.id = "side-bar";
+    leftBar.className = "sticky";
     const feedNav = document.createElement("div");
     feedNav.className = "side-nav";
     const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
@@ -77,8 +78,9 @@ async function loadHomeFeed(
 
   window.scrollTo({ top: 0 });
   if (lastFeed !== feedgen || !wasAtHome) {
-    document.querySelector(".active")?.classList.remove("active");
-    document
+    const sideBar = document.getElementById("side-bar");
+    sideBar.querySelector(".active")?.classList.remove("active");
+    sideBar
       .querySelector(`[href="?feed=${feedgen}&title=${title}"]`)
       ?.classList.add("active");
   }

@@ -25,9 +25,12 @@ import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
 import { deleteCache } from "./elements/utils/cache";
 import { getFirstAndSecondSubdirs } from "./elements/utils/link_processing";
+import { manager } from "./login";
 
 export let loadedPath: string = "";
 export let loadedRoute: string = "";
+
+const navbar = document.getElementById("navbar");
 
 const routesBase: { [key: string]: string } = {
   "/": "home",
@@ -104,6 +107,10 @@ export async function updatePage() {
     ableToLocal = false;
   }
   const route = matchRoute(currentPath);
+  if (!ableToLocal || route !== loadedRoute) {
+    navbar.querySelector(".active")?.classList.remove("active");
+    navbar.querySelector(`[href="${currentPath}"]`)?.classList.add("active");
+  }
   if (ableToLocal && route === loadedRoute) {
     localRoutes[route](currentPath, loadedPath);
   } else {

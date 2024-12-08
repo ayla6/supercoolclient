@@ -133,7 +133,7 @@ code {
         display: none;
     }
 
-    .side-bar {
+    #side-bar {
         display: block;
         &.sticky {
             position: fixed;
@@ -263,7 +263,7 @@ code {
         width: 100%;
     }
 
-    .side-bar {
+    #side-bar {
         background: #f9f9f9;
         display: block;
         width: 100%;

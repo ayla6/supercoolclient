@@ -11,15 +11,48 @@
     display: flex;
     justify-content: space-around;
     z-index: 1;
+    $font-size: 14px;
+    $padding-vertical: (($navbar-height - $font-size) * 0.5);
     a {
-        height: 40px - 28px;
         display: block;
         max-width: fit-content;
-        padding: 14px 12px;
+        padding: $padding-vertical 12px;
         vertical-align: middle;
-
-        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.75);
-        background-color: #202020;
         color: #fff;
+        font-size: $font-size;
+        height: $font-size;
+
+        svg {
+            $height: 24px;
+            float: left;
+            position: relative;
+            top: ($font-size - $height) * 0.5;
+        }
+
+        span {
+            margin-left: 4px;
+        }
+
+        &.active {
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.75);
+            background-color: #202020;
+        }
+    }
+}
+
+@media (max-width: 920px) {
+    #navbar {
+        justify-content: space-between;
+        a {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        span {
+            display: none;
+        }
+        svg,
+        button {
+            width: 25vw;
+        }
     }
 }

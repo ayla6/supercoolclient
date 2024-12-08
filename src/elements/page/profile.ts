@@ -7,7 +7,6 @@ import { manager } from "../../login";
 import { changeImageFormat, idChoose } from "../utils/link_processing.ts";
 import { elem } from "../utils/elem";
 import { processText } from "../utils/text_processing";
-import { inCache } from "../utils/cache";
 
 export function profilePage(
   profile: AppBskyActorDefs.ProfileViewDetailed,
@@ -30,7 +29,7 @@ export function profilePage(
     } catch (error) {}*/
   container.replaceChildren(
     header(profile, sccprofile),
-    elem("div", { className: "side-bar" }, null, [
+    elem("div", { id: "side-bar" }, null, [
       elem("div", { className: "side-nav" }, null, [
         navButton("posts", did, "Posts"),
         navButton("replies", did, "Posts and replies"),
@@ -129,7 +128,6 @@ function navButton(name: string, did: string, text: string) {
     href: `/${did}${name === "posts" ? "" : "/" + name}`,
     textContent: text,
   });
-  button.setAttribute("value", name);
   return button;
 }
 

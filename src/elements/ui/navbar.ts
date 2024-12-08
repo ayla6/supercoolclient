@@ -1,11 +1,15 @@
-import { manager, rpc } from "../../login";
+import { manager } from "../../login";
 import { elem } from "../utils/elem";
 
-function navButton(text: string, link: string, icon?: string) {
+import homeSVG from "../../svg/home.svg?raw";
+import notifSVG from "../../svg/bell.svg?raw";
+import profileSVG from "../../svg/user.svg?raw";
+import postSVG from "../../svg/pencil.svg?raw";
+
+function navButton(text: string, link: string, icon: string) {
   const button = document.createElement("a");
-  const span = document.createElement("span");
-  span.innerText = text;
-  button.append(span);
+  console.log(icon);
+  button.innerHTML = `${icon}<span>${text}</span>`;
   button.href = link;
   return button;
 }
@@ -13,9 +17,11 @@ function navButton(text: string, link: string, icon?: string) {
 export function loadNavbar() {
   const navbar = document.getElementById("navbar");
   navbar.append(
-    navButton("Home", "/"),
-    navButton("Notifications", "/notifications"),
-    manager.session ? navButton("Profile", "/" + manager.session.did) : "",
+    navButton("Home", "/", homeSVG),
+    navButton("Notifications", "/notifications", notifSVG),
+    manager.session
+      ? navButton("Profile", "/" + manager.session.did, profileSVG)
+      : "",
     elem("button", {
       textContent: "Post",
     }),
