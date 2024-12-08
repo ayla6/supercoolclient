@@ -103,9 +103,7 @@ export async function updatePage() {
   const route = matchRoute(currentSplitPath);
   if (!ableToLocal || route !== loadedRoute) {
     navbar.querySelector(".active")?.classList.remove("active");
-    navbar
-      .querySelector(`[href="${currentSplitPath}"]`)
-      ?.classList.add("active");
+    navbar.querySelector(`[href="${currentPath}"]`)?.classList.add("active");
   }
   if (ableToLocal && route === loadedRoute) {
     localRoutes[route](currentPath, currentSplitPath, loadedSplitPath);
