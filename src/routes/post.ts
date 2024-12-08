@@ -2,14 +2,10 @@ import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { cache, get } from "../elements/utils/cache";
 import { elem } from "../elements/utils/elem";
 import { postCard } from "../elements/ui/post_card";
-import { rpc } from "../login";
 import { loadThread } from "../elements/page/thread";
 import { loadedPath, profileRedirect } from "../router";
 import { stickyHeader } from "../elements/ui/sticky_header";
-import {
-  getAtIdFromPath,
-  getUriFromPath,
-} from "../elements/utils/link_processing";
+import { getUriFromSplitPath } from "../elements/utils/link_processing";
 
 let preloadedPost: AppBskyFeedDefs.PostView;
 export function setPreloaded(post: AppBskyFeedDefs.PostView) {
@@ -17,14 +13,15 @@ export function setPreloaded(post: AppBskyFeedDefs.PostView) {
 }
 export async function postRoute(
   currentPath: string,
-  previousPath: string,
-  reload: boolean = true,
+  currentSplitPath: string[],
+  previousSplitPath: string[],
 ) {
   const container = document.getElementById("container");
   const content = elem("div", { id: "content" });
 
-  const atId = getAtIdFromPath(currentPath);
-  const uri = getUriFromPath(currentPath);
+  const atId = currentSplitPath[0];
+  const uri = getUriFromSplitPath(currentSplitPath);
+  const reload = previousSplitPath[1] !== "post";
 
   if (preloadedPost && atId === preloadedPost.author.did) {
     const mainPost = postCard(preloadedPost, true);

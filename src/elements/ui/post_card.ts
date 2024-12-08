@@ -1,6 +1,5 @@
 import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import {
-  getAtIdFromPath,
   getDidFromUri,
   getPathFromUri,
   idChoose,
@@ -11,6 +10,7 @@ import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
 import { setPreloaded } from "../../routes/post";
 import { handleEmbed } from "./embeds/embed_handlers";
+import { languagesToNotTranslate } from "../../config.ts";
 
 export function postCard(
   postHousing:
@@ -170,7 +170,7 @@ export function postCard(
       ),
     );
   }
-  if (record.embed) {
+  if (post.embed) {
     content.append(
       elem(
         "div",
@@ -211,8 +211,8 @@ export function postCard(
   if (
     record.text &&
     record.langs &&
-    record.langs[0] != "en" &&
-    record.langs[0].slice(0, 2) != "en"
+    record.langs[0] &&
+    record.langs[0] in languagesToNotTranslate
   ) {
     translateButton = elem("a", {
       className: "small-link",

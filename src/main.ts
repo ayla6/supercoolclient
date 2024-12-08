@@ -1,3 +1,4 @@
+import { fillMissingSettings } from "./config";
 import { loadNavbar } from "./elements/ui/navbar";
 import { login } from "./login";
 import { navigateTo, updatePage } from "./router";
@@ -29,6 +30,7 @@ addEventListener("popstate", () => {
 }
 rpc.call('com.atproto.repo.putRecord', {data: {record: record, collection: 'app.scc.profile',repo: sessionStorage.getItem('userdid'), rkey: 'self'}})*/
 
+fillMissingSettings();
 login();
 loadNavbar();
 updatePage();

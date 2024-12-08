@@ -3,74 +3,13 @@ import { loadedPath, profileRedirect } from "../router";
 import { feedNSID, hydrateFeed } from "../elements/ui/feed";
 import { profilePage } from "../elements/page/profile";
 import { profileCard } from "../elements/ui/profile_card";
-import {
-  getAtIdFromPath,
-  getFirstAndSecondSubdirs,
-} from "../elements/utils/link_processing";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
-  "": ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
+  posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
   media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
   replies: ["app.bsky.feed.getAuthorFeed", "posts_with_replies"],
   likes: ["app.bsky.feed.getActorLikes"],
 };
-
-export async function profileRoute(currentPath: string, loadedPath: string) {
-  const atId = getAtIdFromPath(currentPath);
-
-  const { data: profile } = await get("app.bsky.actor.getProfile", {
-    params: { actor: atId },
-  });
-  const { data: lastMedia } = await get("app.bsky.feed.getAuthorFeed", {
-    params: {
-      actor: profile.did,
-      filter: "posts_with_media",
-      limit: 4,
-    },
-  });
-  if (window.location.pathname === currentPath) {
-    if (atId != profile.did) profileRedirect(profile.did);
-    profilePage(profile, lastMedia);
-
-    profileUrlChange(currentPath, loadedPath);
-  }
-}
-
-export async function profileUrlChange(
-  currentPath: string,
-  previousPath: string,
-) {
-  const [currentProfile, currentFeed] = getFirstAndSecondSubdirs(currentPath);
-  const [previousProfile, previousFeed] =
-    getFirstAndSecondSubdirs(previousPath);
-  const atSameProfile = currentProfile === previousProfile;
-  const atSameFeed = currentFeed === previousFeed;
-
-  const did = getAtIdFromPath(currentPath);
-
-  const content = document.getElementById("content");
-  const sideBar = document.getElementById("side-bar");
-  sideBar.querySelector(".active")?.classList.remove("active");
-  sideBar.querySelector(`[href="${currentPath}"]`)?.classList.add("active");
-
-  if (atSameProfile && !atSameFeed) content.replaceChildren();
-  let posts: HTMLElement[];
-  console.log(currentPath, previousPath);
-  const feed = feedConfig[currentFeed] ?? feedConfig.default;
-  posts = await hydrateFeed(
-    feed.endpoint ?? urlEquivalents[currentFeed][0],
-    feed.params(did, currentFeed),
-    atSameProfile && atSameFeed,
-    feed.type,
-  );
-  if (currentPath === loadedPath) content.replaceChildren(...posts);
-}
-
-export function profileTrim(currentPath: string, loadedPath: string) {
-  const newPath = currentPath.slice(0, -1);
-  history.pushState(null, "", newPath);
-  profileRoute(newPath, loadedPath);
-}
 
 const feedConfig = {
   following: {
@@ -98,3 +37,72 @@ const feedConfig = {
     }),
   },
 };
+
+async function loadProfileFeed(
+  path: string,
+  splitPath: string[],
+  reload: boolean,
+) {
+  const sideBar = document.getElementById("side-bar");
+  sideBar.querySelector(".active")?.classList.remove("active");
+  sideBar.querySelector(`[href="${path}"]`)?.classList.add("active");
+
+  const content = document.getElementById("content");
+  if (!reload) content.replaceChildren();
+
+  const feedToLoad = splitPath[1] ?? "posts";
+  const feed = feedConfig[feedToLoad] ?? feedConfig.default;
+
+  const posts = await hydrateFeed(
+    feed.endpoint ?? urlEquivalents[feedToLoad][0],
+    feed.params(splitPath[0], feedToLoad),
+    reload,
+    feed.type,
+  );
+  if (path === loadedPath) content.replaceChildren(...posts);
+}
+
+export function profileTrim(
+  currentPath: string,
+  currentSplitPath: string[],
+  loadedSplitPath: string[],
+) {
+  const newPath = currentPath.slice(0, -1);
+  delete currentSplitPath[1];
+  history.pushState(null, "", newPath);
+  profileRoute(newPath, currentSplitPath);
+}
+
+export async function profileRoute(
+  currentPath: string,
+  currentSplitPath: string[],
+  previousSplitPath?: string[],
+) {
+  const atId = currentSplitPath[0];
+
+  const { data: profile } = await get("app.bsky.actor.getProfile", {
+    params: { actor: atId },
+  });
+  const { data: lastMedia } = await get("app.bsky.feed.getAuthorFeed", {
+    params: {
+      actor: profile.did,
+      filter: "posts_with_media",
+      limit: 4,
+    },
+  });
+  if (loadedPath === currentPath) {
+    if (atId != profile.did) profileRedirect(profile.did);
+    profilePage(profile, lastMedia);
+
+    loadProfileFeed(currentPath, currentSplitPath, false);
+  }
+}
+
+export async function profileUrlChange(
+  currentPath: string,
+  currentSplitPath: string[],
+  previousSplitPath: string[],
+) {
+  const atSameFeed = currentSplitPath[1] === previousSplitPath[1];
+  loadProfileFeed(currentPath, currentSplitPath, atSameFeed);
+}

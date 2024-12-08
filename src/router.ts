@@ -24,24 +24,23 @@ import { likesRoute } from "./routes/likes";
 import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
 import { deleteCache } from "./elements/utils/cache";
-import { getFirstAndSecondSubdirs } from "./elements/utils/link_processing";
-import { manager } from "./login";
 
 export let loadedPath: string = "";
+export let loadedSplitPath: string[] = [];
 export let loadedRoute: string = "";
 
 const navbar = document.getElementById("navbar");
 
 const routesBase: { [key: string]: string } = {
-  "/": "home",
-  "/notifications": "notifications",
-  "/:/": "profileTrim",
-  "/:": "profile",
-  "/:/:": "profile",
-  "/:/post/:": "post",
-  "/:/post/:/likes": "postLikes",
-  "/:/post/:/reposts": "postReposts",
-  "/:/post/:/quotes": "postQuotes",
+  "": "home",
+  notifications: "notifications",
+  ":/": "profileTrim",
+  ":": "profile",
+  ":/:": "profile",
+  ":/post/:": "post",
+  ":/post/:/likes": "postLikes",
+  ":/post/:/reposts": "postReposts",
+  ":/post/:/quotes": "postQuotes",
 };
 const changeRoutes: { [key: string]: Function } = {
   home: homeRoute,
@@ -73,15 +72,14 @@ function computeRoutes(routes: { [key: string]: string }) {
   return computedRoutes as computedRoutes;
 }
 
-function matchRoute(path: string) {
-  const splitPath = path.split("/");
+function matchRoute(path: string[]) {
   for (const route of routes) {
-    if (splitPath.length !== route.key.length) continue;
+    if (path.length !== route.key.length) continue;
 
     let match = true;
     for (let i = 0; i < route.key.length; i++) {
       if (route.key[i] === ":") continue;
-      if (route.key[i] !== splitPath[i]) {
+      if (route.key[i] !== path[i]) {
         match = false;
         break;
       }
@@ -95,37 +93,38 @@ function matchRoute(path: string) {
 export async function updatePage() {
   window.onscroll = null;
   const currentPath = window.location.pathname;
-
-  const [currentFirstSubdir, currentSecondSubdir] =
-    getFirstAndSecondSubdirs(currentPath);
-  const [loadedFirstSubdir, loadedSecondSubdir] =
-    getFirstAndSecondSubdirs(loadedPath);
+  const currentSplitPath = currentPath.slice(1).split("/");
 
   let ableToLocal = true;
-  if (currentFirstSubdir !== loadedFirstSubdir) {
+  if (currentSplitPath[0] !== loadedSplitPath[0]) {
     document.body.setAttribute("style", "");
     ableToLocal = false;
   }
-  const route = matchRoute(currentPath);
+  const route = matchRoute(currentSplitPath);
   if (!ableToLocal || route !== loadedRoute) {
     navbar.querySelector(".active")?.classList.remove("active");
-    navbar.querySelector(`[href="${currentPath}"]`)?.classList.add("active");
+    navbar
+      .querySelector(`[href="${currentSplitPath}"]`)
+      ?.classList.add("active");
   }
   if (ableToLocal && route === loadedRoute) {
-    localRoutes[route](currentPath, loadedPath);
+    localRoutes[route](currentPath, currentSplitPath, loadedSplitPath);
   } else {
-    if (currentSecondSubdir === "post" && loadedSecondSubdir !== "post")
+    if (loadedRoute === "post" && route !== "post") {
       deleteCache("app.bsky.feed.getPostThread");
+      deleteCache("app.bsky.feed.getPosts");
+    }
     document.title = "SuperCoolClient";
     window.scrollTo({ top: 0 });
     document.body.removeChild(document.getElementById("container"));
     document.body.append(elem("div", { id: "container" }));
-    changeRoutes[route](currentPath, loadedPath);
+    changeRoutes[route](currentPath, currentSplitPath, loadedSplitPath);
   }
 
-  loadedPath = window.location.pathname;
+  loadedPath = currentPath;
+  loadedSplitPath = currentSplitPath;
   loadedRoute = route;
-  if (window.location.search) loadedPath += "/" + window.location.search;
+  if (window.location.search) loadedSplitPath.push(window.location.search);
 }
 
 export function profileRedirect(did: string) {

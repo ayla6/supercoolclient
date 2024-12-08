@@ -1,9 +1,6 @@
 import { get } from "../elements/utils/cache";
 
-export async function notificationsRoute(
-  currentPath: string,
-  loadedPath: string,
-) {
+export async function notificationsRoute() {
   const container = document.getElementById("container");
   const content = document.createElement("div");
   content.id = "content";

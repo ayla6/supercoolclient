@@ -1,11 +1,13 @@
 import { AppBskyEmbedExternal } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { loadEmbedGif } from "./gif";
+import { cutOutThePath } from "../../utils/link_processing";
 
 export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
-  const url = new URL(embed.external.uri);
-  if (url.hostname === "media.tenor.com") {
-    return loadEmbedGif(url);
+  const host = cutOutThePath(embed.external.uri);
+  if (host === "https://media.tenor.com/") {
+    const uri = new URL(embed.external.uri);
+    return loadEmbedGif(uri);
   } else {
     const card = elem("a", { href: embed.external.uri, className: "external" });
     if (embed.external.thumb) {
@@ -29,7 +31,7 @@ export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
             })
           : "",
         elem("span", {
-          textContent: url.host,
+          textContent: host,
           className: "small",
         }),
       ]),

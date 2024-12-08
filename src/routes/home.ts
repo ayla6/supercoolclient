@@ -5,58 +5,6 @@ import { hydrateFeed } from "../elements/ui/feed";
 let currentFeed: string;
 let currentScroll: { [key: string]: number } = {};
 
-function navButton(feed: string, title: string) {
-  const button = elem("a", {
-    textContent: title,
-    href: `?feed=${feed}&title=${title}`,
-    onclick: (e) => {
-      e.preventDefault();
-      currentScroll[currentFeed] = scrollY;
-      loadHomeFeed(feed, title);
-    },
-  });
-  button.setAttribute("ignore", "");
-  return button;
-}
-
-export async function homeRoute(currentPath: string, loadedPath: string) {
-  if (loadedPath !== "home") {
-    const container = document.getElementById("container");
-    const leftBar = document.createElement("div");
-    leftBar.id = "side-bar";
-    leftBar.className = "sticky";
-    const feedNav = document.createElement("div");
-    feedNav.className = "side-nav";
-    const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
-    const { items: feeds } = prefs.data.preferences.find((e) => {
-      return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
-    });
-    const { data: feedGens } = await get("app.bsky.feed.getFeedGenerators", {
-      params: {
-        feeds: (() => {
-          let pinned = [];
-          for (const feed of feeds.slice(1)) {
-            if (feed.pinned) pinned.push(feed.value);
-          }
-          return pinned;
-        })(),
-      },
-    });
-
-    feedNav.append(navButton("following", "Following"));
-    for (const feed of feedGens.feeds) {
-      feedNav.append(navButton(feed.uri, feed.displayName));
-    }
-
-    leftBar.append(feedNav);
-
-    const content = document.createElement("div");
-    content.id = "content";
-    container.replaceChildren(leftBar, content);
-    homeUrlChange();
-  }
-}
-
 async function loadHomeFeed(
   feedgen: string,
   title: string,
@@ -102,12 +50,73 @@ async function loadHomeFeed(
   }
 }
 
-export async function homeUrlChange(currentPath?: string, loadedPath?: string) {
-  const url = new URL(window.location.href);
-  const params = url.searchParams;
-  let feedgen = params.get("feed");
-  let title = params.get("title");
+function navButton(feed: string, title: string) {
+  const button = elem("a", {
+    textContent: title,
+    href: `?feed=${feed}&title=${title}`,
+    onclick: (e) => {
+      e.preventDefault();
+      currentScroll[currentFeed] = scrollY;
+      loadHomeFeed(feed, title);
+    },
+  });
+  button.setAttribute("ignore", "");
+  return button;
+}
 
-  history.replaceState({}, "", url.pathname);
-  loadHomeFeed(feedgen, title, loadedPath === "/");
+function loadHomeFeedFromSearchParams(previousSplitPath: string[]) {
+  const params = new URLSearchParams(window.location.search);
+  const feedgen = params.get("feed");
+  const title = params.get("title");
+
+  history.replaceState({}, "", window.location.pathname);
+  loadHomeFeed(feedgen, title, previousSplitPath[0] === "");
+}
+
+export async function homeRoute(
+  currentPath: string,
+  currentSplitPath: string[],
+  previousSplitPath: string[],
+) {
+  const container = document.getElementById("container");
+  const leftBar = document.createElement("div");
+  leftBar.id = "side-bar";
+  leftBar.className = "sticky";
+  const feedNav = document.createElement("div");
+  feedNav.className = "side-nav";
+  const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
+  const { items: feeds } = prefs.data.preferences.find((e) => {
+    return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
+  });
+  const { data: feedGens } = await get("app.bsky.feed.getFeedGenerators", {
+    params: {
+      feeds: (() => {
+        let pinned = [];
+        for (const feed of feeds.slice(1)) {
+          if (feed.pinned) pinned.push(feed.value);
+        }
+        return pinned;
+      })(),
+    },
+  });
+
+  feedNav.append(navButton("following", "Following"));
+  for (const feed of feedGens.feeds) {
+    feedNav.append(navButton(feed.uri, feed.displayName));
+  }
+
+  leftBar.append(feedNav);
+
+  const content = document.createElement("div");
+  content.id = "content";
+  container.replaceChildren(leftBar, content);
+  loadHomeFeedFromSearchParams(previousSplitPath);
+}
+
+export async function homeUrlChange(
+  currentPath: string,
+  currentSplitPath: string[],
+  previousSplitPath: string[],
+) {
+  loadHomeFeedFromSearchParams(previousSplitPath);
 }

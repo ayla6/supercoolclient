@@ -15,9 +15,11 @@
     display: flex;
     scroll-margin: 48px;
     flex-grow: 1;
+    min-height: 0;
     min-width: 0;
 
     .card {
+        align-self: flex-start;
         background: $white;
         border: $border;
         border-radius: $border-radius;

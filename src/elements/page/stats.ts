@@ -3,10 +3,10 @@ import { elem } from "../utils/elem";
 import { feedNSID, hydrateFeed } from "../ui/feed";
 import { postCard } from "../ui/post_card";
 import { stickyHeader } from "../ui/sticky_header";
-import { getUriFromPath } from "../utils/link_processing";
+import { getUriFromSplitPath } from "../utils/link_processing";
 
 export async function statsPage(
-  currentPath: string,
+  splitPath: string[],
   title: string,
   nsid: feedNSID,
   func: (item: any) => HTMLElement,
@@ -14,7 +14,7 @@ export async function statsPage(
   const container = document.getElementById("container");
   const content = elem("div", { id: "content" });
 
-  const uri = getUriFromPath(currentPath);
+  const uri = getUriFromSplitPath(splitPath);
 
   container.replaceChildren(stickyHeader(title), content);
   content.append(
