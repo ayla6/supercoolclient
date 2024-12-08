@@ -47,7 +47,8 @@
 
     .pfp-holder::after {
         width: $reply-pfp-right-margin;
-        left: $reply-pfp-size + 2px;
+        left: $reply-pfp-size + ($reply-pfp-right-margin - $speech-bubble-width) +
+            2px;
         bottom: ($reply-pfp-size + $speech-bubble-height) * 0.5;
     }
 }

@@ -18,9 +18,10 @@
         content: "";
         display: block;
         position: relative;
-        width: $large-pfp-right-margin;
+        width: $speech-bubble-width;
         height: $speech-bubble-height;
-        left: $large-pfp-size + 2px;
+        left: $large-pfp-size + ($large-pfp-right-margin - $speech-bubble-width) +
+            2px;
         bottom: ($large-pfp-size + $speech-bubble-height) * 0.5;
     }
 

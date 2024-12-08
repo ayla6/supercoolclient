@@ -5,7 +5,7 @@ $pfp-margin: 0px;
 $large-pfp-size: 40px;
 $reply-pfp-size: 32px;
 $large-pfp-right-margin: 10px;
-$reply-pfp-right-margin: 8px;
+$reply-pfp-right-margin: 10px;
 $string-width: 2px;
 $string-pfp-margin: 3px;
 $large-string-margin: ($large-pfp-size - $string-width) * 0.5 +
@@ -13,5 +13,6 @@ $large-string-margin: ($large-pfp-size - $string-width) * 0.5 +
 $reply-string-margin: ($reply-pfp-size - $string-width) * 0.5 +
     ($border-width + $pfp-margin);
 $speech-bubble-height: 16px;
+$speech-bubble-width: 8px;
 
 $content-padding: 8px;
