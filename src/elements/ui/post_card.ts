@@ -163,10 +163,11 @@ export function postCard(
   const content = elem("div", { className: "post-content" });
   if (record.text) {
     content.append(
-      elem("div", {
-        className: "text-content",
-        innerHTML: processRichText(record.text, record.facets),
-      }),
+      elem(
+        "div",
+        { className: "text-content" },
+        processRichText(record.text, record.facets),
+      ),
     );
   }
   if (record.embed) {
@@ -194,10 +195,7 @@ export function postCard(
 
   if (fullView) {
     const warnings = [];
-    if (
-      post.indexedAt &&
-      Math.abs(indexedAt.getTime() - createdAt.getTime()) > 250000
-    ) {
+    if (post.indexedAt && indexedAt.getTime() - createdAt.getTime() > 250000) {
       warnings.push(
         elem("span", {
           className: "label",

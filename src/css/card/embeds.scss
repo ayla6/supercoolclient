@@ -149,6 +149,13 @@ $border-total-width: 2px;
     }
 
     span {
+        max-height: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: pre-wrap;
+    }
+
+    span {
         display: block;
         text-align: left;
         word-break: break-word;

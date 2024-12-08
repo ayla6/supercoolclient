@@ -133,7 +133,7 @@ function mediaNavButton(
   lastMedia: AppBskyFeedGetAuthorFeed.Output,
 ) {
   const button = elem("a", {
-    href: `/${did}${name}`,
+    href: `/${did}/${name}`,
     textContent: text,
   });
   button.setAttribute("value", name);

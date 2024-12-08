@@ -268,12 +268,12 @@ code {
         display: block;
         width: 100%;
         overflow-x: scroll;
-        white-space: nowrap; /* Prevent wrapping */
+        white-space: nowrap;
         scrollbar-width: none;
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 10; /* Ensure it's above other content */
+        z-index: 10;
         &::-webkit-scrollbar {
             display: none;
         }

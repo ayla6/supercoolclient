@@ -32,9 +32,7 @@ export function profileCard(profile: AppBskyActorDefs.ProfileView) {
       ]),
       elem("div", {
         className: "bio",
-        textContent: profile.description
-          ? profile.description?.replace("<br/>", " ")
-          : "",
+        textContent: profile.description,
       }),
     ]),
   ]);

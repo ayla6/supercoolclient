@@ -4,7 +4,7 @@ import { elem } from "../elements/utils/elem";
 import { postCard } from "../elements/ui/post_card";
 import { rpc } from "../login";
 import { loadThread } from "../elements/page/thread";
-import { profileRedirect } from "../router";
+import { loadedPath, profileRedirect } from "../router";
 import { stickyHeader } from "../elements/ui/sticky_header";
 import {
   getAtIdFromPath,
@@ -18,7 +18,7 @@ export function setPreloaded(post: AppBskyFeedDefs.PostView) {
 }
 export async function postRoute(
   currentPath: string,
-  loadedPath: string,
+  previousPath: string,
   reload: boolean = true,
 ) {
   const container = document.getElementById("container");
@@ -44,38 +44,47 @@ export async function postRoute(
     reload,
   );
 
-  let rootPost: AppBskyFeedDefs.PostView;
-  if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
-    const post = postThread.thread.post;
-    document.title = `${post.author.handle}: “${(post.record as AppBskyFeedPost.Record).text}” — SuperCoolClient`;
+  if (loadedPath === currentPath) {
+    let rootPost: AppBskyFeedDefs.PostView;
+    if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
+      const post = postThread.thread.post;
+      document.title = `${post.author.handle}: “${(post.record as AppBskyFeedPost.Record).text}” — SuperCoolClient`;
 
-    if (preloadedPost) Object.assign(preloadedPost, post);
-    if (!cache["app.bsky.feed.getPosts"]) cache["app.bsky.feed.getPosts"] = {};
-    const params = `{"uris":["${uri}"]}`;
-    cache["app.bsky.feed.getPosts"][params] = {
-      [params]: { data: { posts: [post] } },
-    };
-    preloadedPost = null;
-    const record = postThread.thread.post.record as AppBskyFeedPost.Record;
-    if (record.reply)
-      rootPost = (
-        await get(
-          "app.bsky.feed.getPosts",
-          {
-            params: {
-              uris: [record.reply.root.uri],
+      if (preloadedPost) Object.assign(preloadedPost, post);
+      if (!cache["app.bsky.feed.getPosts"])
+        cache["app.bsky.feed.getPosts"] = {};
+      const params = `{"uris":["${uri}"]}`;
+      cache["app.bsky.feed.getPosts"][params] = {
+        [params]: { data: { posts: [post] } },
+      };
+      preloadedPost = null;
+      if (
+        postThread.thread.parent &&
+        postThread.thread.parent.$type !== "app.bsky.feed.defs#threadViewPost"
+      ) {
+        rootPost = (
+          await get(
+            "app.bsky.feed.getPosts",
+            {
+              params: {
+                uris: [
+                  (postThread.thread.post.record as AppBskyFeedPost.Record)
+                    .reply.root.uri,
+                ],
+              },
             },
-          },
-          reload,
-        )
-      ).data.posts[0];
+            reload,
+          )
+        ).data.posts[0];
+      }
+    }
+
+    if (
+      postThread.thread.$type === "app.bsky.feed.defs#threadViewPost" &&
+      atId != postThread.thread.post.author.did
+    )
+      profileRedirect(postThread.thread.post.author.did);
+
+    loadThread(postThread, rootPost, content);
   }
-
-  if (
-    postThread.thread.$type === "app.bsky.feed.defs#threadViewPost" &&
-    atId != postThread.thread.post.author.did
-  )
-    profileRedirect(postThread.thread.post.author.did);
-
-  loadThread(postThread, rootPost, content);
 }

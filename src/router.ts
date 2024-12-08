@@ -100,6 +100,7 @@ export async function updatePage() {
 
   let ableToLocal = true;
   if (currentFirstSubdir !== loadedFirstSubdir) {
+    console.log("mamamam", currentFirstSubdir, loadedFirstSubdir);
     document.body.setAttribute("style", "");
     ableToLocal = false;
   }

@@ -6,6 +6,7 @@
     }
 
     .bio {
+        white-space: wrap;
         font-size: 12px;
         overflow-y: hidden;
         text-overflow: ellipsis;

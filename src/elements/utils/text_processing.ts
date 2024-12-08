@@ -1,4 +1,5 @@
 import { Facet, segmentize } from "@atcute/bluesky-richtext-segmenter";
+import { elem } from "./elem";
 
 const emojiRegex = /([\p{Emoji}\u200d]+|\ud83c[\udde6-\uddff]{2})/gu;
 const map: { [key: string]: string } = {
@@ -12,30 +13,33 @@ const map: { [key: string]: string } = {
 export function processText(input: string = ""): string {
   return input
     .replace(/[<>&]/g, (m) => map[m])
-    .replace(emojiRegex, '<span class="emoji">$1</span>')
-    .replace(/`(.*?)`/g, "<code>$1</code>")
-    .replace(/\n/g, "<br/>");
+    .replace(emojiRegex, '<span class="emoji">$1</span>');
 }
 
 export function processRichText(text: string, facets: Facet[]) {
-  let processed: string = "";
   const segmentText = segmentize(text, facets);
-  for (const segment of segmentText) {
-    const text = processText(segment.text);
+  const length = segmentText.length;
+  const processed = document.createDocumentFragment();
+
+  for (let i = 0; i < length; i++) {
+    const segment = segmentText[i];
+    const text = segment.text;
+    let result: string | Node;
     if (segment.features)
       for (const feat of segment.features) {
         const type = feat.$type;
         if (type === "app.bsky.richtext.facet#tag") {
-          processed += `<a href="/search/#${escapeHTML(feat.tag)}">${text}</a>`;
+          result = elem("a", { href: `/search/#${feat.tag}` }, text);
         } else if (type === "app.bsky.richtext.facet#link") {
-          processed += `<a href="${escapeHTML(feat.uri)}">${text}</a>`;
+          result = elem("a", { href: feat.uri }, text);
         } else if (type === "app.bsky.richtext.facet#mention") {
-          processed += `<a href="/${escapeHTML(feat.did)}">${text}</a>`;
+          result = elem("a", { href: `/${feat.did}` }, text);
         } else {
-          processed += text;
+          result = text;
         }
       }
-    else processed += text;
+    else result = text;
+    processed.append(result);
   }
   return processed;
 }

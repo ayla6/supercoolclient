@@ -40,12 +40,8 @@ export function getLocationFromPath(uri: string) {
 export function getFirstAndSecondSubdirs(path: string) {
   const firstSlashIndex = path.indexOf("/", 1);
   const secondSlashIndex = path.indexOf("/", firstSlashIndex) + 1;
-  const thirdSlashIndex = path.indexOf("/", secondSlashIndex);
 
-  return [
-    path.slice(1, firstSlashIndex),
-    thirdSlashIndex
-      ? path.slice(secondSlashIndex, thirdSlashIndex)
-      : path.slice(secondSlashIndex),
-  ];
+  return firstSlashIndex !== -1
+    ? [path.slice(1, firstSlashIndex), path.slice(secondSlashIndex)]
+    : [path.slice(1), ""];
 }

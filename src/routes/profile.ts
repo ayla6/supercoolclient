@@ -1,5 +1,5 @@
 import { get } from "../elements/utils/cache";
-import { profileRedirect } from "../router";
+import { loadedPath, profileRedirect } from "../router";
 import { feedNSID, hydrateFeed } from "../elements/ui/feed";
 import { profilePage } from "../elements/page/profile";
 import { profileCard } from "../elements/ui/profile_card";
@@ -38,17 +38,17 @@ export async function profileRoute(currentPath: string, loadedPath: string) {
 
 export async function profileUrlChange(
   currentPath: string,
-  loadedPath: string,
+  previousPath: string,
 ) {
   const currentLocation = getLocationFromPath(currentPath);
-  const lastLocation = getLocationFromPath(loadedPath);
+  const previousLocation = getLocationFromPath(previousPath);
 
   const did = getAtIdFromPath(currentPath);
 
   const content = document.getElementById("content");
   document
     .querySelector(
-      `[value="${lastLocation + (lastLocation === "search" ? "" : "")}"]`,
+      `[value="${previousLocation + (previousLocation === "search" ? "" : "")}"]`,
     )
     ?.classList.remove("active");
   document
@@ -57,9 +57,9 @@ export async function profileUrlChange(
     )
     ?.classList.add("active");
 
-  if (currentLocation !== lastLocation) content.replaceChildren();
+  if (currentLocation !== previousLocation) content.replaceChildren();
   let posts: HTMLElement[];
-  let reload = lastLocation !== "post";
+  let reload = previousLocation !== "post";
   const feed = feedConfig[currentLocation] ?? feedConfig.default;
   posts = await hydrateFeed(
     feed.endpoint ?? urlEquivalents[currentLocation][0],
@@ -67,7 +67,7 @@ export async function profileUrlChange(
     reload,
     feed.type,
   );
-  content.replaceChildren(...posts);
+  if (currentPath === loadedPath) content.replaceChildren(...posts);
 }
 
 export function profileTrim(currentPath: string, loadedPath: string) {
