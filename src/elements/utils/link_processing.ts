@@ -21,5 +21,5 @@ export function getUriFromSplitPath(splitPath: string[]) {
 
 export function cutOutThePath(uri: string) {
   const slashIndex = uri.indexOf("/", 8);
-  return slashIndex !== -1 ? uri.slice(0, slashIndex + 1) : uri;
+  return slashIndex !== -1 ? uri.slice(8, slashIndex) : uri;
 }

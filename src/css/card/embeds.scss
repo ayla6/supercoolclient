@@ -131,6 +131,9 @@ $border-total-width: 2px;
         width: 100%;
         aspect-ratio: 1.91 / 1;
     }
+    &.widescreen .image {
+        aspect-ratio: 16 / 9;
+    }
 
     img {
         $border-radius-minus-one: $border-radius - 1px;
