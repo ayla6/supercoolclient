@@ -10,6 +10,8 @@ async function loadHomeFeed(
   title: string,
   wasAtHome: boolean = true,
 ) {
+  window.onscroll = null;
+
   if (!feedgen) {
     if (localStorage.getItem("last-feed"))
       [feedgen, title] = JSON.parse(localStorage.getItem("last-feed"));

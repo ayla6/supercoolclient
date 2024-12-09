@@ -26,7 +26,6 @@ export async function postRoute(
     const mainPost = postCard(preloadedPost, true);
     mainPost.classList.add("full");
     content.append(mainPost);
-    mainPost.scrollIntoView();
   }
 
   container.replaceChildren(stickyHeader("Post"), content);
