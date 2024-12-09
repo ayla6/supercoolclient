@@ -212,7 +212,7 @@ export function postCard(
     record.text &&
     record.langs &&
     record.langs[0] &&
-    languagesToNotTranslate.includes(record.langs[0])
+    !languagesToNotTranslate.includes(record.langs[0])
   ) {
     translateButton = elem("a", {
       className: "small-link",

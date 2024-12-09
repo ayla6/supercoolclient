@@ -1,6 +1,5 @@
 import { AppBskyEmbedDefs } from "@atcute/client/lexicons";
 
-const borderWidth = 2;
 const singleImageHeight = 320;
 const multiImageHeight = 220;
 
