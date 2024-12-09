@@ -299,10 +299,12 @@ code {
             display: none;
         }
         a {
-            display: inline-block;
+            display: flex;
+            align-items: center;
             font-size: $font-size;
             height: $font-size;
-            padding: ($header-height - $font-size) * 0.5;
+            padding: 0 15px;
+            height: 39px;
             border-bottom: 1px solid #e8e8e8;
             border-right: 1px solid #e8e8e8;
             border-width: 0;
