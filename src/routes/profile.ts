@@ -42,8 +42,10 @@ async function loadProfileFeed(splitPath: string[], reload: boolean) {
   const feedToLoad = splitPath[1] ?? "posts";
 
   const sideBar = document.getElementById("side-bar");
-  sideBar.querySelector(".active")?.classList.remove("active");
-  sideBar.querySelector(`[feed="${feedToLoad}"]`)?.classList.add("active");
+  if (sideBar) {
+    sideBar.querySelector(".active")?.classList.remove("active");
+    sideBar.querySelector(`[feed="${feedToLoad}"]`)?.classList.add("active");
+  }
 
   const content = document.getElementById("content");
   if (!reload) content.replaceChildren();

@@ -11,7 +11,11 @@ export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
     const uri = new URL(embed.external.uri);
     return loadEmbedGif(uri);
   } else {
-    const card = elem("a", { href: embed.external.uri, className: "external" });
+    const card = elem("a", {
+      href: embed.external.uri,
+      className: "external",
+      target: " ",
+    });
     if (embed.external.thumb) {
       const image = elem(
         "div",

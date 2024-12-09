@@ -105,9 +105,12 @@ export async function updatePage() {
   if (ableToLocal && route === loadedRoute) {
     localRoutes[route](currentSplitPath, loadedSplitPath);
   } else {
-    if (loadedRoute === "post" && route !== "post") {
+    if (loadedSplitPath[1] === "post" && currentSplitPath[1] !== "post") {
       deleteCache("app.bsky.feed.getPostThread");
       deleteCache("app.bsky.feed.getPosts");
+      deleteCache("app.bsky.feed.getRepostedBy");
+      deleteCache("app.bsky.feed.getQuotes");
+      deleteCache("app.bsky.feed.getLikes");
     }
     document.title = "SuperCoolClient";
     window.scrollTo({ top: 0 });

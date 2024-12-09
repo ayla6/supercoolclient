@@ -31,7 +31,7 @@ export function processRichText(text: string, facets: Facet[]) {
         if (type === "app.bsky.richtext.facet#tag") {
           result = elem("a", { href: `/search/#${feat.tag}` }, text);
         } else if (type === "app.bsky.richtext.facet#link") {
-          result = elem("a", { href: feat.uri }, text);
+          result = elem("a", { href: feat.uri, target: " " }, text);
         } else if (type === "app.bsky.richtext.facet#mention") {
           result = elem("a", { href: `/${feat.did}` }, text);
         } else {

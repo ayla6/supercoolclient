@@ -29,10 +29,12 @@ async function loadHomeFeed(
   window.scrollTo({ top: 0 });
   if (lastFeed !== feedgen || !wasAtHome) {
     const sideBar = document.getElementById("side-bar");
-    sideBar.querySelector(".active")?.classList.remove("active");
-    sideBar
-      .querySelector(`[href="?feed=${feedgen}&title=${title}"]`)
-      ?.classList.add("active");
+    if (sideBar) {
+      sideBar.querySelector(".active")?.classList.remove("active");
+      sideBar
+        .querySelector(`[href="?feed=${feedgen}&title=${title}"]`)
+        ?.classList.add("active");
+    }
   }
   const content = document.getElementById("content");
   if (currentFeed !== lastFeed) content.replaceChildren();
