@@ -69,12 +69,11 @@ function loadHomeFeedFromSearchParams(previousSplitPath: string[]) {
   const feedgen = params.get("feed");
   const title = params.get("title");
 
-  history.replaceState({}, "", window.location.pathname);
+  history.replaceState(null, "", window.location.pathname);
   loadHomeFeed(feedgen, title, previousSplitPath[0] === "");
 }
 
 export async function homeRoute(
-  currentPath: string,
   currentSplitPath: string[],
   previousSplitPath: string[],
 ) {
@@ -114,7 +113,6 @@ export async function homeRoute(
 }
 
 export async function homeUrlChange(
-  currentPath: string,
   currentSplitPath: string[],
   previousSplitPath: string[],
 ) {

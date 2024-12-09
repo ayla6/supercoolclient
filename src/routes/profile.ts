@@ -1,5 +1,5 @@
 import { get } from "../elements/utils/cache";
-import { loadedPath, profileRedirect } from "../router";
+import { loadedSplitPath, profileRedirect } from "../router";
 import { feedNSID, hydrateFeed } from "../elements/ui/feed";
 import { profilePage } from "../elements/page/profile";
 import { profileCard } from "../elements/ui/profile_card";
@@ -38,19 +38,16 @@ const feedConfig = {
   },
 };
 
-async function loadProfileFeed(
-  path: string,
-  splitPath: string[],
-  reload: boolean,
-) {
+async function loadProfileFeed(splitPath: string[], reload: boolean) {
+  const feedToLoad = splitPath[1] ?? "posts";
+
   const sideBar = document.getElementById("side-bar");
   sideBar.querySelector(".active")?.classList.remove("active");
-  sideBar.querySelector(`[href="${path}"]`)?.classList.add("active");
+  sideBar.querySelector(`[feed="${feedToLoad}"]`)?.classList.add("active");
 
   const content = document.getElementById("content");
   if (!reload) content.replaceChildren();
 
-  const feedToLoad = splitPath[1] ?? "posts";
   const feed = feedConfig[feedToLoad] ?? feedConfig.default;
 
   const posts = await hydrateFeed(
@@ -59,22 +56,10 @@ async function loadProfileFeed(
     reload,
     feed.type,
   );
-  if (path === loadedPath) content.replaceChildren(...posts);
-}
-
-export function profileTrim(
-  currentPath: string,
-  currentSplitPath: string[],
-  loadedSplitPath: string[],
-) {
-  const newPath = currentPath.slice(0, -1);
-  delete currentSplitPath[1];
-  history.pushState(null, "", newPath);
-  profileRoute(newPath, currentSplitPath);
+  if (splitPath === loadedSplitPath) content.replaceChildren(...posts);
 }
 
 export async function profileRoute(
-  currentPath: string,
   currentSplitPath: string[],
   previousSplitPath?: string[],
 ) {
@@ -90,19 +75,18 @@ export async function profileRoute(
       limit: 4,
     },
   });
-  if (loadedPath === currentPath) {
+  if (loadedSplitPath === currentSplitPath) {
     if (atId != profile.did) profileRedirect(profile.did);
     profilePage(profile, lastMedia);
 
-    loadProfileFeed(currentPath, currentSplitPath, false);
+    loadProfileFeed(currentSplitPath, false);
   }
 }
 
 export async function profileUrlChange(
-  currentPath: string,
   currentSplitPath: string[],
   previousSplitPath: string[],
 ) {
   const atSameFeed = currentSplitPath[1] === previousSplitPath[1];
-  loadProfileFeed(currentPath, currentSplitPath, atSameFeed);
+  loadProfileFeed(currentSplitPath, atSameFeed);
 }

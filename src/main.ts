@@ -30,6 +30,12 @@ addEventListener("popstate", () => {
 }
 rpc.call('com.atproto.repo.putRecord', {data: {record: record, collection: 'app.scc.profile',repo: sessionStorage.getItem('userdid'), rkey: 'self'}})*/
 
+const path = window.location.pathname;
+if (path.length !== 1 && path.endsWith("/")) {
+  const newPath = path.slice(0, -1);
+  history.replaceState(null, "", newPath);
+}
+
 fillMissingSettings();
 login();
 loadNavbar();

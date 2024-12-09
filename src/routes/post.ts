@@ -3,7 +3,7 @@ import { cache, get } from "../elements/utils/cache";
 import { elem } from "../elements/utils/elem";
 import { postCard } from "../elements/ui/post_card";
 import { loadThread } from "../elements/page/thread";
-import { loadedPath, profileRedirect } from "../router";
+import { loadedSplitPath, profileRedirect } from "../router";
 import { stickyHeader } from "../elements/ui/sticky_header";
 import { getUriFromSplitPath } from "../elements/utils/link_processing";
 
@@ -12,7 +12,6 @@ export function setPreloaded(post: AppBskyFeedDefs.PostView) {
   preloadedPost = post;
 }
 export async function postRoute(
-  currentPath: string,
   currentSplitPath: string[],
   previousSplitPath: string[],
 ) {
@@ -40,7 +39,7 @@ export async function postRoute(
     reload,
   );
 
-  if (loadedPath === currentPath) {
+  if (loadedSplitPath === currentSplitPath) {
     let rootPost: AppBskyFeedDefs.PostView;
     if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
       const post = postThread.thread.post;

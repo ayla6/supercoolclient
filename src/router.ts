@@ -15,7 +15,7 @@
   history.pushState(null, "", url);
 });*/
 
-import { profileRoute, profileTrim, profileUrlChange } from "./routes/profile";
+import { profileRoute, profileUrlChange } from "./routes/profile";
 import { homeRoute, homeUrlChange } from "./routes/home";
 import { postRoute } from "./routes/post";
 import { elem } from "./elements/utils/elem";
@@ -25,7 +25,6 @@ import { repostsRoute } from "./routes/reposts";
 import { quotesRoute } from "./routes/quotes";
 import { deleteCache } from "./elements/utils/cache";
 
-export let loadedPath: string = "";
 export let loadedSplitPath: string[] = [];
 export let loadedRoute: string = "";
 
@@ -34,7 +33,6 @@ const navbar = document.getElementById("navbar");
 const routesBase: { [key: string]: string } = {
   "": "home",
   notifications: "notifications",
-  ":/": "profileTrim",
   ":": "profile",
   ":/:": "profile",
   ":/post/:": "post",
@@ -46,7 +44,6 @@ const changeRoutes: { [key: string]: Function } = {
   home: homeRoute,
   profile: profileRoute,
   post: postRoute,
-  profileTrim: profileTrim,
   notifications: notificationsRoute,
   postLikes: likesRoute,
   postReposts: repostsRoute,
@@ -106,7 +103,7 @@ export async function updatePage() {
     navbar.querySelector(`[href="${currentPath}"]`)?.classList.add("active");
   }
   if (ableToLocal && route === loadedRoute) {
-    localRoutes[route](currentPath, currentSplitPath, loadedSplitPath);
+    localRoutes[route](currentSplitPath, loadedSplitPath);
   } else {
     if (loadedRoute === "post" && route !== "post") {
       deleteCache("app.bsky.feed.getPostThread");
@@ -116,10 +113,9 @@ export async function updatePage() {
     window.scrollTo({ top: 0 });
     document.body.removeChild(document.getElementById("container"));
     document.body.append(elem("div", { id: "container" }));
-    changeRoutes[route](currentPath, currentSplitPath, loadedSplitPath);
+    changeRoutes[route](currentSplitPath, loadedSplitPath);
   }
 
-  loadedPath = currentPath;
   loadedSplitPath = currentSplitPath;
   loadedRoute = route;
   if (window.location.search) loadedSplitPath.push(window.location.search);

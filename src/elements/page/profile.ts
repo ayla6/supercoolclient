@@ -128,6 +128,7 @@ function navButton(name: string, did: string, text: string) {
     href: `/${did}${name === "posts" ? "" : "/" + name}`,
     textContent: text,
   });
+  button.setAttribute("feed", name);
   return button;
 }
 
