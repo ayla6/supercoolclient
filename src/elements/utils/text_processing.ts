@@ -8,16 +8,16 @@ const map: { [key: string]: string } = {
   "'": "&apos;",
   '"': "&quot;",
 };
-export function processText(input: string = ""): string {
+export const processText = (input: string = ""): string => {
   return input
     .replace(/[<>&]/g, (m) => map[m])
     .replace(
       /([\p{Emoji}\u200d]+|\ud83c[\udde6-\uddff]{2})/gu,
       '<span class="emoji">$1</span>',
     );
-}
+};
 
-export function processRichText(text: string, facets: Facet[]) {
+export const processRichText = (text: string, facets: Facet[]) => {
   const segmentText = segmentize(text, facets);
   const length = segmentText.length;
   const processed = document.createDocumentFragment();
@@ -50,12 +50,12 @@ export function processRichText(text: string, facets: Facet[]) {
     processed.appendChild(result);
   }
   return processed;
-}
+};
 
-export function encodeQuery(query: string) {
+export const encodeQuery = (query: string) => {
   return encodeURIComponent(query).replace("%20", "+");
-}
+};
 
-export function decodeQuery(query: string) {
+export const decodeQuery = (query: string) => {
   return decodeURIComponent(query.replace("+", "%20"));
-}
+};

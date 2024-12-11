@@ -11,7 +11,7 @@ export let manager = new CredentialManager({
 });
 export let rpc = new XRPC({ handler: manager });
 
-export async function login() {
+export const login = async () => {
   if (manager.session) {
     console.log("Already logged in...");
   }
@@ -36,4 +36,4 @@ export async function login() {
     rpc = new XRPC({ handler: manager });
   }
   return manager;
-}
+};

@@ -75,5 +75,5 @@ export const homeRoute = async (
   );
   container.appendChild(content);
 
-  return [onscrollFunction];
+  return { onscrollFunction, feed: uri };
 };

@@ -1,9 +1,8 @@
 import Hls from "hls.js";
-import { AppBskyEmbedDefs, AppBskyEmbedVideo } from "@atcute/client/lexicons";
+import { AppBskyEmbedVideo } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
-import { getProperSize } from "../../utils/get_proper_size";
 
-function loadVideo(embed: AppBskyEmbedVideo.View) {
+const loadVideo = (embed: AppBskyEmbedVideo.View) => {
   // stole from aglais!!
   const hls = new Hls({
     capLevelToPlayerSize: true,
@@ -37,9 +36,9 @@ function loadVideo(embed: AppBskyEmbedVideo.View) {
     videoElem,
   );
   return videoContainer;
-}
+};
 
-export function loadEmbedVideo(embed: AppBskyEmbedVideo.View) {
+export const loadEmbedVideo = (embed: AppBskyEmbedVideo.View) => {
   const thumbnail = elem("div", { className: "video-thumbnail" }, undefined, [
     elem("img", {
       src: embed.thumbnail,
@@ -58,4 +57,4 @@ export function loadEmbedVideo(embed: AppBskyEmbedVideo.View) {
   });
 
   return mediaContainer;
-}
+};

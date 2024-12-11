@@ -24,12 +24,12 @@ const dataLocations = {
 };
 
 let feedBeingLoaded = false;
-export async function hydrateFeed(
+export const hydrateFeed = async (
   output: HTMLElement,
   nsid: feedNSID,
   params: { [key: string]: any },
   func: (item: any) => HTMLDivElement = postCard,
-): Promise<OnscrollFunction> {
+): Promise<OnscrollFunction> => {
   const dataLocation = dataLocations[nsid] ?? "feed";
   const { data } = await rpc.get(nsid, { params: params });
 
@@ -58,4 +58,4 @@ export async function hydrateFeed(
       feedBeingLoaded = false;
     }
   };
-}
+};

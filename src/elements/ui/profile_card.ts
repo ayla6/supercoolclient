@@ -2,7 +2,7 @@ import { AppBskyActorDefs, Brand } from "@atcute/client/lexicons";
 import { elem } from "../utils/elem";
 import { idChoose } from "../utils/link_processing.ts";
 
-export function profileCard(profile: AppBskyActorDefs.ProfileView) {
+export const profileCard = (profile: AppBskyActorDefs.ProfileView) => {
   const profileDid = profile.did;
   const atId = idChoose(profile);
 
@@ -36,7 +36,7 @@ export function profileCard(profile: AppBskyActorDefs.ProfileView) {
       }),
     ]),
   ]);
-}
+};
 
 export function statProfile(stat: {
   [Brand.Type]?: string;

@@ -6,10 +6,10 @@ const dateOptions: Intl.DateTimeFormatOptions = {
   minute: "numeric",
   hour12: false,
 };
-export function formatDate(date: Date) {
+export const formatDate = (date: Date) => {
   return date.toLocaleString(undefined, dateOptions);
-}
-export function formatTimeDifference(date1: Date, date2: Date): string {
+};
+export const formatTimeDifference = (date1: Date, date2: Date): string => {
   const diffInSeconds = Math.abs(date2.getTime() - date1.getTime()) / 1000;
 
   if (diffInSeconds < 60) {
@@ -25,4 +25,4 @@ export function formatTimeDifference(date1: Date, date2: Date): string {
   } else {
     return formatDate(date2);
   }
-}
+};

@@ -45,12 +45,14 @@ export const createLocalStateManager = (
     } else {
       window.scrollTo({ top: currentFeedState[2] });
     }
-    const onscrollFunc = feedState[feed][1];
+    const onscrollFunction = feedState[feed][1];
     if (cache.has(path)) {
-      window.onscroll = onscrollFunc;
-      cache.get(path)[3] = onscrollFunc;
+      window.onscroll = onscrollFunction;
+      const cacheEntry = cache.get(path);
+      cacheEntry.onscroll = onscrollFunction;
+      cacheEntry.feed = feed;
     }
-    return [onscrollFunc, content];
+    return [onscrollFunction, content];
   };
   return loadFeedState;
 };

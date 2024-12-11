@@ -4,8 +4,7 @@ import { loadEmbedGif } from "./gif";
 import { cutOutThePath } from "../../utils/link_processing";
 
 const widescreenThumbs = ["www.youtube.com", "music.youtube.com"];
-
-export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
+export const loadEmbedExternal = (embed: AppBskyEmbedExternal.View) => {
   const host = cutOutThePath(embed.external.uri);
   if (host === "media.tenor.com") {
     const uri = new URL(embed.external.uri);
@@ -38,7 +37,7 @@ export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
               textContent: embed.external.description,
               className: "description",
             })
-          : "",
+          : undefined,
         elem("span", {
           textContent: host,
           className: "small",
@@ -47,4 +46,4 @@ export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
     );
     return card;
   }
-}
+};

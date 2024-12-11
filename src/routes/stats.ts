@@ -26,6 +26,6 @@ export const createStatsRoute = (
     );
     container.appendChild(content);
 
-    return [onscrollFunction, title];
+    return { onscrollFunction, title };
   };
 };

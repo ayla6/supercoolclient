@@ -12,7 +12,112 @@ import { setPreloaded } from "../../routes/post";
 import { handleEmbed } from "./embeds/embed_handlers";
 import { languagesToNotTranslate } from "../../config.ts";
 
-export function postCard(
+const stat = (
+  type: "reply" | "like" | "repost" | "quote",
+  post: AppBskyFeedDefs.PostView,
+  href: string,
+) => {
+  const count: number = post[type + "Count"];
+  if (count === 0) return;
+  return elem(
+    "a",
+    {
+      className: "stat",
+      href: `${href}/${plural[type]}`,
+      onclick: () => setPreloaded(post),
+    },
+    undefined,
+    [
+      elem("span", { textContent: count.toLocaleString() }),
+      elem("span", {
+        className: "stat-name",
+        textContent: " " + (count === 1 ? type : plural[type]),
+      }),
+    ],
+  );
+};
+
+const interactionButton = (
+  type: "reply" | "like" | "repost" | "quote",
+  post: AppBskyFeedDefs.PostView,
+) => {
+  const hasViewer = "viewer" in post;
+  let count: number = post[type + "Count"];
+
+  const countSpan = elem("span", { textContent: count.toLocaleString() });
+  const button = elem(
+    "button",
+    { className: "interaction " + type + "-button" },
+    undefined,
+    [elem("div", { className: "icon" }), countSpan],
+  );
+  button.setAttribute("role", "button");
+
+  if (type === "like" || type === "repost") {
+    let isActive = Boolean(hasViewer ? post.viewer[type] : false);
+    button.classList.toggle("active", isActive);
+
+    if (hasViewer)
+      button.addEventListener(
+        "click",
+        manager.session
+          ? async () => {
+              isActive = !isActive;
+              await updateInteraction(isActive, post, type, countSpan, button);
+            }
+          : async () => {},
+      );
+  }
+
+  return button;
+};
+
+const updateInteraction = async (
+  active: boolean,
+  post: AppBskyFeedDefs.PostView,
+  type: "repost" | "like",
+  countSpan: HTMLSpanElement,
+  button: HTMLButtonElement,
+) => {
+  let count = post[type + "Count"];
+  try {
+    const collection = "app.bsky.feed." + type;
+    count += active ? 1 : -1;
+    countSpan.textContent = count.toLocaleString();
+    if (active) {
+      const { cid, uri } = post;
+      const { data } = await rpc.call("com.atproto.repo.createRecord", {
+        data: {
+          record: {
+            $type: collection,
+            createdAt: new Date().toISOString(),
+            subject: { cid, uri },
+          },
+          collection,
+          repo: manager.session.did,
+        },
+      });
+      post.viewer[type] = data.uri;
+    } else {
+      const recordUri = post.viewer[type];
+      if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
+      const did = recordUri.slice(5, recordUri.indexOf("/", 6));
+      const rkey = recordUri.slice(recordUri.lastIndexOf("/") + 1);
+      await rpc.call("com.atproto.repo.deleteRecord", {
+        data: { rkey, collection, repo: did },
+      });
+      delete post.viewer[type];
+    }
+    post[type + "Count"] = count;
+    button.classList.toggle("active", active);
+  } catch (err) {
+    console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
+    count += active ? -1 : 1;
+    countSpan.textContent = count.toLocaleString();
+  }
+};
+
+export const postCard = (
   postHousing:
     | AppBskyFeedDefs.FeedViewPost
     | AppBskyFeedDefs.PostView
@@ -20,7 +125,7 @@ export function postCard(
   fullView = false,
   hasReplies = false,
   isEmbed = false,
-) {
+) => {
   const post: AppBskyFeedDefs.PostView =
     "post" in postHousing ? postHousing.post : postHousing;
   const record = post.record as AppBskyFeedPost.Record;
@@ -87,7 +192,7 @@ export function postCard(
       ]),
     );
   } else {
-    let handleElem: any[];
+    let handleElem: HTMLElement[];
     if (
       "reason" in postHousing &&
       postHousing.reason.$type === "app.bsky.feed.defs#reasonRepost"
@@ -99,17 +204,19 @@ export function postCard(
           { className: "repost" },
           elem("div", { className: "icon" }),
         ),
-        elem("a", {
-          className: "handle",
-          href: "/" + repostedBy.did,
-          textContent: idChoose(repostedBy),
-        }),
-        document.createTextNode("reposted"),
-        elem("a", {
-          className: "handle",
-          href: authorHref,
-          textContent: atId,
-        }),
+        elem("span", {}, undefined, [
+          elem("a", {
+            className: "handle",
+            href: "/" + repostedBy.did,
+            textContent: idChoose(repostedBy),
+          }),
+          document.createTextNode(" reposted "),
+          elem("a", {
+            className: "handle",
+            href: authorHref,
+            textContent: atId,
+          }),
+        ]),
       ];
     } else {
       handleElem = [
@@ -261,7 +368,7 @@ export function postCard(
   postElem.appendChild(card);
 
   return postElem;
-}
+};
 
 const plural = {
   reply: "replies",
@@ -269,108 +376,3 @@ const plural = {
   repost: "reposts",
   quote: "quotes",
 };
-
-function stat(
-  type: "reply" | "like" | "repost" | "quote",
-  post: AppBskyFeedDefs.PostView,
-  href: string,
-) {
-  const count: number = post[type + "Count"];
-  if (count === 0) return;
-  return elem(
-    "a",
-    {
-      className: "stat",
-      href: `${href}/${plural[type]}`,
-      onclick: () => setPreloaded(post),
-    },
-    undefined,
-    [
-      elem("span", { textContent: count.toLocaleString() }),
-      elem("span", {
-        className: "stat-name",
-        textContent: " " + (count === 1 ? type : plural[type]),
-      }),
-    ],
-  );
-}
-
-function interactionButton(
-  type: "reply" | "like" | "repost" | "quote",
-  post: AppBskyFeedDefs.PostView,
-) {
-  const hasViewer = "viewer" in post;
-  let count: number = post[type + "Count"];
-
-  const countSpan = elem("span", { textContent: count.toLocaleString() });
-  const button = elem(
-    "button",
-    { className: "interaction " + type + "-button" },
-    undefined,
-    [elem("div", { className: "icon" }), countSpan],
-  );
-  button.setAttribute("role", "button");
-
-  if (type === "like" || type === "repost") {
-    let isActive = Boolean(hasViewer ? post.viewer[type] : false);
-    button.classList.toggle("active", isActive);
-
-    if (hasViewer)
-      button.addEventListener(
-        "click",
-        manager.session
-          ? async () => {
-              isActive = !isActive;
-              await updateInteraction(isActive, post, type, countSpan, button);
-            }
-          : async () => {},
-      );
-  }
-
-  return button;
-}
-
-async function updateInteraction(
-  active: boolean,
-  post: AppBskyFeedDefs.PostView,
-  type: "repost" | "like",
-  countSpan: HTMLSpanElement,
-  button: HTMLButtonElement,
-) {
-  let count = post[type + "Count"];
-  try {
-    const collection = "app.bsky.feed." + type;
-    count += active ? 1 : -1;
-    countSpan.textContent = count.toLocaleString();
-    if (active) {
-      const { cid, uri } = post;
-      const { data } = await rpc.call("com.atproto.repo.createRecord", {
-        data: {
-          record: {
-            $type: collection,
-            createdAt: new Date().toISOString(),
-            subject: { cid, uri },
-          },
-          collection,
-          repo: manager.session.did,
-        },
-      });
-      post.viewer[type] = data.uri;
-    } else {
-      const recordUri = post.viewer[type];
-      if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
-      const did = recordUri.slice(5, recordUri.indexOf("/", 6));
-      const rkey = recordUri.slice(recordUri.lastIndexOf("/") + 1);
-      await rpc.call("com.atproto.repo.deleteRecord", {
-        data: { rkey, collection, repo: did },
-      });
-      delete post.viewer[type];
-    }
-    post[type + "Count"] = count;
-    button.classList.toggle("active", active);
-  } catch (err) {
-    console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
-    count += active ? -1 : 1;
-    countSpan.textContent = count.toLocaleString();
-  }
-}

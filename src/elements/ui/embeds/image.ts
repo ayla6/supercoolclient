@@ -3,10 +3,10 @@ import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
 import { changeImageFormat } from "../../utils/link_processing";
 
-export function image(
+const loadImage = (
   image: AppBskyEmbedImages.ViewImage,
   isSingleImage: boolean,
-) {
+) => {
   const img = elem("img", {
     title: image.alt,
     alt: image.alt,
@@ -30,15 +30,15 @@ export function image(
 
   imageHolder.href = fullsize;
   return imageHolder;
-}
+};
 
-export function loadEmbedImages(embed: AppBskyEmbedImages.View) {
+export const loadEmbedImages = (embed: AppBskyEmbedImages.View) => {
   const isSingleImage = embed.images.length === 1;
   const mediaContainer = elem("div", {
     className: "media-container" + (embed.images.length === 1 ? "" : " multi"),
   });
   embed.images.forEach((img) =>
-    mediaContainer.appendChild(image(img, isSingleImage)),
+    mediaContainer.appendChild(loadImage(img, isSingleImage)),
   );
   return mediaContainer;
-}
+};

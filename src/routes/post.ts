@@ -300,5 +300,5 @@ export const postRoute = async (
   const [content, mainPost] = loadThread(postThread, rootPost);
   container.replaceChildren(stickyHeader("Post"), content);
 
-  return [undefined, title, mainPost];
+  return { title, scrollToElement: mainPost };
 };

@@ -9,14 +9,15 @@ import { postRoute } from "./routes/post";
 import { profileRoute } from "./routes/profile";
 import { createStatsRoute } from "./routes/stats";
 
-type CacheEntry = [
-  expirationDate: number,
-  content: HTMLDivElement,
-  title: string,
-  onscroll: OnscrollFunction,
-  bodyStyle: string,
-  scrollToElement: HTMLElement,
-];
+type CacheEntry = {
+  expirationDate: number;
+  content: HTMLDivElement;
+  title?: string;
+  feed?: string;
+  onscroll?: OnscrollFunction;
+  bodyStyle?: string;
+  scrollToElement?: HTMLElement;
+};
 type PageCache = Map<string, CacheEntry>;
 export const cache: PageCache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000;
@@ -54,16 +55,15 @@ const routesBase: { [key: string]: Route } = {
   ),
 };
 type computedRoutes = [{ key: string[]; route: Route }];
-function computeRoutes(routes: { [key: string]: Function }): computedRoutes {
+const routes: computedRoutes = (() => {
   const computedRoutes = [];
-  for (const route of Object.keys(routes)) {
-    computedRoutes.push({ key: route.split("/"), route: routes[route] });
+  for (const route of Object.keys(routesBase)) {
+    computedRoutes.push({ key: route.split("/"), route: routesBase[route] });
   }
   return computedRoutes as computedRoutes;
-}
-const routes = computeRoutes(routesBase);
+})();
 
-function matchRoute(path: string[]) {
+const matchRoute = (path: string[]) => {
   for (const route of routes) {
     if (path.length !== route.key.length) continue;
 
@@ -79,9 +79,9 @@ function matchRoute(path: string[]) {
     if (match) return route.route;
   }
   return null;
-}
+};
 
-export async function updatePage(useCache: boolean) {
+export const updatePage = async (useCache: boolean) => {
   {
     const container = document.getElementById("container");
     document.body.removeChild(container);
@@ -105,52 +105,53 @@ export async function updatePage(useCache: boolean) {
     (useCache && cachePage && Date.now() < cachePage[0]) ||
     (currentPath === "/" && cachePage)
   ) {
-    document.body.appendChild(cachePage[1]);
-    document.title = cachePage[2];
-    window.onscroll = cachePage[3];
-    document.body.setAttribute("style", cachePage[4]);
+    document.body.appendChild(cachePage.content);
+    document.title = cachePage.title;
+    window.onscroll = cachePage.onscroll;
+    document.body.setAttribute("style", cachePage.bodyStyle);
   } else {
-    const container = cachePage
-      ? cachePage[1]
-      : elem("div", { id: "container" });
-    document.body.appendChild(container);
-    if (cachePage) {
-      if (cachePage[4]) document.body.setAttribute("style", cachePage[4]);
-      if (cachePage[5]) cachePage[5].scrollIntoView();
+    let container: HTMLDivElement;
+    // kind of a stupid way to go i'm sorry
+    if (cachePage && (!cachePage.feed || cachePage.feed === "posts")) {
+      container = cachePage.content;
+      if (cachePage.bodyStyle)
+        document.body.setAttribute("style", cachePage.bodyStyle);
+      if (cachePage.scrollToElement) cachePage.scrollToElement.scrollIntoView();
+    } else {
+      container = elem("div", { id: "container" });
     }
+    document.body.appendChild(container);
 
     const route = matchRoute(currentSplitPath);
-    const [onscrollFunc, title, scrollToElement, css] = await route(
-      currentSplitPath,
-      loadedSplitPath,
-      container,
-    );
+    const { onscrollFunction, title, scrollToElement, bodyStyle, feed } =
+      await route(currentSplitPath, loadedSplitPath, container);
     if (document.body.contains(container)) {
       if (title) document.title = title + " — SuperCoolClient";
-      if (css) document.body.setAttribute("style", css);
+      if (bodyStyle) document.body.setAttribute("style", bodyStyle);
       if (scrollToElement) scrollToElement.scrollIntoView();
-      if (onscrollFunc) window.onscroll = onscrollFunc;
+      if (onscrollFunction) window.onscroll = onscrollFunction;
 
       const expiration =
         currentPath !== "/" ? Date.now() + CACHE_DURATION : Infinity;
       cache.delete(currentPath);
-      cache.set(currentPath, [
-        expiration,
-        container,
-        document.title,
-        onscrollFunc,
-        document.body.getAttribute("style"),
-        scrollToElement,
-      ]);
+      cache.set(currentPath, {
+        expirationDate: expiration,
+        content: container,
+        title: document.title,
+        onscroll: onscrollFunction,
+        bodyStyle: document.body.getAttribute("style"),
+        scrollToElement: scrollToElement,
+        feed: feed,
+      });
     }
   }
 
   loadedSplitPath = currentSplitPath;
   loadedPath = currentPath;
   if (window.location.search) loadedSplitPath.push(window.location.search);
-}
+};
 
-export function profileRedirect(did: string) {
+export const profileRedirect = (did: string) => {
   const path = window.location.pathname;
   const indexOfSlash = path.indexOf("/", 1);
   history.pushState(
@@ -158,16 +159,16 @@ export function profileRedirect(did: string) {
     "",
     "/" + did + (indexOfSlash === -1 ? "" : path.slice(indexOfSlash)),
   );
-}
+};
 
-export function cleanCache() {
+export const cleanCache = () => {
   console.time("Time to clean cache");
   const now = Date.now();
   for (const [path, entry] of cache.entries()) {
-    if (entry[0] < now) {
+    if (entry.expirationDate < now) {
       cache.delete(path);
       console.log("deleted " + path);
     } else if (entry[0] < Infinity) break;
   }
   console.timeEnd("Time to clean cache");
-}
+};

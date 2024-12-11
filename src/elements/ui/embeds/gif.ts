@@ -1,7 +1,7 @@
 import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
 
-function gifClick(e: MouseEvent) {
+const gifClick = (e: MouseEvent) => {
   //i saw this on aglais but like this is  basically the only option right
   const video = e.currentTarget as HTMLVideoElement;
 
@@ -12,7 +12,7 @@ function gifClick(e: MouseEvent) {
   } else {
     video.pause();
   }
-}
+};
 
 function loadVideo(videoUrl: string, style: string) {
   const videoElem = elem("video", {

@@ -180,14 +180,14 @@ export const profileRoute = async (
     ? false
     : container.replaceChildren(header, sideBar);
 
-  const customCss = `background-image:
+  const bodyStyle = `background-image:
     url(${profile.banner?.replace("img/banner", "img/feed_fullsize").replace("jpeg", "webp")});`;
-  document.body.setAttribute("style", customCss);
+  document.body.setAttribute("style", bodyStyle);
 
   const params = new URLSearchParams(window.location.search);
   const feed = params.get("feed") ?? "posts";
   const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
-  const [onscrollFunc, content] = await loadProfileFeed(
+  const [onscrollFunction, content] = await loadProfileFeed(
     feed,
     feedConfig.endpoint ?? urlEquivalents[feed][0],
     feedConfig.params(atId, feed),
@@ -196,5 +196,5 @@ export const profileRoute = async (
   if (!hasContainerLoaded) container.replaceChildren(header, sideBar);
   container.appendChild(content);
 
-  return [onscrollFunc, profile.handle, undefined, customCss];
+  return { onscrollFunction, title: profile.handle, bodyStyle, feed };
 };

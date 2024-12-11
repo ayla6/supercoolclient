@@ -10,5 +10,5 @@ export const notificationsRoute = async (): RouteOutput => {
     await rpc.get("app.bsky.notification.listNotifications", { params: {} }),
   );
 
-  return [undefined, "Notifications"];
+  return { title: "Notifications" };
 };

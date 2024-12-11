@@ -11,7 +11,7 @@ function navButton(text: string, link: string, icon: string) {
   return elem("a", { innerHTML: `${icon}<span>${text}</span>`, href: link });
 }
 
-export function loadNavbar() {
+export const loadNavbar = () => {
   const navbar = document.getElementById("navbar");
   navbar.append(
     navButton("Home", "/", homeSVG),
@@ -23,4 +23,4 @@ export function loadNavbar() {
       innerHTML: `${postSVG}<span>Post</span>`,
     }),
   );
-}
+};
