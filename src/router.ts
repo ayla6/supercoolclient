@@ -102,7 +102,7 @@ export const updatePage = async (useCache: boolean) => {
 
   const cachePage = cache.get(currentPath);
   if (
-    (useCache && cachePage && Date.now() < cachePage[0]) ||
+    (useCache && cachePage && Date.now() < cachePage.expirationDate) ||
     (currentPath === "/" && cachePage)
   ) {
     document.body.appendChild(cachePage.content);
