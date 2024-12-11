@@ -1,7 +1,6 @@
 import { Facet, segmentize } from "@atcute/bluesky-richtext-segmenter";
 import { elem } from "./elem";
 
-const emojiRegex = /([\p{Emoji}\u200d]+|\ud83c[\udde6-\uddff]{2})/gu;
 const map: { [key: string]: string } = {
   "<": "&lt;",
   ">": "&gt;",
@@ -9,11 +8,13 @@ const map: { [key: string]: string } = {
   "'": "&apos;",
   '"': "&quot;",
 };
-
 export function processText(input: string = ""): string {
   return input
     .replace(/[<>&]/g, (m) => map[m])
-    .replace(emojiRegex, '<span class="emoji">$1</span>');
+    .replace(
+      /([\p{Emoji}\u200d]+|\ud83c[\udde6-\uddff]{2})/gu,
+      '<span class="emoji">$1</span>',
+    );
 }
 
 export function processRichText(text: string, facets: Facet[]) {
@@ -24,22 +25,29 @@ export function processRichText(text: string, facets: Facet[]) {
   for (let i = 0; i < length; i++) {
     const segment = segmentText[i];
     const text = segment.text;
-    let result: string | Node;
+    let result: Node;
     if (segment.features)
       for (const feat of segment.features) {
         const type = feat.$type;
         if (type === "app.bsky.richtext.facet#tag") {
-          result = elem("a", { href: `/search/#${feat.tag}` }, text);
+          result = elem("a", {
+            href: `/search/#${feat.tag}`,
+            textContent: text,
+          });
         } else if (type === "app.bsky.richtext.facet#link") {
-          result = elem("a", { href: feat.uri, target: " " }, text);
+          result = elem("a", {
+            href: feat.uri,
+            target: " ",
+            textContent: text,
+          });
         } else if (type === "app.bsky.richtext.facet#mention") {
-          result = elem("a", { href: `/${feat.did}` }, text);
+          result = elem("a", { href: `/${feat.did}`, textContent: text });
         } else {
-          result = text;
+          result = document.createTextNode(text);
         }
       }
-    else result = text;
-    processed.append(result);
+    else result = document.createTextNode(text);
+    processed.appendChild(result);
   }
   return processed;
 }

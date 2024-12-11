@@ -1,73 +1,67 @@
-// stolen from https://github.com/char/rainbow!!!
-/*document.addEventListener("click", e => {
-  if (!(e.target instanceof Element)) return;
-  const anchor = e.target.closest("a");
-  if (anchor === null) return;
-
-  if (e.ctrlKey || e.button !== 0) return;
-
-  // TODO: make sure these open in a new tab
-  const url = new URL(anchor.href);
-  if (window.location.origin !== url.origin) return; // open external links normally
-
-  e.preventDefault();
-
-  history.pushState(null, "", url);
-});*/
-
-import { profileRoute, profileUrlChange } from "./routes/profile";
-import { homeRoute, homeUrlChange } from "./routes/home";
-import { postRoute } from "./routes/post";
 import { elem } from "./elements/utils/elem";
-import { notificationsRoute } from "./routes/notifications";
-import { likesRoute } from "./routes/likes";
-import { repostsRoute } from "./routes/reposts";
-import { quotesRoute } from "./routes/quotes";
-import { deleteCache } from "./elements/utils/cache";
+import { postCard } from "./elements/ui/post_card";
+import { profileCard, statProfile } from "./elements/ui/profile_card";
+import { OnscrollFunction, RouteOutput } from "./types";
 
+import { homeRoute } from "./routes/home";
+import { notificationsRoute } from "./routes/notifications";
+import { postRoute } from "./routes/post";
+import { profileRoute } from "./routes/profile";
+import { createStatsRoute } from "./routes/stats";
+
+type CacheEntry = [
+  expirationDate: number,
+  content: HTMLDivElement,
+  title: string,
+  onscroll: OnscrollFunction,
+  bodyStyle: string,
+  scrollToElement: HTMLElement,
+];
+type PageCache = Map<string, CacheEntry>;
+export const cache: PageCache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000;
+
+export let loadedPath: string = "";
 export let loadedSplitPath: string[] = [];
-export let loadedRoute: string = "";
+export let beingLoadedSplitPath: string[] = [];
 
 const navbar = document.getElementById("navbar");
 
-const routesBase: { [key: string]: string } = {
-  "": "home",
-  notifications: "notifications",
-  ":": "profile",
-  ":/:": "profile",
-  ":/post/:": "post",
-  ":/post/:/likes": "postLikes",
-  ":/post/:/reposts": "postReposts",
-  ":/post/:/quotes": "postQuotes",
-};
-const changeRoutes: { [key: string]: Function } = {
-  home: homeRoute,
-  profile: profileRoute,
-  post: postRoute,
+type Route = (
+  currentSplitPath: string[],
+  previousSplitPath: string[],
+  container: HTMLDivElement,
+) => RouteOutput;
+const routesBase: { [key: string]: Route } = {
+  "": homeRoute,
   notifications: notificationsRoute,
-  postLikes: likesRoute,
-  postReposts: repostsRoute,
-  postQuotes: quotesRoute,
+  ":": profileRoute,
+  ":/post/:": postRoute,
+  ":/post/:/likes": createStatsRoute(
+    "Likes",
+    "app.bsky.feed.getLikes",
+    statProfile,
+  ),
+  ":/post/:/reposts": createStatsRoute(
+    "Reposts",
+    "app.bsky.feed.getRepostedBy",
+    profileCard,
+  ),
+  ":/post/:/quotes": createStatsRoute(
+    "Quotes",
+    "app.bsky.feed.getQuotes",
+    postCard,
+  ),
 };
-const localRoutes: { [key: string]: Function } = {
-  home: homeUrlChange,
-  profile: profileUrlChange,
-  post: postRoute,
-  postLikes: likesRoute,
-  postReposts: repostsRoute,
-  postQuotes: quotesRoute,
-};
-
-type computedRoutes = [{ key: string[]; routeName: string }];
-
-const routes = computeRoutes(routesBase);
-function computeRoutes(routes: { [key: string]: string }) {
+type computedRoutes = [{ key: string[]; route: Route }];
+function computeRoutes(routes: { [key: string]: Function }): computedRoutes {
   const computedRoutes = [];
   for (const route of Object.keys(routes)) {
-    computedRoutes.push({ key: route.split("/"), routeName: routes[route] });
+    computedRoutes.push({ key: route.split("/"), route: routes[route] });
   }
   return computedRoutes as computedRoutes;
 }
+const routes = computeRoutes(routesBase);
 
 function matchRoute(path: string[]) {
   for (const route of routes) {
@@ -82,45 +76,77 @@ function matchRoute(path: string[]) {
       }
     }
 
-    if (match) return route.routeName;
+    if (match) return route.route;
   }
   return null;
 }
 
-export async function updatePage() {
-  window.onscroll = null;
+export async function updatePage(useCache: boolean) {
+  {
+    const container = document.getElementById("container");
+    document.body.removeChild(container);
+    window.onscroll = null;
+  }
+
   const currentPath = window.location.pathname;
   const currentSplitPath = currentPath.slice(1).split("/");
+  beingLoadedSplitPath = currentSplitPath;
 
-  let ableToLocal = true;
+  document.title = "SuperCoolClient";
+  document.body.removeAttribute("style");
   if (currentSplitPath[0] !== loadedSplitPath[0]) {
-    document.body.setAttribute("style", "");
-    ableToLocal = false;
-  }
-  const route = matchRoute(currentSplitPath);
-  if (!ableToLocal || route !== loadedRoute) {
     navbar.querySelector(".active")?.classList.remove("active");
-    navbar.querySelector(`[href="${currentPath}"]`)?.classList.add("active");
+    navbar.querySelector(`a[href="${currentPath}"]`)?.classList.add("active");
   }
-  if (ableToLocal && route === loadedRoute) {
-    localRoutes[route](currentSplitPath, loadedSplitPath);
+  window.scrollTo({ top: 0 });
+
+  const cachePage = cache.get(currentPath);
+  if (
+    (useCache && cachePage && Date.now() < cachePage[0]) ||
+    (currentPath === "/" && cachePage)
+  ) {
+    document.body.appendChild(cachePage[1]);
+    document.title = cachePage[2];
+    window.onscroll = cachePage[3];
+    document.body.setAttribute("style", cachePage[4]);
   } else {
-    if (loadedSplitPath[1] === "post" && currentSplitPath[1] !== "post") {
-      deleteCache("app.bsky.feed.getPostThread");
-      deleteCache("app.bsky.feed.getPosts");
-      deleteCache("app.bsky.feed.getRepostedBy");
-      deleteCache("app.bsky.feed.getQuotes");
-      deleteCache("app.bsky.feed.getLikes");
+    const container = cachePage
+      ? cachePage[1]
+      : elem("div", { id: "container" });
+    document.body.appendChild(container);
+    if (cachePage) {
+      if (cachePage[4]) document.body.setAttribute("style", cachePage[4]);
+      if (cachePage[5]) cachePage[5].scrollIntoView();
     }
-    document.title = "SuperCoolClient";
-    window.scrollTo({ top: 0 });
-    document.body.removeChild(document.getElementById("container"));
-    document.body.append(elem("div", { id: "container" }));
-    changeRoutes[route](currentSplitPath, loadedSplitPath);
+
+    const route = matchRoute(currentSplitPath);
+    const [onscrollFunc, title, scrollToElement, css] = await route(
+      currentSplitPath,
+      loadedSplitPath,
+      container,
+    );
+    if (document.body.contains(container)) {
+      if (title) document.title = title + " — SuperCoolClient";
+      if (css) document.body.setAttribute("style", css);
+      if (scrollToElement) scrollToElement.scrollIntoView();
+      if (onscrollFunc) window.onscroll = onscrollFunc;
+
+      const expiration =
+        currentPath !== "/" ? Date.now() + CACHE_DURATION : Infinity;
+      cache.delete(currentPath);
+      cache.set(currentPath, [
+        expiration,
+        container,
+        document.title,
+        onscrollFunc,
+        document.body.getAttribute("style"),
+        scrollToElement,
+      ]);
+    }
   }
 
   loadedSplitPath = currentSplitPath;
-  loadedRoute = route;
+  loadedPath = currentPath;
   if (window.location.search) loadedSplitPath.push(window.location.search);
 }
 
@@ -134,7 +160,14 @@ export function profileRedirect(did: string) {
   );
 }
 
-export function navigateTo(url: URL | string) {
-  history.pushState(null, "", url);
-  updatePage();
+export function cleanCache() {
+  console.time("Time to clean cache");
+  const now = Date.now();
+  for (const [path, entry] of cache.entries()) {
+    if (entry[0] < now) {
+      cache.delete(path);
+      console.log("deleted " + path);
+    } else if (entry[0] < Infinity) break;
+  }
+  console.timeEnd("Time to clean cache");
 }

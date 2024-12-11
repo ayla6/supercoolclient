@@ -1,97 +1,26 @@
-import { get } from "../elements/utils/cache";
 import { elem } from "../elements/utils/elem";
 import { hydrateFeed } from "../elements/ui/feed";
+import { rpc } from "../login";
+import { FeedState, OnscrollFunction, RouteOutput } from "../types";
+import { cache } from "../router";
 
-let currentFeed: string;
-let currentScroll: { [key: string]: number } = {};
-
-async function loadHomeFeed(
-  feedgen: string,
-  title: string,
-  wasAtHome: boolean = true,
-) {
-  window.onscroll = null;
-
-  if (!feedgen) {
-    if (localStorage.getItem("last-feed"))
-      [feedgen, title] = JSON.parse(localStorage.getItem("last-feed"));
-    else {
-      feedgen = "following";
-      title = "Following";
-    }
-  }
-  const lastFeed = currentFeed;
-  currentFeed = feedgen;
-  localStorage.setItem("last-feed", JSON.stringify([feedgen, title]));
-
-  document.title = `${title} — SuperCoolClient`;
-
-  window.scrollTo({ top: 0 });
-  if (lastFeed !== feedgen || !wasAtHome) {
-    const sideBar = document.getElementById("side-bar");
-    if (sideBar) {
-      sideBar.querySelector(".active")?.classList.remove("active");
-      sideBar
-        .querySelector(`[href="?feed=${feedgen}&title=${title}"]`)
-        ?.classList.add("active");
-    }
-  }
-  const content = document.getElementById("content");
-  if (currentFeed !== lastFeed) content.replaceChildren();
-  if (currentFeed === feedgen) {
-    const reload = currentFeed === lastFeed && wasAtHome;
-    const items = await hydrateFeed(
-      feedgen === "following"
-        ? "app.bsky.feed.getTimeline"
-        : "app.bsky.feed.getFeed",
-      { feed: feedgen },
-      reload,
-    );
-    if (currentFeed === feedgen) {
-      content.replaceChildren(...items);
-      if (!reload) window.scrollTo({ top: currentScroll[currentFeed] });
-    }
-  }
-}
-
-function navButton(feed: string, title: string) {
-  const button = elem("a", {
-    textContent: title,
-    href: `?feed=${feed}&title=${title}`,
-    onclick: (e) => {
-      e.preventDefault();
-      currentScroll[currentFeed] = scrollY;
-      loadHomeFeed(feed, title);
-    },
-  });
-  button.setAttribute("ignore", "");
-  return button;
-}
-
-function loadHomeFeedFromSearchParams(previousSplitPath: string[]) {
-  const params = new URLSearchParams(window.location.search);
-  const feedgen = params.get("feed");
-  const title = params.get("title");
-
-  history.replaceState(null, "", window.location.pathname);
-  loadHomeFeed(feedgen, title, previousSplitPath[0] === "");
-}
-
-export async function homeRoute(
+export const homeRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
-) {
-  const container = document.getElementById("container");
-  const leftBar = document.createElement("div");
-  leftBar.id = "side-bar";
-  leftBar.className = "sticky";
-  const feedNav = document.createElement("div");
-  feedNav.className = "side-nav";
-  const prefs = await get("app.bsky.actor.getPreferences", { params: {} });
+  container: HTMLDivElement,
+): RouteOutput => {
+  let currentFeed: string;
+  const feedState: FeedState = Object.create(null);
+
+  const sideBar = elem("div", { id: "side-bar", className: "sticky" });
+  const feedNav = elem("div", { className: "side-nav" });
+
+  const prefs = await rpc.get("app.bsky.actor.getPreferences", { params: {} });
   const { items: feeds } = prefs.data.preferences.find((e) => {
     return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
   });
-  const { data: feedGens } = await get("app.bsky.feed.getFeedGenerators", {
+
+  const { data: feedGens } = await rpc.get("app.bsky.feed.getFeedGenerators", {
     params: {
       feeds: (() => {
         let pinned = [];
@@ -103,22 +32,83 @@ export async function homeRoute(
     },
   });
 
-  feedNav.append(navButton("following", "Following"));
-  for (const feed of feedGens.feeds) {
-    feedNav.append(navButton(feed.uri, feed.displayName));
+  const loadHomeFeed = async (feed: string, title: string) => {
+    window.onscroll = null;
+    const lastFeed = currentFeed;
+    currentFeed = feed;
+    localStorage.setItem("last-feed", JSON.stringify([feed, title]));
+
+    document.title = `${title} — SuperCoolClient`;
+
+    const currentFeedState = feedState[currentFeed];
+    const content = currentFeedState?.[0] ?? elem("div", { id: "content" });
+    if (feed !== lastFeed) {
+      sideBar.querySelector(".active")?.classList.remove("active");
+      sideBar
+        .querySelector(`a[href="?feed=${feed}&title=${title}"]`)
+        ?.classList.add("active");
+      if (lastFeed) {
+        feedState[lastFeed][2] = window.scrollY;
+        container.replaceChild(content, feedState[lastFeed][0]);
+      } else {
+        container.append(content);
+      }
+    }
+    if (feed === lastFeed || !currentFeedState) {
+      window.scrollTo({ top: 0 });
+      const onscrollFunc: OnscrollFunction = await hydrateFeed(
+        content,
+        feed === "following"
+          ? "app.bsky.feed.getTimeline"
+          : "app.bsky.feed.getFeed",
+        { feed: feed },
+      );
+      feedState[feed] = [content, onscrollFunc, 0];
+    } else {
+      window.scrollTo({ top: currentFeedState[2] });
+    }
+    const onscrollFunc = feedState[feed][1];
+    if (cache.has("/")) {
+      window.onscroll = onscrollFunc;
+      cache.get("/")[3] = onscrollFunc;
+    }
+    return onscrollFunc;
+  };
+
+  for (const feedGen of [
+    { uri: "following", displayName: "Following" },
+    ...feedGens.feeds,
+  ]) {
+    const { uri, displayName } = feedGen;
+    const button = elem("a", {
+      textContent: displayName,
+      href: `?feed=${uri}&title=${displayName}`,
+      onclick: async (e) => {
+        e.preventDefault();
+        loadHomeFeed(uri, displayName);
+      },
+    });
+    button.setAttribute("ignore", "");
+    feedNav.append(button);
+  }
+  sideBar.append(feedNav);
+
+  const params = new URLSearchParams(window.location.search);
+  let feedgen: string = params.get("feed");
+  let title: string = params.get("title");
+  history.replaceState(null, "", window.location.pathname);
+  if (!feedgen) {
+    if (localStorage.getItem("last-feed"))
+      [feedgen, title] = JSON.parse(localStorage.getItem("last-feed"));
+    else {
+      feedgen = "following";
+      title = "Following";
+    }
   }
 
-  leftBar.append(feedNav);
+  container.append(sideBar);
 
-  const content = document.createElement("div");
-  content.id = "content";
-  container.replaceChildren(leftBar, content);
-  loadHomeFeedFromSearchParams(previousSplitPath);
-}
+  const onscrollFunction = await loadHomeFeed(feedgen, title);
 
-export async function homeUrlChange(
-  currentSplitPath: string[],
-  previousSplitPath: string[],
-) {
-  loadHomeFeedFromSearchParams(previousSplitPath);
-}
+  return [onscrollFunction];
+};

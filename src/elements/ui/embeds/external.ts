@@ -25,10 +25,10 @@ export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
       if (widescreenThumbs.includes(host)) {
         card.classList.add("widescreen");
       }
-      card.append(image);
+      card.appendChild(image);
     }
-    card.append(
-      elem("div", { className: "text" }, null, [
+    card.appendChild(
+      elem("div", { className: "text" }, undefined, [
         elem("span", {
           textContent: embed.external.title || embed.external.uri,
           className: "title",
@@ -45,6 +45,6 @@ export function loadEmbedExternal(embed: AppBskyEmbedExternal.View) {
         }),
       ]),
     );
-    return [card];
+    return card;
   }
 }

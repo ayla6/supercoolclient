@@ -1,27 +1,23 @@
 import { fillMissingSettings } from "./config";
 import { loadNavbar } from "./elements/ui/navbar";
 import { login } from "./login";
-import { navigateTo, updatePage } from "./router";
+import { cleanCache, updatePage } from "./router";
 
 document.addEventListener("click", (e) => {
   const anchor = e.target instanceof Element ? e.target.closest("a") : null;
-  if (!anchor || e.ctrlKey || e.button !== 0) return;
+  if (!anchor || e.ctrlKey || e.button !== 0 || anchor.hasAttribute("ignore"))
+    return;
 
-  if (!anchor.hasAttribute("ignore")) {
-    const url = new URL(anchor.href);
-    if (window.location.origin !== url.origin) return;
+  const url = new URL(anchor.href);
+  if (window.location.origin !== url.origin) return;
 
-    e.preventDefault();
-    //if (anchor.hasAttribute("no-history")) history.replaceState(null, "", url);
-    //else
+  e.preventDefault();
 
-    navigateTo(url);
-  }
+  history.pushState(null, "", url);
+  updatePage(false);
 });
-
-addEventListener("popstate", () => {
-  updatePage();
-});
+addEventListener("popstate", () => updatePage(true));
+setInterval(cleanCache, 5 * 60 * 1000);
 
 /*const record: AppSCCProfile.Record = {
   $type: 'app.scc.profile',
@@ -39,4 +35,4 @@ if (path.length !== 1 && path.endsWith("/")) {
 fillMissingSettings();
 login();
 loadNavbar();
-updatePage();
+updatePage(false);

@@ -22,7 +22,7 @@ export function loadEmbedRecord(embed: AppBskyEmbedRecord.View) {
         repostCount: record.repostCount,
         quoteCount: record.quoteCount,
       };
-      return [postCard(post, false, false, true)];
+      return postCard(post, false, false, true);
     }
   } else if (
     record.$type === "app.bsky.embed.record#viewBlocked" ||
@@ -38,12 +38,10 @@ export function loadEmbedRecord(embed: AppBskyEmbedRecord.View) {
     } else {
       text = "Post not found";
     }
-    return [
-      elem("a", {
-        className: "simple-card",
-        href: getPathFromUri(record.uri),
-        textContent: text,
-      }),
-    ];
-  } else return [];
+    return elem("a", {
+      className: "simple-card",
+      href: getPathFromUri(record.uri),
+      textContent: text,
+    });
+  }
 }

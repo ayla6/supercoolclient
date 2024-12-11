@@ -5,12 +5,10 @@ import homeSVG from "../../svg/home.svg?raw";
 import notifSVG from "../../svg/bell.svg?raw";
 import profileSVG from "../../svg/user.svg?raw";
 import postSVG from "../../svg/pencil.svg?raw";
+import { cleanCache } from "../../router";
 
 function navButton(text: string, link: string, icon: string) {
-  const button = document.createElement("a");
-  button.innerHTML = `${icon}<span>${text}</span>`;
-  button.href = link;
-  return button;
+  return elem("a", { innerHTML: `${icon}<span>${text}</span>`, href: link });
 }
 
 export function loadNavbar() {

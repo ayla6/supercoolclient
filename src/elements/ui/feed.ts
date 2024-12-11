@@ -1,5 +1,6 @@
-import { get, inCache } from "../utils/cache";
 import { postCard } from "../ui/post_card";
+import { rpc } from "../../login";
+import { OnscrollFunction } from "../../types";
 
 export type feedNSID =
   | "app.bsky.feed.getAuthorFeed"
@@ -22,58 +23,38 @@ const dataLocations = {
   "app.bsky.feed.getQuotes": "posts",
 };
 
-export async function hydrateFeed(
-  nsid: feedNSID,
-  params: { [key: string]: any },
-  reload: boolean = false,
-  func: (item: any) => HTMLElement = postCard,
-): Promise<HTMLElement[]> {
-  const dataLocation = dataLocations[nsid] ?? "feed";
-  async function _load(reload: boolean = false) {
-    return await loadFeed(nsid, params, dataLocation, func, reload);
-  }
-  let { items, cursor } = await _load(reload);
-  params.cursor = cursor;
-  if (cursor && inCache(nsid, params)) {
-    while (inCache(nsid, params)) {
-      const { items: newItems, cursor } = await _load();
-      params.cursor = cursor;
-      items.push(...newItems);
-    }
-  }
-  if (params.cursor != undefined)
-    window.onscroll = await loadOnScroll(_load, params);
-  else window.onscroll = null;
-  return items;
-}
-
-async function loadFeed(
-  nsid: feedNSID,
-  params: { [key: string]: any },
-  dataLocation: string,
-  func: (item: any) => HTMLElement,
-  reload: boolean = false,
-): Promise<{ items: HTMLElement[]; cursor: string }> {
-  const { data } = await get(nsid, { params: params }, reload);
-  const _func = (item: any) => func(item);
-  const items = data[dataLocation].map(_func);
-  return { items, cursor: data.cursor };
-}
-
 let feedBeingLoaded = false;
-export async function loadOnScroll(load: Function, params: any) {
-  const content = document.getElementById("content");
-  return async function (ev) {
-    if (
-      !feedBeingLoaded &&
-      window.innerHeight + Math.round(window.scrollY) + 1000 >=
-        document.body.offsetHeight
-    ) {
+export async function hydrateFeed(
+  output: HTMLElement,
+  nsid: feedNSID,
+  params: { [key: string]: any },
+  func: (item: any) => HTMLDivElement = postCard,
+): Promise<OnscrollFunction> {
+  const dataLocation = dataLocations[nsid] ?? "feed";
+  const { data } = await rpc.get(nsid, { params: params });
+
+  output.replaceChildren();
+  data[dataLocation].forEach((item: Object) => output.appendChild(func(item)));
+
+  if (data.cursor === undefined) return;
+  params.cursor = data.cursor;
+  return async () => {
+    if (feedBeingLoaded) return;
+
+    const bottomPosition = window.innerHeight + Math.round(window.scrollY);
+    const shouldLoad = bottomPosition + 2000 >= document.body.offsetHeight;
+
+    if (!shouldLoad) return;
+
+    try {
       feedBeingLoaded = true;
-      const { items, cursor } = await load();
-      content.append(...items);
-      params.cursor = cursor;
-      if (cursor === undefined) window.onscroll = null;
+      const { data } = await rpc.get(nsid, { params: params });
+      data[dataLocation].forEach((item: Object) =>
+        output.appendChild(func(item)),
+      );
+      params.cursor = data.cursor;
+      if (params.cursor === undefined) window.onscroll = null;
+    } finally {
       feedBeingLoaded = false;
     }
   };

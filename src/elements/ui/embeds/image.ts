@@ -29,24 +29,16 @@ export function image(
   } else img.src = changeImageFormat(image.thumb);
 
   imageHolder.href = fullsize;
-
   return imageHolder;
 }
 
 export function loadEmbedImages(embed: AppBskyEmbedImages.View) {
   const isSingleImage = embed.images.length === 1;
-  const func = (img: AppBskyEmbedImages.ViewImage) => {
-    return image(img, isSingleImage);
-  };
-  return [
-    elem(
-      "div",
-      {
-        className:
-          "media-container" + (embed.images.length === 1 ? "" : " multi"),
-      },
-      null,
-      embed.images.map(func),
-    ),
-  ];
+  const mediaContainer = elem("div", {
+    className: "media-container" + (embed.images.length === 1 ? "" : " multi"),
+  });
+  embed.images.forEach((img) =>
+    mediaContainer.appendChild(image(img, isSingleImage)),
+  );
+  return mediaContainer;
 }

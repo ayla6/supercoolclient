@@ -44,7 +44,7 @@ export function loadEmbedGif(url: URL) {
   const videoUrl = `https://t.gifs.bsky.app/${gifId}P3/${gifName}`;
   const thumbnailUrl = `https://t.gifs.bsky.app/${gifId}AF/${gifName}`;
 
-  const thumbnail = elem("div", { className: "video-thumbnail" }, null, [
+  const thumbnail = elem("div", { className: "video-thumbnail" }, undefined, [
     elem("img", {
       src: thumbnailUrl,
       loading: "lazy",
@@ -62,9 +62,9 @@ export function loadEmbedGif(url: URL) {
   );
 
   thumbnail.addEventListener("click", () => {
-    mediaContainer.append(loadVideo(videoUrl, style));
+    mediaContainer.appendChild(loadVideo(videoUrl, style));
     thumbnail.remove();
   });
 
-  return [mediaContainer];
+  return mediaContainer;
 }

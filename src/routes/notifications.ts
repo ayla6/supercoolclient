@@ -1,12 +1,14 @@
-import { get } from "../elements/utils/cache";
+import { elem } from "../elements/utils/elem";
+import { rpc } from "../login";
+import { RouteOutput } from "../types";
 
-export async function notificationsRoute() {
-  const container = document.getElementById("container");
-  const content = document.createElement("div");
-  content.id = "content";
-  container.replaceChildren(content);
+export const notificationsRoute = async (): RouteOutput => {
+  const content = elem("div", { id: "content" });
+  const container = elem("div", { id: "container" }, content);
+
   console.log(
-    await get("app.bsky.notification.listNotifications", { params: {} }, true),
+    await rpc.get("app.bsky.notification.listNotifications", { params: {} }),
   );
-  //content.append(...items);
-}
+
+  return [undefined, "Notifications"];
+};

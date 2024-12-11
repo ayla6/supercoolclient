@@ -40,7 +40,7 @@ function loadVideo(embed: AppBskyEmbedVideo.View) {
 }
 
 export function loadEmbedVideo(embed: AppBskyEmbedVideo.View) {
-  const thumbnail = elem("div", { className: "video-thumbnail" }, null, [
+  const thumbnail = elem("div", { className: "video-thumbnail" }, undefined, [
     elem("img", {
       src: embed.thumbnail,
     }),
@@ -53,9 +53,9 @@ export function loadEmbedVideo(embed: AppBskyEmbedVideo.View) {
   );
 
   thumbnail.addEventListener("click", () => {
-    mediaContainer.append(loadVideo(embed));
+    mediaContainer.appendChild(loadVideo(embed));
     thumbnail.remove();
   });
 
-  return [mediaContainer];
+  return mediaContainer;
 }

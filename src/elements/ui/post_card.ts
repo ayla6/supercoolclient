@@ -55,9 +55,9 @@ export function postCard(
   );
 
   if (isEmbed) {
-    card.append(
-      elem("div", { className: "header" }, null, [
-        elem("a", { className: "user-area", href: authorHref }, null, [
+    card.appendChild(
+      elem("div", { className: "header" }, undefined, [
+        elem("a", { className: "user-area", href: authorHref }, undefined, [
           profilePicture,
           elem(
             "a",
@@ -74,10 +74,10 @@ export function postCard(
       ]),
     );
   } else if (fullView) {
-    card.append(
-      elem("a", { className: "header", href: authorHref }, null, [
+    card.appendChild(
+      elem("a", { className: "header", href: authorHref }, undefined, [
         profilePicture,
-        elem("a", { className: "handle-area", href: authorHref }, null, [
+        elem("a", { className: "handle-area", href: authorHref }, undefined, [
           elem("span", { className: "handle", textContent: atId }),
           elem("span", {
             className: "",
@@ -104,7 +104,7 @@ export function postCard(
           href: "/" + repostedBy.did,
           textContent: idChoose(repostedBy),
         }),
-        "reposted",
+        document.createTextNode("reposted"),
         elem("a", {
           className: "handle",
           href: authorHref,
@@ -121,16 +121,16 @@ export function postCard(
       ];
     }
 
-    postElem.append(
-      elem("div", { className: "left-area" }, null, [
+    postElem.appendChild(
+      elem("div", { className: "left-area" }, undefined, [
         profilePicture,
-        hasReplies ? elem("div", { className: "reply-string" }) : "",
+        hasReplies ? elem("div", { className: "reply-string" }) : undefined,
       ]),
     );
 
-    card.append(
-      elem("div", { className: "header" }, null, [
-        elem("span", { className: "handle-area" }, null, handleElem),
+    card.appendChild(
+      elem("div", { className: "header" }, undefined, [
+        elem("span", { className: "handle-area" }, undefined, handleElem),
         elem("a", {
           className: "timestamp",
           href: href,
@@ -148,7 +148,7 @@ export function postCard(
       replyTo.$type === "app.bsky.feed.defs#postView"
         ? idChoose(replyTo.author)
         : did;
-    card.append(
+    card.appendChild(
       elem(
         "span",
         { className: "small reply-to", textContent: "Reply to " },
@@ -162,7 +162,7 @@ export function postCard(
 
   const content = elem("div", { className: "post-content" });
   if (record.text) {
-    content.append(
+    content.appendChild(
       elem(
         "div",
         { className: "text-content" },
@@ -171,16 +171,18 @@ export function postCard(
     );
   }
   if (post.embed) {
-    content.append(
-      elem(
-        "div",
-        { className: "embeds" },
-        null,
-        handleEmbed(post.embed as any),
-      ),
+    const embeds = handleEmbed(post.embed as any);
+    const multipleEmbeds =
+      post.embed.$type === "app.bsky.embed.recordWithMedia#view";
+    const embedsElem = elem(
+      "div",
+      { className: "embeds" },
+      multipleEmbeds ? undefined : embeds,
+      multipleEmbeds ? embeds : undefined,
     );
+    content.appendChild(embedsElem);
   }
-  card.append(content);
+  card.appendChild(content);
 
   if (record.tags) {
     const tags = record.tags.map((tag) =>
@@ -190,7 +192,7 @@ export function postCard(
         href: `/search?tag=${encodeQuery(tag)}`,
       }),
     );
-    card.append(elem("div", { className: "label-area" }, null, tags));
+    card.appendChild(elem("div", { className: "label-area" }, undefined, tags));
   }
 
   if (fullView) {
@@ -204,7 +206,9 @@ export function postCard(
       );
     }
     if (warnings.length)
-      card.append(elem("div", { className: "label-area" }, null, warnings));
+      card.appendChild(
+        elem("div", { className: "label-area" }, undefined, warnings),
+      );
   }
 
   let translateButton: HTMLElement;
@@ -219,11 +223,11 @@ export function postCard(
       textContent: "Translate",
       href: "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
     });
-    if (!fullView) card.append(translateButton);
+    if (!fullView) card.appendChild(translateButton);
   }
   if (fullView) {
     const postData = elem("div", { className: "post-data" });
-    postData.append(
+    postData.appendChild(
       elem("a", {
         className: "timestamp",
         href: href,
@@ -231,8 +235,8 @@ export function postCard(
         onclick: () => setPreloaded(post),
       }),
     );
-    if (translateButton) postData.append(translateButton);
-    card.append(postData);
+    if (translateButton) postData.appendChild(translateButton);
+    card.appendChild(postData);
   }
   if (fullView) {
     const stats = [
@@ -242,11 +246,11 @@ export function postCard(
     ].filter(Boolean);
 
     if (stats.length > 0)
-      card.append(elem("div", { className: "stats" }, null, stats));
+      card.appendChild(elem("div", { className: "stats" }, undefined, stats));
   }
   if (!isEmbed)
-    card.append(
-      elem("div", { className: "stats-buttons" }, null, [
+    card.appendChild(
+      elem("div", { className: "stats-buttons" }, undefined, [
         interactionButton("reply", post),
         interactionButton("repost", post),
         interactionButton("like", post),
@@ -254,7 +258,7 @@ export function postCard(
       ]),
     );
 
-  postElem.append(card);
+  postElem.appendChild(card);
 
   return postElem;
 }
@@ -272,11 +276,15 @@ function stat(
   href: string,
 ) {
   const count: number = post[type + "Count"];
-  if (count === 0) return "";
+  if (count === 0) return;
   return elem(
     "a",
-    { className: "stat", href: `${href}/${plural[type]}` },
-    null,
+    {
+      className: "stat",
+      href: `${href}/${plural[type]}`,
+      onclick: () => setPreloaded(post),
+    },
+    undefined,
     [
       elem("span", { textContent: count.toLocaleString() }),
       elem("span", {
@@ -298,7 +306,7 @@ function interactionButton(
   const button = elem(
     "button",
     { className: "interaction " + type + "-button" },
-    null,
+    undefined,
     [elem("div", { className: "icon" }), countSpan],
   );
   button.setAttribute("role", "button");

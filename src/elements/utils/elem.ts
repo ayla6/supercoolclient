@@ -1,12 +1,15 @@
-export function elem<K extends keyof HTMLElementTagNameMap>(
+export const elem = <K extends keyof HTMLElementTagNameMap>(
   tag: K,
   params: Partial<HTMLElementTagNameMap[K]> = {},
-  child?: Node | string,
-  children?: (Node | string)[],
-) {
+  child?: Node,
+  children?: Node[],
+) => {
   const e = document.createElement(tag);
   Object.assign(e, params);
-  if (child) e.append(child);
-  if (children) e.append(...children);
+  if (child) e.appendChild(child);
+  if (children)
+    children.forEach((child) => {
+      if (child) e.appendChild(child);
+    });
   return e;
-}
+};
