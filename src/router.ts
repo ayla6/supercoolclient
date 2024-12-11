@@ -116,11 +116,12 @@ export const updatePage = async (useCache: boolean) => {
       container = cachePage.content;
       if (cachePage.bodyStyle)
         document.body.setAttribute("style", cachePage.bodyStyle);
+      document.body.appendChild(container);
       if (cachePage.scrollToElement) cachePage.scrollToElement.scrollIntoView();
     } else {
       container = elem("div", { id: "container" });
+      document.body.appendChild(container);
     }
-    document.body.appendChild(container);
 
     const route = matchRoute(currentSplitPath);
     const { onscrollFunction, title, scrollToElement, bodyStyle, feed } =
