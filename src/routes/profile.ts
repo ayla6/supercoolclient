@@ -1,15 +1,13 @@
-import { feedNSID, hydrateFeed } from "../elements/ui/feed";
+import { AppBskyFeedGetAuthorFeed } from "@atcute/client/lexicons";
+import { feedNSID } from "../elements/ui/feed";
+import { createLocalStateManager } from "../elements/ui/local_state_manager";
 import { profileCard } from "../elements/ui/profile_card";
-import { manager, rpc } from "../login";
 import { elem } from "../elements/utils/elem";
-import { beingLoadedSplitPath, cache, profileRedirect } from "../router";
-import { FeedState, OnscrollFunction, RouteOutput } from "../types";
-import {
-  AppBskyActorDefs,
-  AppBskyFeedGetAuthorFeed,
-} from "@atcute/client/lexicons";
 import { changeImageFormat } from "../elements/utils/link_processing";
 import { processText } from "../elements/utils/text_processing";
+import { manager, rpc } from "../login";
+import { beingLoadedSplitPath, profileRedirect } from "../router";
+import { RouteOutput } from "../types";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -50,9 +48,6 @@ export const profileRoute = async (
   previousSplitPath: string[],
   container: HTMLDivElement,
 ): RouteOutput => {
-  let currentFeed: string;
-  const feedState: FeedState = Object.create(null);
-
   const atId = currentSplitPath[0];
 
   const { data: profile } = await rpc.get("app.bsky.actor.getProfile", {
@@ -74,52 +69,23 @@ export const profileRoute = async (
 
   if (currentSplitPath !== beingLoadedSplitPath) return;
 
-  const loadProfileFeed = async (feed: string) => {
-    window.onscroll = null;
-    const lastFeed = currentFeed;
-    currentFeed = feed;
+  const sideBar = elem("div", { id: "side-bar" });
 
-    const currentFeedState = feedState[currentFeed];
-    const content = currentFeedState?.[0] ?? elem("div", { id: "content" });
-    if (feed !== lastFeed) {
-      sideBar.querySelector(".active")?.classList.remove("active");
-      sideBar.querySelector(`a[href="?feed=${feed}"]`)?.classList.add("active");
-      if (lastFeed) {
-        feedState[lastFeed][2] = window.scrollY;
-        container.replaceChild(content, feedState[lastFeed][0]);
-      } else {
-        container.append(content);
-      }
-    }
-    if (feed === lastFeed || !currentFeedState) {
-      window.scrollTo({ top: 0 });
-      const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
-      const onscrollFunc: OnscrollFunction = await hydrateFeed(
-        content,
-        feedConfig.endpoint ?? urlEquivalents[feed][0],
-        feedConfig.params(atId, feed),
-        feedConfig.type,
-      );
-      feedState[feed] = [content, onscrollFunc, 0];
-    } else {
-      window.scrollTo({ top: currentFeedState[2] });
-    }
-    const onscrollFunc = feedState[feed][1];
-    const path = window.location.pathname;
-    if (cache.has(path)) {
-      window.onscroll = onscrollFunc;
-      cache.get(path)[3] = onscrollFunc;
-    }
-    return onscrollFunc;
-  };
+  const loadProfileFeed = createLocalStateManager(container, sideBar);
 
-  const navButton = (name: string, text: string) => {
+  const navButton = (feed: string, text: string) => {
     const button = elem("a", {
-      href: `?feed=${name}`,
+      href: `?feed=${feed}`,
       textContent: text,
       onclick: (e) => {
         e.preventDefault();
-        loadProfileFeed(name);
+        const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
+        loadProfileFeed(
+          feed,
+          feedConfig.endpoint ?? urlEquivalents[feed][0],
+          feedConfig.params(atId, feed),
+          feedConfig.type,
+        );
       },
     });
     button.setAttribute("ignore", "");
@@ -155,7 +121,7 @@ export const profileRoute = async (
     return button;
   };
 
-  const sideBar = elem("div", { id: "side-bar" }, undefined, [
+  sideBar.appendChild(
     elem("div", { className: "side-nav" }, undefined, [
       navButton("posts", "Posts"),
       navButton("replies", "Posts and replies"),
@@ -166,7 +132,7 @@ export const profileRoute = async (
       navButton("followers", "Followers"),
       mediaNavButton(navButton("media", "Media"), lastMedia),
     ]),
-  ]);
+  );
 
   const header = elem("div", { className: "profile-header" }, undefined, [
     elem("div", { className: "info" }, undefined, [
@@ -220,9 +186,15 @@ export const profileRoute = async (
 
   const params = new URLSearchParams(window.location.search);
   const feed = params.get("feed") ?? "posts";
-  const onscrollFunc = await loadProfileFeed(feed);
+  const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
+  const [onscrollFunc, content] = await loadProfileFeed(
+    feed,
+    feedConfig.endpoint ?? urlEquivalents[feed][0],
+    feedConfig.params(atId, feed),
+    feedConfig.type,
+  );
   if (!hasContainerLoaded) container.replaceChildren(header, sideBar);
-  container.appendChild(feedState[feed][0]);
+  container.appendChild(content);
 
   return [onscrollFunc, profile.handle, undefined, customCss];
 };

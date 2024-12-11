@@ -6,7 +6,6 @@ import { feedNSID, hydrateFeed } from "./feed";
 export const createLocalStateManager = (
   container: HTMLDivElement,
   sideBar: HTMLDivElement,
-  selector: string,
 ) => {
   const path = window.location.pathname;
   let currentFeed: string;
@@ -14,11 +13,10 @@ export const createLocalStateManager = (
 
   const loadFeedState = async (
     feed: string,
-    output: HTMLElement,
     nsid: feedNSID,
     params: { [key: string]: any },
-    func: (item: any) => HTMLDivElement,
-  ) => {
+    func?: (item: any) => HTMLDivElement,
+  ): Promise<[OnscrollFunction, HTMLDivElement]> => {
     window.onscroll = null;
     const lastFeed = currentFeed;
     currentFeed = feed;
@@ -27,9 +25,7 @@ export const createLocalStateManager = (
     const content = currentFeedState?.[0] ?? elem("div", { id: "content" });
     if (feed !== lastFeed) {
       sideBar.querySelector(".active")?.classList.remove("active");
-      sideBar
-        .querySelector(`a[href="${selector}${feed}"]`)
-        ?.classList.add("active");
+      sideBar.querySelector(`a[href="?feed=${feed}"]`)?.classList.add("active");
       if (lastFeed) {
         feedState[lastFeed][2] = window.scrollY;
         container.replaceChild(content, feedState[lastFeed][0]);
@@ -40,7 +36,7 @@ export const createLocalStateManager = (
     if (feed === lastFeed || !currentFeedState) {
       window.scrollTo({ top: 0 });
       const onscrollFunc: OnscrollFunction = await hydrateFeed(
-        output,
+        content,
         nsid,
         params,
         func,
@@ -54,7 +50,7 @@ export const createLocalStateManager = (
       window.onscroll = onscrollFunc;
       cache.get(path)[3] = onscrollFunc;
     }
-    return onscrollFunc;
+    return [onscrollFunc, content];
   };
-  return { feedState };
+  return loadFeedState;
 };
