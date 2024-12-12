@@ -45,11 +45,11 @@
         height: $reply-pfp-size;
     }
 
-    .pfp-holder::after {
-        width: $reply-pfp-right-margin;
+    .left-area::after {
         left: $reply-pfp-size + ($reply-pfp-right-margin - $speech-bubble-width) +
-            2px;
-        bottom: ($reply-pfp-size + $speech-bubble-height) * 0.5;
+            3px;
+        top: $string-pfp-margin + 1px + ($reply-pfp-size * 0.5) -
+            ($speech-bubble-height * 0.5);
     }
 }
 

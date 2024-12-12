@@ -13,16 +13,17 @@
         flex-flow: column;
     }
 
-    .pfp-holder::after {
+    .left-area::after {
         background-image: url("../svg/bubble.svg");
         content: "";
         display: block;
-        position: relative;
+        position: absolute;
         width: $speech-bubble-width;
         height: $speech-bubble-height;
         left: $large-pfp-size + ($large-pfp-right-margin - $speech-bubble-width) +
-            2px;
-        bottom: ($large-pfp-size + $speech-bubble-height) * 0.5;
+            3px;
+        top: $string-pfp-margin + 1px + ($large-pfp-size * 0.5) -
+            ($speech-bubble-height * 0.5);
     }
 
     .timestamp {

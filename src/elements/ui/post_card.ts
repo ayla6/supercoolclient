@@ -12,6 +12,13 @@ import { setPreloaded } from "../../routes/post";
 import { handleEmbed } from "./embeds/embed_handlers";
 import { languagesToNotTranslate } from "../../config.ts";
 
+const plural = {
+  reply: "replies",
+  like: "likes",
+  repost: "reposts",
+  quote: "quotes",
+};
+
 const stat = (
   type: "reply" | "like" | "repost" | "quote",
   post: AppBskyFeedDefs.PostView,
@@ -24,7 +31,6 @@ const stat = (
     {
       className: "stat",
       href: `${href}/${plural[type]}`,
-      onclick: () => setPreloaded(post),
     },
     undefined,
     [
@@ -35,6 +41,48 @@ const stat = (
       }),
     ],
   );
+};
+
+const updateInteraction = async (
+  active: boolean,
+  cid: string,
+  uri: string,
+  count: number,
+  recordUri: string,
+  type: "repost" | "like",
+  countSpan: HTMLSpanElement,
+  button: HTMLButtonElement,
+) => {
+  try {
+    const collection = "app.bsky.feed." + type;
+    count += active ? 1 : -1;
+    countSpan.textContent = count.toLocaleString();
+    button.classList.toggle("active", active);
+    if (active) {
+      await rpc.call("com.atproto.repo.createRecord", {
+        data: {
+          record: {
+            $type: collection,
+            createdAt: new Date().toISOString(),
+            subject: { cid, uri },
+          },
+          collection,
+          repo: manager.session.did,
+        },
+      });
+    } else {
+      if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
+      const did = recordUri.slice(5, recordUri.indexOf("/", 6));
+      const rkey = recordUri.slice(recordUri.lastIndexOf("/") + 1);
+      await rpc.call("com.atproto.repo.deleteRecord", {
+        data: { rkey, collection, repo: did },
+      });
+    }
+  } catch (err) {
+    console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
+    count += active ? -1 : 1;
+    countSpan.textContent = count.toLocaleString();
+  }
 };
 
 const interactionButton = (
@@ -58,63 +106,22 @@ const interactionButton = (
     button.classList.toggle("active", isActive);
 
     if (hasViewer)
-      button.addEventListener(
-        "click",
-        manager.session
-          ? async () => {
-              isActive = !isActive;
-              await updateInteraction(isActive, post, type, countSpan, button);
-            }
-          : async () => {},
-      );
+      button.addEventListener("click", () => {
+        isActive = !isActive;
+        updateInteraction(
+          isActive,
+          post.cid,
+          post.uri,
+          post[type + "Count"],
+          post.viewer[type],
+          type,
+          countSpan,
+          button,
+        );
+      });
   }
 
   return button;
-};
-
-const updateInteraction = async (
-  active: boolean,
-  post: AppBskyFeedDefs.PostView,
-  type: "repost" | "like",
-  countSpan: HTMLSpanElement,
-  button: HTMLButtonElement,
-) => {
-  let count = post[type + "Count"];
-  try {
-    const collection = "app.bsky.feed." + type;
-    count += active ? 1 : -1;
-    countSpan.textContent = count.toLocaleString();
-    if (active) {
-      const { cid, uri } = post;
-      const { data } = await rpc.call("com.atproto.repo.createRecord", {
-        data: {
-          record: {
-            $type: collection,
-            createdAt: new Date().toISOString(),
-            subject: { cid, uri },
-          },
-          collection,
-          repo: manager.session.did,
-        },
-      });
-      post.viewer[type] = data.uri;
-    } else {
-      const recordUri = post.viewer[type];
-      if (!recordUri) throw new Error(`No ${type} record URI found on post.`);
-      const did = recordUri.slice(5, recordUri.indexOf("/", 6));
-      const rkey = recordUri.slice(recordUri.lastIndexOf("/") + 1);
-      await rpc.call("com.atproto.repo.deleteRecord", {
-        data: { rkey, collection, repo: did },
-      });
-      delete post.viewer[type];
-    }
-    post[type + "Count"] = count;
-    button.classList.toggle("active", active);
-  } catch (err) {
-    console.error(`Failed to ${active ? "add" : "remove"} ${type}:`, err);
-    count += active ? -1 : 1;
-    countSpan.textContent = count.toLocaleString();
-  }
 };
 
 export const postCard = (
@@ -126,17 +133,12 @@ export const postCard = (
   hasReplies = false,
   isEmbed = false,
 ) => {
-  const post: AppBskyFeedDefs.PostView =
-    "post" in postHousing ? postHousing.post : postHousing;
+  const post = "post" in postHousing ? postHousing.post : postHousing;
   const record = post.record as AppBskyFeedPost.Record;
-
   const author = post.author;
   const atId = idChoose(author);
-  const authorDid = author.did;
-
-  const authorHref = `/${authorDid}`;
+  const authorHref = `/${author.did}`;
   const href = getPathFromUri(post.uri);
-
   const indexedAt = new Date(post.indexedAt);
   const createdAt = new Date(record.createdAt);
 
@@ -145,18 +147,18 @@ export const postCard = (
   });
   const card = elem("div", { className: "card" });
 
+  const preload = () => {
+    setPreloaded(post);
+  };
+
   const profilePicture = elem(
-    "div",
-    { className: "pfp-holder" },
-    elem(
-      "a",
-      { href: authorHref },
-      elem("img", {
-        className: "pfp",
-        src: post.author.avatar,
-        loading: "lazy",
-      }),
-    ),
+    "a",
+    { className: "pfp-holder", href: authorHref },
+    elem("img", {
+      className: "pfp",
+      src: post.author.avatar,
+      loading: "lazy",
+    }),
   );
 
   if (isEmbed) {
@@ -164,17 +166,13 @@ export const postCard = (
       elem("div", { className: "header" }, undefined, [
         elem("a", { className: "user-area", href: authorHref }, undefined, [
           profilePicture,
-          elem(
-            "a",
-            { className: "handle-area" },
-            elem("span", { className: "handle", textContent: atId }),
-          ),
+          elem("span", { className: "handle-area handle", textContent: atId }),
         ]),
         elem("a", {
           className: "timestamp",
           href: href,
           textContent: formatTimeDifference(new Date(), indexedAt || createdAt),
-          onclick: () => setPreloaded(post),
+          onclick: preload,
         }),
       ]),
     );
@@ -182,12 +180,9 @@ export const postCard = (
     card.appendChild(
       elem("a", { className: "header", href: authorHref }, undefined, [
         profilePicture,
-        elem("a", { className: "handle-area", href: authorHref }, undefined, [
+        elem("div", { className: "handle-area" }, undefined, [
           elem("span", { className: "handle", textContent: atId }),
-          elem("span", {
-            className: "",
-            textContent: post.author.displayName,
-          }),
+          elem("span", { textContent: post.author.displayName }),
         ]),
       ]),
     );
@@ -242,7 +237,7 @@ export const postCard = (
           className: "timestamp",
           href: href,
           textContent: formatTimeDifference(new Date(), indexedAt || createdAt),
-          onclick: () => setPreloaded(post),
+          onclick: preload,
         }),
       ]),
     );
@@ -321,8 +316,7 @@ export const postCard = (
   let translateButton: HTMLElement;
   if (
     record.text &&
-    record.langs &&
-    record.langs[0] &&
+    record.langs?.[0] &&
     !languagesToNotTranslate.includes(record.langs[0])
   ) {
     translateButton = elem("a", {
@@ -332,6 +326,7 @@ export const postCard = (
     });
     if (!fullView) card.appendChild(translateButton);
   }
+
   if (fullView) {
     const postData = elem("div", { className: "post-data" });
     postData.appendChild(
@@ -339,22 +334,22 @@ export const postCard = (
         className: "timestamp",
         href: href,
         textContent: formatDate(indexedAt ?? createdAt),
-        onclick: () => setPreloaded(post),
+        onclick: preload,
       }),
     );
     if (translateButton) postData.appendChild(translateButton);
     card.appendChild(postData);
-  }
-  if (fullView) {
+
     const stats = [
       stat("like", post, href),
       stat("repost", post, href),
       stat("quote", post, href),
     ].filter(Boolean);
 
-    if (stats.length > 0)
+    if (stats.length)
       card.appendChild(elem("div", { className: "stats" }, undefined, stats));
   }
+
   if (!isEmbed)
     card.appendChild(
       elem("div", { className: "stats-buttons" }, undefined, [
@@ -368,11 +363,4 @@ export const postCard = (
   postElem.appendChild(card);
 
   return postElem;
-};
-
-const plural = {
-  reply: "replies",
-  like: "likes",
-  repost: "reposts",
-  quote: "quotes",
 };

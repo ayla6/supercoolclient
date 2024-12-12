@@ -6,7 +6,6 @@ export type RouteOutput = Promise<{
   title?: string;
   scrollToElement?: HTMLElement;
   bodyStyle?: string;
-  feed?: string;
 }>;
 
 export type FeedState = {

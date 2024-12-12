@@ -111,21 +111,15 @@ export const updatePage = async (useCache: boolean) => {
     document.body.setAttribute("style", cachePage.bodyStyle);
   } else {
     let container: HTMLDivElement;
-    // kind of a stupid way to go i'm sorry
-    if (cachePage && (!cachePage.feed || cachePage.feed === "posts")) {
-      container = cachePage.content;
-      if (cachePage.bodyStyle)
-        document.body.setAttribute("style", cachePage.bodyStyle);
-      document.body.appendChild(container);
-      if (cachePage.scrollToElement) cachePage.scrollToElement.scrollIntoView();
-    } else {
-      container = elem("div", { id: "container" });
-      document.body.appendChild(container);
-    }
+    container = elem("div", { id: "container" });
+    document.body.appendChild(container);
 
     const route = matchRoute(currentSplitPath);
-    const { onscrollFunction, title, scrollToElement, bodyStyle, feed } =
-      await route(currentSplitPath, loadedSplitPath, container);
+    const { onscrollFunction, title, scrollToElement, bodyStyle } = await route(
+      currentSplitPath,
+      loadedSplitPath,
+      container,
+    );
     if (document.body.contains(container)) {
       if (title) document.title = title + " — SuperCoolClient";
       if (bodyStyle) document.body.setAttribute("style", bodyStyle);
@@ -142,7 +136,6 @@ export const updatePage = async (useCache: boolean) => {
         onscroll: onscrollFunction,
         bodyStyle: document.body.getAttribute("style"),
         scrollToElement: scrollToElement,
-        feed: feed,
       });
     }
   }
@@ -165,8 +158,9 @@ export const profileRedirect = (did: string) => {
 export const cleanCache = () => {
   console.time("Time to clean cache");
   const now = Date.now();
+  const currentPath = window.location.pathname;
   for (const [path, entry] of cache.entries()) {
-    if (entry.expirationDate < now) {
+    if (entry.expirationDate < now && path !== currentPath) {
       cache.delete(path);
       console.log("deleted " + path);
     } else if (entry[0] < Infinity) break;

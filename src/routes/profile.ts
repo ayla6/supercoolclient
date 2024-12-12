@@ -1,6 +1,6 @@
 import { AppBskyFeedGetAuthorFeed } from "@atcute/client/lexicons";
 import { feedNSID } from "../elements/ui/feed";
-import { createLocalStateManager } from "../elements/ui/local_state_manager";
+import { createFeedManager } from "../elements/ui/local_state_manager";
 import { profileCard } from "../elements/ui/profile_card";
 import { elem } from "../elements/utils/elem";
 import { changeImageFormat } from "../elements/utils/link_processing";
@@ -43,6 +43,32 @@ const feedConfigs = {
   },
 };
 
+const mediaNavButton = (
+  button: HTMLAnchorElement,
+  lastMedia: AppBskyFeedGetAuthorFeed.Output,
+) => {
+  const images = elem("div", { className: "images" });
+  for (const post of lastMedia.feed) {
+    if (images.children.length >= 4) break;
+
+    const embed =
+      post.post.embed.$type === "app.bsky.embed.recordWithMedia#view"
+        ? post.post.embed.media
+        : post.post.embed;
+
+    if (embed.$type === "app.bsky.embed.images#view") {
+      for (const image of embed.images) {
+        if (images.children.length >= 4) break;
+        images.append(elem("img", { src: changeImageFormat(image.thumb) }));
+      }
+    } else if (embed.$type === "app.bsky.embed.video#view" && embed.thumbnail) {
+      images.append(elem("img", { src: embed.thumbnail }));
+    }
+  }
+  button.append(images);
+  return button;
+};
+
 export const profileRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
@@ -71,53 +97,23 @@ export const profileRoute = async (
 
   const sideBar = elem("div", { id: "side-bar" });
 
-  const loadProfileFeed = createLocalStateManager(container, sideBar);
+  const loadProfileFeed = createFeedManager(container, sideBar);
 
   const navButton = (feed: string, text: string) => {
+    const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
+    const endpoint = feedConfig.endpoint ?? urlEquivalents[feed][0];
+    const params = feedConfig.params(atId, feed);
+    const type = feedConfig.type;
+
     const button = elem("a", {
       href: `?feed=${feed}`,
       textContent: text,
       onclick: (e) => {
         e.preventDefault();
-        const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
-        loadProfileFeed(
-          feed,
-          feedConfig.endpoint ?? urlEquivalents[feed][0],
-          feedConfig.params(atId, feed),
-          feedConfig.type,
-        );
+        loadProfileFeed(feed, endpoint, params, type);
       },
     });
     button.setAttribute("ignore", "");
-    return button;
-  };
-
-  const mediaNavButton = (
-    button: HTMLAnchorElement,
-    lastMedia: AppBskyFeedGetAuthorFeed.Output,
-  ) => {
-    const images = elem("div", { className: "images" });
-    for (const post of lastMedia.feed) {
-      if (images.children.length >= 4) break;
-
-      const embed =
-        post.post.embed.$type === "app.bsky.embed.recordWithMedia#view"
-          ? post.post.embed.media
-          : post.post.embed;
-
-      if (embed.$type === "app.bsky.embed.images#view") {
-        for (const image of embed.images) {
-          if (images.children.length >= 4) break;
-          images.append(elem("img", { src: changeImageFormat(image.thumb) }));
-        }
-      } else if (
-        embed.$type === "app.bsky.embed.video#view" &&
-        embed.thumbnail
-      ) {
-        images.append(elem("img", { src: embed.thumbnail }));
-      }
-    }
-    button.append(images);
     return button;
   };
 
@@ -176,9 +172,7 @@ export const profileRoute = async (
     ]),
   ]);
 
-  const hasContainerLoaded = container.hasChildNodes()
-    ? false
-    : container.replaceChildren(header, sideBar);
+  container.append(header, sideBar, elem("div", { id: "content" }));
 
   const bodyStyle = `background-image:
     url(${profile.banner?.replace("img/banner", "img/feed_fullsize").replace("jpeg", "webp")});`;
@@ -187,14 +181,12 @@ export const profileRoute = async (
   const params = new URLSearchParams(window.location.search);
   const feed = params.get("feed") ?? "posts";
   const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
-  const [onscrollFunction, content] = await loadProfileFeed(
+  const onscrollFunction = await loadProfileFeed(
     feed,
     feedConfig.endpoint ?? urlEquivalents[feed][0],
     feedConfig.params(atId, feed),
     feedConfig.type,
   );
-  if (!hasContainerLoaded) container.replaceChildren(header, sideBar);
-  container.appendChild(content);
 
-  return { onscrollFunction, title: profile.handle, bodyStyle, feed };
+  return { onscrollFunction, title: profile.handle, bodyStyle };
 };

@@ -1,4 +1,4 @@
-import { createLocalStateManager } from "../elements/ui/local_state_manager";
+import { createFeedManager } from "../elements/ui/local_state_manager";
 import { elem } from "../elements/utils/elem";
 import { rpc } from "../login";
 import { RouteOutput } from "../types";
@@ -28,26 +28,25 @@ export const homeRoute = async (
     },
   });
 
-  const loadHomeFeed = createLocalStateManager(container, sideBar);
+  const loadHomeFeed = createFeedManager(container, sideBar);
 
   for (const feedGen of [
     { uri: "following", displayName: "Following" },
     ...feedGens.feeds,
   ]) {
     const { uri, displayName } = feedGen;
+    const nsid =
+      uri !== "following"
+        ? "app.bsky.feed.getFeed"
+        : "app.bsky.feed.getTimeline";
+    const params = { feed: uri };
     const button = elem("a", {
       textContent: displayName,
       href: `?feed=${uri}`,
       onclick: async (e) => {
         e.preventDefault();
         localStorage.setItem("last-feed", uri);
-        loadHomeFeed(
-          uri,
-          uri !== "following"
-            ? "app.bsky.feed.getFeed"
-            : "app.bsky.feed.getTimeline",
-          { feed: uri },
-        );
+        loadHomeFeed(uri, nsid, params);
       },
     });
     button.setAttribute("ignore", "");
@@ -66,14 +65,14 @@ export const homeRoute = async (
     }
   }
 
-  container.append(sideBar);
+  container.append(sideBar, elem("div", { id: "content" }));
 
-  const [onscrollFunction, content] = await loadHomeFeed(
+  const onscrollFunction = await loadHomeFeed(
     uri,
     uri !== "following" ? "app.bsky.feed.getFeed" : "app.bsky.feed.getTimeline",
     { feed: uri },
+    undefined,
   );
-  container.appendChild(content);
 
-  return { onscrollFunction, feed: uri };
+  return { onscrollFunction };
 };
