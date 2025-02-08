@@ -33,7 +33,7 @@ export const composerBox = (
     role: "textbox",
     contentEditable: "true",
     translate: false,
-    ariaPlaceholder: "Wanna blaze your glory?",
+    ariaPlaceholder: "Say anything you want",
   });
 
   // Image handling functions
@@ -113,16 +113,119 @@ export const composerBox = (
         },
       );
 
+      // this was claude
       const fixedImage = await new Promise<Blob>((resolve) => {
-        if (file.type === "image/png") {
+        // Constants
+        const MAX_FILE_SIZE = 976.56 * 1024; // ~1MB
+        const MAX_DIMENSION = 2000;
+        const DEFAULT_QUALITY = 0.95;
+
+        // Helper functions
+        const createCanvas = (width: number, height: number) => {
           const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          canvas.getContext("2d")?.drawImage(img, 0, 0);
-          canvas.toBlob((blob) => resolve(blob!), "image/webp", 1.0);
+          canvas.width = width;
+          canvas.height = height;
+          return canvas;
+        };
+
+        const drawImageToCanvas = (
+          canvas: HTMLCanvasElement,
+          image: HTMLImageElement,
+          width?: number,
+          height?: number,
+        ) => {
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(
+            image,
+            0,
+            0,
+            width || image.width,
+            height || image.height,
+          );
+          return canvas;
+        };
+
+        const getScaledDimensions = (width: number, height: number) => {
+          const scale = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+          return {
+            width: width * scale,
+            height: height * scale,
+          };
+        };
+
+        // Handle PNG files
+        if (file.type === "image/png") {
+          const canvas = drawImageToCanvas(
+            createCanvas(img.width, img.height),
+            img,
+          );
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob && blob.size > MAX_FILE_SIZE) {
+                if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
+                  const { width, height } = getScaledDimensions(
+                    img.width,
+                    img.height,
+                  );
+                  const scaledCanvas = drawImageToCanvas(
+                    createCanvas(width, height),
+                    img,
+                    width,
+                    height,
+                  );
+
+                  scaledCanvas.toBlob(
+                    (resizedBlob) => resolve(resizedBlob!),
+                    "image/webp",
+                    1.0,
+                  );
+                } else {
+                  throw new Error("Image file size too large");
+                }
+              } else {
+                resolve(blob!);
+              }
+            },
+            "image/webp",
+            1.0,
+          );
           return;
         }
 
+        // Handle large images that need resizing
+        if (
+          file.size > MAX_FILE_SIZE &&
+          (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION)
+        ) {
+          const { width, height } = getScaledDimensions(img.width, img.height);
+          const canvas = drawImageToCanvas(
+            createCanvas(width, height),
+            img,
+            width,
+            height,
+          );
+
+          const compressImage = (quality: number): void => {
+            canvas.toBlob(
+              (blob) => {
+                if (blob && blob.size > MAX_FILE_SIZE && quality > 0.1) {
+                  compressImage(quality - 0.05);
+                } else {
+                  console.log("Final compression quality:", quality);
+                  resolve(blob!);
+                }
+              },
+              "image/webp",
+              quality,
+            );
+          };
+
+          compressImage(DEFAULT_QUALITY);
+          return;
+        }
+
+        // Handle JPEG metadata stripping
         const reader = new FileReader();
         reader.onload = () => {
           const buffer = reader.result as ArrayBuffer;
@@ -134,6 +237,7 @@ export const composerBox = (
             while (offset < result.byteLength) {
               const marker = view.getUint16(offset);
               if ((marker & 0xff00) !== 0xff00) break;
+
               const segmentLength = view.getUint16(offset + 2);
               if ((marker & 0xff) === 0xe1) {
                 new Uint8Array(result).fill(
@@ -217,7 +321,7 @@ export const composerBox = (
       ? true
       : await new Promise<boolean>((resolve) => {
           const content = elem("div", {}, null, [
-            elem("p", { textContent: "Do you want to cancel this draft?" }),
+            elem("p", { textContent: "Do you want to discard this draft?" }),
             elem("div", { className: "horizontal-buttons" }, null, [
               elem("button", {
                 textContent: "Cancel",
