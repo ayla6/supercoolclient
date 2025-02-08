@@ -138,7 +138,7 @@ export const profileRoute = async (
       navButton("posts", "Posts"),
       navButton("replies", "Posts and replies"),
       manager.session?.did === profile.did
-        ? navButton("likes", "Favourites")
+        ? navButton("likes", "Likes")
         : undefined,
       navButton("following", "Following"),
       navButton("followers", "Followers"),

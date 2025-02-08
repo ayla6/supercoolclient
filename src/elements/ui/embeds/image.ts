@@ -2,6 +2,7 @@ import { AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
 import { changeImageFormat } from "../../utils/link_processing";
+import { dialogBox } from "../dialog";
 
 const loadImage = (
   image: AppBskyEmbedImages.ViewImage,
@@ -17,11 +18,15 @@ const loadImage = (
     {
       className: "image",
       target: " ",
+      onclick: (e) => {
+        e.preventDefault();
+        dialogBox(elem("img", { src: image.fullsize }));
+      },
     },
     img,
   );
 
-  const fullsize = changeImageFormat(image.fullsize, "png");
+  const fullsize = image.fullsize;
 
   imageHolder.style.cssText = getProperSize(image.aspectRatio, isSingleImage);
   if (image.aspectRatio && image.aspectRatio.height <= 350) {

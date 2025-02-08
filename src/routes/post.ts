@@ -14,6 +14,7 @@ import {
 import { rpc } from "../login";
 import { beingLoadedSplitPath, profileRedirect } from "../router";
 import { RouteOutput } from "../types";
+import { preloadedPost, setPreloaded } from "../elements/utils/preloadedPost";
 
 const mutedPostsButton = (
   outputElement: HTMLElement,
@@ -242,10 +243,6 @@ const loadThread = (
   return [content, mainPost];
 };
 
-let preloadedPost: AppBskyFeedDefs.PostView;
-export const setPreloaded = (post: AppBskyFeedDefs.PostView) => {
-  preloadedPost = post;
-};
 export const postRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
@@ -271,7 +268,7 @@ export const postRoute = async (
     title = `${post.author.handle}: “${(post.record as AppBskyFeedPost.Record).text}” — SuperCoolClient`;
 
     if (preloadedPost) Object.assign(preloadedPost, post);
-    preloadedPost = null;
+    setPreloaded(null);
     if (
       postThread.thread.parent &&
       postThread.thread.parent.$type !== "app.bsky.feed.defs#threadViewPost"

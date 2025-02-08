@@ -229,9 +229,59 @@ code {
     }
 }
 
+.popup {
+    // Box Model
+    box-sizing: border-box;
+    width: max-content;
+    max-width: 600px;
+    max-height: 600px;
+    padding: 8px;
+    margin: auto;
+    margin-top: 50vh;
+
+    // Visual
+    background: $white;
+    border-radius: $border-radius;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+
+    // Flex Layout
+    display: flex;
+    flex-flow: column;
+    gap: 8px;
+
+    // Positioning
+    transform: translateY(-75%);
+}
+
+.popup,
+.composer {
+    .horizontal-buttons {
+        display: flex;
+        gap: 8px;
+    }
+}
+
 @media (max-width: 920px) {
     $header-height: 40px;
     $font-size: 15px;
+
+    .popup {
+        // Box Model
+        height: auto;
+        width: 100vw;
+        max-height: 50vh;
+        max-width: 100%;
+        margin: 0;
+        border-bottom: none;
+        border-radius: $border-radius $border-radius 0 0;
+
+        // Positioning
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transform: translateY(0);
+    }
 
     .sticky-header {
         z-index: 1;

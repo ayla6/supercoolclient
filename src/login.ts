@@ -1,5 +1,6 @@
 //stole most stuff from here because idk how to do this... https://github.com/wesbos/blue-sky-cli
 import { AtpSessionData, XRPC, CredentialManager } from "@atcute/client";
+import { AppBskyActorDefs } from "@atcute/client/lexicons";
 let savedSessionData: AtpSessionData;
 
 export let manager = new CredentialManager({
@@ -10,6 +11,7 @@ export let manager = new CredentialManager({
   },
 });
 export let rpc = new XRPC({ handler: manager });
+export let sessionData: AppBskyActorDefs.ProfileViewDetailed;
 
 export const login = async () => {
   if (manager.session) return manager;
@@ -20,20 +22,24 @@ export const login = async () => {
     try {
       await manager.resume(savedSessionData);
     } catch {}
-    if (manager.session) return manager;
-  }
-
-  const id = prompt("user");
-  if (id) {
-    await manager.login({
-      identifier: id,
-      password: prompt("app password"),
-    });
   } else {
-    manager = new CredentialManager({
-      service: "https://public.api.bsky.app",
-    });
+    const id = prompt("user");
+    if (id) {
+      await manager.login({
+        identifier: id,
+        password: prompt("app password"),
+      });
+    } else {
+      manager = new CredentialManager({
+        service: "https://public.api.bsky.app",
+      });
+    }
+    rpc = new XRPC({ handler: manager });
   }
-  rpc = new XRPC({ handler: manager });
+  sessionData = (
+    await rpc.get("app.bsky.actor.getProfile", {
+      params: { actor: manager.session.did },
+    })
+  ).data;
   return manager;
 };

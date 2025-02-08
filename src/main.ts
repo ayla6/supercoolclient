@@ -1,6 +1,6 @@
 import { fillMissingSettings } from "./config";
 import { loadNavbar } from "./elements/ui/navbar";
-import { login } from "./login";
+import { login, manager, rpc } from "./login";
 import { cleanCache, updatePage } from "./router";
 
 document.addEventListener("click", (e) => {
@@ -33,6 +33,6 @@ if (path.length !== 1 && path.endsWith("/")) {
 }
 
 fillMissingSettings();
-login();
+await login();
 loadNavbar();
 updatePage(false);

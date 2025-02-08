@@ -1,14 +1,14 @@
 import {
-  AppBskyEmbedDefs,
-  AppBskyEmbedImages,
   AppBskyEmbedVideo,
   AppBskyFeedDefs,
   AppBskyFeedPost,
 } from "@atcute/client/lexicons";
-import { manager, rpc } from "../../login";
+import { manager, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
 import { dialogBox } from "./dialog";
+import { uploadImages } from "./composer-embeds/image";
+import { uploadVideo } from "./composer-embeds/video";
 
 export const composerBox = (
   replyTo?: AppBskyFeedPost.ReplyRef,
@@ -25,6 +25,8 @@ export const composerBox = (
   }
   let images: ImageWithURL[] = [];
   let video: File;
+  let language: string = "en";
+
   let cleaning = false;
 
   // Create main textbox
@@ -97,184 +99,6 @@ export const composerBox = (
     return input;
   };
 
-  // Media upload functions
-  const uploadImages = async (input: ImageWithURL[]) => {
-    const images: AppBskyEmbedImages.Main = {
-      $type: "app.bsky.embed.images",
-      images: [],
-    };
-
-    for (const { file, objectURL } of input) {
-      const img = new Image();
-      const aspectRatio = await new Promise<AppBskyEmbedDefs.AspectRatio>(
-        (resolve) => {
-          img.onload = () => resolve({ width: img.width, height: img.height });
-          img.src = objectURL;
-        },
-      );
-
-      // this was claude
-      const fixedImage = await new Promise<Blob>((resolve) => {
-        // Constants
-        const MAX_FILE_SIZE = 976.56 * 1024; // ~1MB
-        const MAX_DIMENSION = 2000;
-        const DEFAULT_QUALITY = 0.95;
-
-        // Helper functions
-        const createCanvas = (width: number, height: number) => {
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          return canvas;
-        };
-
-        const drawImageToCanvas = (
-          canvas: HTMLCanvasElement,
-          image: HTMLImageElement,
-          width?: number,
-          height?: number,
-        ) => {
-          const ctx = canvas.getContext("2d");
-          ctx?.drawImage(
-            image,
-            0,
-            0,
-            width || image.width,
-            height || image.height,
-          );
-          return canvas;
-        };
-
-        const getScaledDimensions = (width: number, height: number) => {
-          const scale = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-          return {
-            width: width * scale,
-            height: height * scale,
-          };
-        };
-
-        // Handle PNG files
-        if (file.type === "image/png") {
-          const canvas = drawImageToCanvas(
-            createCanvas(img.width, img.height),
-            img,
-          );
-
-          canvas.toBlob(
-            (blob) => {
-              if (blob && blob.size > MAX_FILE_SIZE) {
-                if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
-                  const { width, height } = getScaledDimensions(
-                    img.width,
-                    img.height,
-                  );
-                  const scaledCanvas = drawImageToCanvas(
-                    createCanvas(width, height),
-                    img,
-                    width,
-                    height,
-                  );
-
-                  scaledCanvas.toBlob(
-                    (resizedBlob) => resolve(resizedBlob!),
-                    "image/webp",
-                    1.0,
-                  );
-                } else {
-                  throw new Error("Image file size too large");
-                }
-              } else {
-                resolve(blob!);
-              }
-            },
-            "image/webp",
-            1.0,
-          );
-          return;
-        }
-
-        // Handle large images that need resizing
-        if (
-          file.size > MAX_FILE_SIZE &&
-          (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION)
-        ) {
-          const { width, height } = getScaledDimensions(img.width, img.height);
-          const canvas = drawImageToCanvas(
-            createCanvas(width, height),
-            img,
-            width,
-            height,
-          );
-
-          const compressImage = (quality: number): void => {
-            canvas.toBlob(
-              (blob) => {
-                if (blob && blob.size > MAX_FILE_SIZE && quality > 0.1) {
-                  compressImage(quality - 0.05);
-                } else {
-                  console.log("Final compression quality:", quality);
-                  resolve(blob!);
-                }
-              },
-              "image/webp",
-              quality,
-            );
-          };
-
-          compressImage(DEFAULT_QUALITY);
-          return;
-        }
-
-        // Handle JPEG metadata stripping
-        const reader = new FileReader();
-        reader.onload = () => {
-          const buffer = reader.result as ArrayBuffer;
-          const result = buffer.slice(0);
-          const view = new DataView(result);
-
-          if (file.type === "image/jpeg") {
-            let offset = 2;
-            while (offset < result.byteLength) {
-              const marker = view.getUint16(offset);
-              if ((marker & 0xff00) !== 0xff00) break;
-
-              const segmentLength = view.getUint16(offset + 2);
-              if ((marker & 0xff) === 0xe1) {
-                new Uint8Array(result).fill(
-                  0,
-                  offset + 4,
-                  offset + 2 + segmentLength,
-                );
-              }
-              offset += 2 + segmentLength;
-            }
-          }
-
-          resolve(new Blob([result], { type: file.type }));
-        };
-        reader.readAsArrayBuffer(file);
-      });
-
-      const blob = (
-        await rpc.call("com.atproto.repo.uploadBlob", { data: fixedImage })
-      ).data.blob;
-      images.images.push({
-        $type: "app.bsky.embed.image",
-        aspectRatio,
-        alt: "",
-        image: blob,
-      });
-    }
-    return images;
-  };
-
-  const uploadVideo = async (input: File) =>
-    ({
-      $type: "app.bsky.embed.video",
-      video: (await rpc.call("com.atproto.repo.uploadBlob", { data: input }))
-        .data.blob,
-    }) as AppBskyEmbedVideo.Main;
-
   // Post creation
   const createPost = async () => {
     let embed: any;
@@ -321,28 +145,28 @@ export const composerBox = (
       !hasContent || override
         ? true
         : await new Promise<boolean>((resolve) => {
-            const content = elem("div", {}, null, [
+            const content = elem("div", { className: "popup" }, null, [
               elem("p", { textContent: "Do you want to discard this draft?" }),
               elem("div", { className: "horizontal-buttons" }, null, [
                 elem("button", {
                   textContent: "Cancel",
                   onclick: () => {
-                    dialog.close();
-                    resolve(false);
+                    dialog.cleanup(false);
                   },
                 }),
                 elem("button", {
                   textContent: "Discard",
                   onclick: () => {
-                    dialog.close();
-                    resolve(true);
+                    dialog.cleanup(true);
                   },
                 }),
               ]),
             ]);
-            const dialog = dialogBox(content);
+            const dialog = dialogBox(content, (close = false) =>
+              resolve(close),
+            );
           });
-
+    console.log(result);
     if (result) {
       images.forEach((image) => URL.revokeObjectURL(image.objectURL));
       document.body.style.overflow = null;
@@ -381,18 +205,25 @@ export const composerBox = (
   });
 
   // Compose the UI
-  const composer = elem("div", { className: "composer popup" }, null, [
-    elem("div", { className: "horizontal-buttons space-between" }, null, [
-      cancelButton,
-      postButton,
+  const composer = elem("div", { className: "composer" }, null, [
+    elem("div", { className: "text-area" }, undefined, [
+      elem(
+        "div",
+        { className: "avatar-area" },
+        elem("img", { src: sessionData.avatar }),
+      ),
+      textbox,
     ]),
-    textbox,
     imagePreviewContainer,
     quote &&
       elem("div", { className: "embeds" }, postCard(quote, false, false, true)),
     elem("div", { className: "horizontal-buttons" }, null, [
       imageButton,
-      videoButton,
+      //videoButton,
+    ]),
+    elem("div", { className: "horizontal-buttons space-between" }, null, [
+      cancelButton,
+      postButton,
     ]),
   ]);
 

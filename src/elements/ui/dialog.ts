@@ -1,12 +1,15 @@
 import { elem } from "../utils/elem";
 
-export const dialogBox = (content: HTMLElement) => {
+export const dialogBox = (
+  dialog: HTMLElement,
+  onCleanup?: (result: boolean) => void,
+) => {
   const background = elem("div", { className: "background" });
-  const dialog = elem("div", { className: "popup" }, null, [content]);
 
-  const cleanup = () => {
+  const cleanup = (result: boolean = false) => {
     document.body.style.overflow = null;
     background.remove();
+    if (onCleanup) onCleanup(result);
   };
 
   // Prevent clicks inside dialog from closing it
@@ -16,7 +19,7 @@ export const dialogBox = (content: HTMLElement) => {
   background.append(dialog);
 
   // Handle background click
-  background.onclick = cleanup;
+  background.onclick = () => cleanup();
 
   // Handle escape key
   document.addEventListener("keydown", function handler(e) {
@@ -31,7 +34,7 @@ export const dialogBox = (content: HTMLElement) => {
   document.body.style.overflow = "hidden";
 
   return {
-    close: cleanup,
+    cleanup,
     element: dialog,
   };
 };

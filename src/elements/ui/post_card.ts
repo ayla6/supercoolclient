@@ -12,10 +12,10 @@ import { manager, rpc } from "../../login";
 import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
-import { setPreloaded } from "../../routes/post";
 import { handleEmbed } from "./embeds/embed_handlers";
 import { languagesToNotTranslate } from "../../config.ts";
 import { composerBox } from "./composer.ts";
+import { setPreloaded } from "../utils/preloadedPost.ts";
 
 const plural = {
   reply: "replies",
@@ -175,7 +175,7 @@ export const postCard = (
   const card = elem("div", { className: "card" });
 
   const preload = () => {
-    //setPreloaded(post);
+    setPreloaded(post);
   };
 
   const profilePicture = elem(
