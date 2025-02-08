@@ -8,6 +8,7 @@ import { notificationsRoute } from "./routes/notifications";
 import { postRoute } from "./routes/post";
 import { profileRoute } from "./routes/profile";
 import { createStatsRoute } from "./routes/stats";
+import { searchRoute } from "./routes/search";
 
 type CacheEntry = {
   expirationDate: number;
@@ -36,6 +37,7 @@ type Route = (
 const routesBase: { [key: string]: Route } = {
   "": homeRoute,
   notifications: notificationsRoute,
+  search: searchRoute,
   ":": profileRoute,
   ":/post/:": postRoute,
   ":/post/:/likes": createStatsRoute(

@@ -14,16 +14,20 @@ export const composerBox = (
   replyTo?: AppBskyFeedPost.ReplyRef,
   quote?: AppBskyFeedDefs.PostView,
 ) => {
+  // Main container elements
   const background = elem("div", { className: "background" });
+  const imagePreviewContainer = elem("div", { className: "image-preview" });
 
+  // State
   interface ImageWithURL {
     file: File;
     objectURL: string;
   }
-
   let images: ImageWithURL[] = [];
   let video: File;
+  let cleaning = false;
 
+  // Create main textbox
   const textbox = elem("div", {
     className: "textbox",
     role: "textbox",
@@ -32,8 +36,7 @@ export const composerBox = (
     ariaPlaceholder: "Wanna blaze your glory?",
   });
 
-  const imagePreviewContainer = elem("div", { className: "image-preview" });
-
+  // Image handling functions
   const updateImagePreviews = () => {
     imagePreviewContainer.innerHTML = "";
     images.forEach((image, index) => {
@@ -65,6 +68,7 @@ export const composerBox = (
     updateImagePreviews();
   };
 
+  // Paste handler
   textbox.addEventListener("paste", (e) => {
     e.preventDefault();
     if (images?.length >= 4) return;
@@ -79,6 +83,7 @@ export const composerBox = (
     }
   });
 
+  // File input helpers
   const createFileInput = (
     type: string,
     multiple: boolean,
@@ -92,17 +97,7 @@ export const composerBox = (
     return input;
   };
 
-  const imageButton = elem("button", {
-    textContent: "🖼️",
-    onclick: () => createFileInput("image", true, handleImageInput).click(),
-  });
-
-  const videoButton = elem("button", {
-    textContent: "📽️",
-    onclick: () =>
-      createFileInput("video", false, (files) => (video = files[0])).click(),
-  });
-
+  // Media upload functions
   const uploadImages = async (input: ImageWithURL[]) => {
     const images: AppBskyEmbedImages.Main = {
       $type: "app.bsky.embed.images",
@@ -176,6 +171,7 @@ export const composerBox = (
         .data.blob,
     }) as AppBskyEmbedVideo.Main;
 
+  // Post creation
   const createPost = async () => {
     let embed: any;
     if (images.length) embed = await uploadImages(images);
@@ -211,40 +207,47 @@ export const composerBox = (
     cleanup();
   };
 
+  // Cleanup function
   const cleanup = async () => {
-    const result =
-      !textbox.textContent && !images[0] && !video
-        ? true
-        : await new Promise<boolean>((resolve) => {
-            const content = elem("div", {}, null, [
-              elem("p", { textContent: "Do you want to cancel this draft?" }),
-              elem("div", { className: "horizontal-buttons" }, null, [
-                elem("button", {
-                  textContent: "Cancel",
-                  onclick: () => {
-                    dialog.close();
-                    resolve(false);
-                  },
-                }),
-                elem("button", {
-                  textContent: "Discard",
-                  onclick: () => {
-                    dialog.close();
-                    resolve(true);
-                  },
-                }),
-              ]),
-            ]);
-            const dialog = dialogBox(content);
-          });
+    if (cleaning) return;
+    cleaning = true;
+
+    const hasContent = textbox.textContent || images[0] || video;
+    const result = !hasContent
+      ? true
+      : await new Promise<boolean>((resolve) => {
+          const content = elem("div", {}, null, [
+            elem("p", { textContent: "Do you want to cancel this draft?" }),
+            elem("div", { className: "horizontal-buttons" }, null, [
+              elem("button", {
+                textContent: "Cancel",
+                onclick: () => {
+                  dialog.close();
+                  resolve(false);
+                },
+              }),
+              elem("button", {
+                textContent: "Discard",
+                onclick: () => {
+                  dialog.close();
+                  resolve(true);
+                },
+              }),
+            ]),
+          ]);
+          const dialog = dialogBox(content);
+        });
+
     if (result) {
       images.forEach((image) => URL.revokeObjectURL(image.objectURL));
       document.body.style.overflow = null;
       background.remove();
     }
+    cleaning = false;
     return result;
   };
 
+  // UI Elements
   const postButton = elem("button", {
     textContent: "Post",
     onclick: () => {
@@ -261,11 +264,19 @@ export const composerBox = (
     },
   });
 
+  const imageButton = elem("button", {
+    textContent: "🖼️",
+    onclick: () => createFileInput("image", true, handleImageInput).click(),
+  });
+
+  const videoButton = elem("button", {
+    textContent: "📽️",
+    onclick: () =>
+      createFileInput("video", false, (files) => (video = files[0])).click(),
+  });
+
+  // Compose the UI
   const composer = elem("div", { className: "composer popup" }, null, [
-    elem("div", { className: "horizontal-buttons space-between" }, null, [
-      cancelButton,
-      postButton,
-    ]),
     textbox,
     imagePreviewContainer,
     quote &&
@@ -274,8 +285,13 @@ export const composerBox = (
       imageButton,
       videoButton,
     ]),
+    elem("div", { className: "horizontal-buttons space-between" }, null, [
+      cancelButton,
+      postButton,
+    ]),
   ]);
 
+  // Event handlers
   composer.addEventListener("click", (e) => e.stopPropagation());
   background.append(composer);
   background.onclick = () => cleanup();
@@ -286,6 +302,7 @@ export const composerBox = (
     }
   });
 
+  // Final setup
   document.body.append(background);
   document.body.style.overflow = "hidden";
   textbox.focus();
