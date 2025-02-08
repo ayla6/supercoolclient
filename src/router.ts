@@ -12,7 +12,7 @@ import { searchRoute } from "./routes/search";
 
 type CacheEntry = {
   expirationDate: number;
-  content: HTMLDivElement;
+  container: HTMLDivElement;
   title?: string;
   feed?: string;
   onscroll?: OnscrollFunction;
@@ -107,7 +107,7 @@ export const updatePage = async (useCache: boolean) => {
     (useCache && cachePage && Date.now() < cachePage.expirationDate) ||
     (currentPath === "/" && cachePage)
   ) {
-    document.body.appendChild(cachePage.content);
+    document.body.appendChild(cachePage.container);
     document.title = cachePage.title;
     window.onscroll = cachePage.onscroll;
     document.body.setAttribute("style", cachePage.bodyStyle);
@@ -133,7 +133,7 @@ export const updatePage = async (useCache: boolean) => {
       cache.delete(currentPath);
       cache.set(currentPath, {
         expirationDate: expiration,
-        content: container,
+        container: container,
         title: document.title,
         onscroll: onscrollFunction,
         bodyStyle: document.body.getAttribute("style"),

@@ -6,6 +6,7 @@ import { feedNSID, hydrateFeed } from "./feed";
 export const createFeedManager = (
   container: HTMLDivElement,
   sideBar: HTMLDivElement,
+  match: string = 'href="?feed=',
 ) => {
   const path = window.location.pathname;
 
@@ -25,7 +26,7 @@ export const createFeedManager = (
 
     if (feed !== loadedFeed) {
       sideBar.querySelector(".active")?.classList.remove("active");
-      sideBar.querySelector(`a[href="?feed=${feed}"]`)?.classList.add("active");
+      sideBar.querySelector(`a[${match}${feed}"]`)?.classList.add("active");
       if (loadedFeed) feedState[loadedFeed][2] = window.scrollY;
     }
 
