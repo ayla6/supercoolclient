@@ -136,6 +136,9 @@ code {
         display: block;
         &.sticky {
             position: fixed;
+            max-height: calc(100vh - $navbar-height - 8px);
+            overflow-x: hidden;
+            overflow-y: auto;
         }
     }
 
@@ -146,6 +149,9 @@ code {
         width: $width;
         margin-bottom: 8px;
         position: relative;
+        &:last-of-type {
+            margin-bottom: 0;
+        }
         a {
             cursor: pointer;
             width: $width - 24px;
@@ -273,7 +279,7 @@ code {
         position: fixed;
         top: 0;
         left: 0;
-        z-index: 10;
+        z-index: 1;
         &::-webkit-scrollbar {
             display: none;
         }

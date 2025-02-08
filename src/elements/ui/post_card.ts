@@ -1,4 +1,8 @@
-import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
+import {
+  AppBskyFeedDefs,
+  AppBskyFeedPost,
+  ComAtprotoRepoStrongRef,
+} from "@atcute/client/lexicons";
 import {
   getDidFromUri,
   getPathFromUri,
@@ -11,6 +15,7 @@ import { formatDate, formatTimeDifference } from "../utils/date";
 import { setPreloaded } from "../../routes/post";
 import { handleEmbed } from "./embeds/embed_handlers";
 import { languagesToNotTranslate } from "../../config.ts";
+import { composerBox } from "./composer.ts";
 
 const plural = {
   reply: "replies",
@@ -106,7 +111,7 @@ const interactionButton = (
     button.classList.toggle("active", isActive);
 
     if (hasViewer)
-      button.addEventListener("click", () => {
+      button.onclick = () => {
         isActive = !isActive;
         updateInteraction(
           isActive,
@@ -118,7 +123,29 @@ const interactionButton = (
           countSpan,
           button,
         );
+      };
+  } else if (type == "reply") {
+    button.onclick = () => {
+      const root: ComAtprotoRepoStrongRef.Main = (
+        post.record as AppBskyFeedPost.Record
+      ).reply
+        ? (post.record as AppBskyFeedPost.Record).reply.root
+        : {
+            cid: post.cid,
+            uri: post.uri,
+          };
+      composerBox({
+        parent: {
+          cid: post.cid,
+          uri: post.uri,
+        },
+        root: root,
       });
+    };
+  } else if (type === "quote") {
+    button.onclick = () => {
+      composerBox(undefined, post);
+    };
   }
 
   return button;
@@ -148,7 +175,7 @@ export const postCard = (
   const card = elem("div", { className: "card" });
 
   const preload = () => {
-    setPreloaded(post);
+    //setPreloaded(post);
   };
 
   const profilePicture = elem(

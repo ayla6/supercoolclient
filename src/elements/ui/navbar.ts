@@ -5,7 +5,7 @@ import homeSVG from "../../svg/home.svg?raw";
 import notifSVG from "../../svg/bell.svg?raw";
 import profileSVG from "../../svg/user.svg?raw";
 import postSVG from "../../svg/pencil.svg?raw";
-import { cleanCache } from "../../router";
+import { composerBox } from "./composer";
 
 function navButton(text: string, link: string, icon: string) {
   return elem("a", { innerHTML: `${icon}<span>${text}</span>`, href: link });
@@ -21,6 +21,7 @@ export const loadNavbar = () => {
       : "",
     elem("button", {
       innerHTML: `${postSVG}<span>Post</span>`,
+      onclick: () => composerBox(),
     }),
   );
 };

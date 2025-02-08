@@ -7,9 +7,6 @@ export const elem = <K extends keyof HTMLElementTagNameMap>(
   const e = document.createElement(tag);
   Object.assign(e, params);
   if (child) e.appendChild(child);
-  if (children)
-    children.forEach((child) => {
-      if (child) e.appendChild(child);
-    });
+  children?.forEach((c) => c && e.appendChild(c));
   return e;
 };

@@ -19,36 +19,49 @@ export const processText = (input: string = ""): string => {
 
 export const processRichText = (text: string, facets: Facet[]) => {
   const segmentText = segmentize(text, facets);
-  const length = segmentText.length;
   const processed = document.createDocumentFragment();
+  const len = segmentText.length;
+  const createTextNode = document.createTextNode.bind(document);
 
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < len; i++) {
     const segment = segmentText[i];
     const text = segment.text;
     let result: Node;
-    if (segment.features)
-      for (const feat of segment.features) {
-        const type = feat.$type;
-        if (type === "app.bsky.richtext.facet#tag") {
+
+    if (!segment.features) {
+      result = createTextNode(text);
+    } else {
+      const feat = segment.features[0]; // Only use first feature
+      const type = feat.$type;
+
+      switch (type) {
+        case "app.bsky.richtext.facet#tag":
           result = elem("a", {
             href: `/search/#${feat.tag}`,
             textContent: text,
           });
-        } else if (type === "app.bsky.richtext.facet#link") {
+          break;
+        case "app.bsky.richtext.facet#link":
           result = elem("a", {
             href: feat.uri,
             target: " ",
             textContent: text,
           });
-        } else if (type === "app.bsky.richtext.facet#mention") {
-          result = elem("a", { href: `/${feat.did}`, textContent: text });
-        } else {
-          result = document.createTextNode(text);
-        }
+          break;
+        case "app.bsky.richtext.facet#mention":
+          result = elem("a", {
+            href: `/${feat.did}`,
+            textContent: text,
+          });
+          break;
+        default:
+          result = createTextNode(text);
       }
-    else result = document.createTextNode(text);
+    }
+
     processed.appendChild(result);
   }
+
   return processed;
 };
 

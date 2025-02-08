@@ -1,0 +1,94 @@
+@use "variables" as *;
+
+.background {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #3333;
+    z-index: 2;
+}
+
+.popup {
+    margin: 20vh auto;
+    border-radius: $border-radius;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    max-height: 600px;
+    padding: 8px;
+    background: $white;
+    display: flex;
+    flex-flow: column;
+    width: max-content;
+    .horizontal-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    .space-between {
+        justify-content: space-between;
+    }
+    .textbox {
+        margin: 8px 0;
+        font-size: 16px;
+        outline: none;
+        overflow-y: auto;
+        flex-grow: 1;
+        &:empty:before {
+            color: $medium-grey;
+            content: attr(aria-placeholder);
+        }
+    }
+
+    .image-preview {
+        display: flex;
+        gap: 4px;
+        .image {
+            width: 25%;
+            position: relative;
+            .remove {
+                position: absolute;
+                right: 0;
+                top: 0;
+                font-size: 16px;
+                line-height: 8px;
+                padding: 6px;
+            }
+            img {
+                box-sizing: border-box;
+                border-radius: $border-radius;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                width: 100%;
+            }
+        }
+    }
+}
+.composer {
+    width: 100%;
+}
+
+@media (min-width: 920px) {
+    .composer {
+        margin-top: 10vh;
+        min-height: 200px;
+    }
+}
+@media (max-width: 920px) {
+    .popup {
+        margin-top: 20vh;
+    }
+    .composer {
+        margin: 0;
+        border-radius: 0;
+        border: none;
+        max-width: unset;
+        max-height: unset;
+        box-sizing: border-box;
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        .textbox {
+            flex-grow: 1;
+        }
+    }
+}

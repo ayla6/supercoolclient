@@ -38,11 +38,11 @@ export const profileCard = (profile: AppBskyActorDefs.ProfileView) => {
   ]);
 };
 
-export function statProfile(stat: {
+export const statProfile = (stat: {
   [Brand.Type]?: string;
   actor: AppBskyActorDefs.ProfileView;
   createdAt: string;
   indexedAt: string;
-}) {
+}) => {
   return profileCard(stat.actor);
-}
+};
