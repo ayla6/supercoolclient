@@ -41,20 +41,6 @@
     button {
         margin: 3px 0;
     }
-    #search-bar {
-        outline: none;
-        border: none;
-        border-radius: 32px;
-        padding: 4px 12px;
-        margin: 8px 0;
-        background-color: white;
-        width: 200px;
-        &::placeholder {
-            color: $medium-grey;
-            content: attr(aria-placeholder);
-            cursor: text;
-        }
-    }
 }
 
 @media (max-width: 920px) {
@@ -69,10 +55,6 @@
             min-width: 0;
             justify-content: center;
             flex-grow: 1;
-        }
-        #search-bar {
-            box-sizing: border-box;
-            width: unset;
         }
     }
 }

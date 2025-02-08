@@ -224,7 +224,7 @@ const loadThread = (
     content.append(
       mainThreadPosts,
       replyPosts,
-      elem("div", { className: "buffer" }),
+      elem("div", { className: "buffer-bottom" }),
     );
     //if (mutedPosts.hasChildNodes())
     //  outputElement.append(mutedPostsButton(outputElement, mutedPosts));

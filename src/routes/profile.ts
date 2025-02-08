@@ -6,7 +6,7 @@ import { elem } from "../elements/utils/elem";
 import { changeImageFormat } from "../elements/utils/link_processing";
 import { processText } from "../elements/utils/text_processing";
 import { manager, rpc } from "../login";
-import { beingLoadedSplitPath, profileRedirect } from "../router";
+import { beingLoadedSplitPath, profileRedirect, updatePage } from "../router";
 import { RouteOutput } from "../types";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
@@ -117,7 +117,23 @@ export const profileRoute = async (
     return button;
   };
 
-  sideBar.appendChild(
+  const searchBar = elem("input", {
+    id: "search-bar",
+    placeholder: "Search…",
+  });
+  searchBar.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && searchBar.value) {
+      history.pushState(
+        null,
+        "",
+        `/search?q=from:${profile.handle ?? profile.did} ${searchBar.value}`,
+      );
+      updatePage(false);
+    }
+  });
+
+  sideBar.append(
+    searchBar,
     elem("div", { className: "side-nav" }, undefined, [
       navButton("posts", "Posts"),
       navButton("replies", "Posts and replies"),
@@ -172,7 +188,12 @@ export const profileRoute = async (
     ]),
   ]);
 
-  container.append(header, sideBar, elem("div", { id: "content" }));
+  container.append(
+    elem("div", { className: "buffer-top" }),
+    header,
+    sideBar,
+    elem("div", { id: "content" }),
+  );
 
   const bodyStyle = `background-image:
     url(${profile.banner?.replace("img/banner", "img/feed_fullsize").replace("jpeg", "webp")});`;

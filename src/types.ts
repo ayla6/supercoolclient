@@ -8,6 +8,13 @@ export type RouteOutput = Promise<{
   bodyStyle?: string;
 }>;
 
+export type RouteOutputNotPromise = {
+  onscrollFunction?: OnscrollFunction;
+  title?: string;
+  scrollToElement?: HTMLElement;
+  bodyStyle?: string;
+};
+
 export type FeedState = {
   [key: string]: [
     content: HTMLDivElement,
