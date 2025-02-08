@@ -277,6 +277,10 @@ export const composerBox = (
 
   // Compose the UI
   const composer = elem("div", { className: "composer popup" }, null, [
+    elem("div", { className: "horizontal-buttons space-between" }, null, [
+      cancelButton,
+      postButton,
+    ]),
     textbox,
     imagePreviewContainer,
     quote &&
@@ -284,10 +288,6 @@ export const composerBox = (
     elem("div", { className: "horizontal-buttons" }, null, [
       imageButton,
       videoButton,
-    ]),
-    elem("div", { className: "horizontal-buttons space-between" }, null, [
-      cancelButton,
-      postButton,
     ]),
   ]);
 

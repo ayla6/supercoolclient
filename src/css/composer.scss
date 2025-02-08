@@ -86,8 +86,10 @@
         max-height: unset;
         box-sizing: border-box;
         width: 100vw;
-        height: 100vh;
+        height: max-content;
+        flex-grow: 1;
         .textbox {
+            min-height: 100px;
             flex-grow: 1;
         }
     }
