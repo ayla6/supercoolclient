@@ -308,39 +308,40 @@ export const composerBox = (
       },
     });
 
-    cleanup();
+    cleanup(true);
   };
 
   // Cleanup function
-  const cleanup = async () => {
+  const cleanup = async (override?: boolean) => {
     if (cleaning) return;
     cleaning = true;
 
     const hasContent = textbox.textContent || images[0] || video;
-    const result = !hasContent
-      ? true
-      : await new Promise<boolean>((resolve) => {
-          const content = elem("div", {}, null, [
-            elem("p", { textContent: "Do you want to discard this draft?" }),
-            elem("div", { className: "horizontal-buttons" }, null, [
-              elem("button", {
-                textContent: "Cancel",
-                onclick: () => {
-                  dialog.close();
-                  resolve(false);
-                },
-              }),
-              elem("button", {
-                textContent: "Discard",
-                onclick: () => {
-                  dialog.close();
-                  resolve(true);
-                },
-              }),
-            ]),
-          ]);
-          const dialog = dialogBox(content);
-        });
+    const result =
+      !hasContent || override
+        ? true
+        : await new Promise<boolean>((resolve) => {
+            const content = elem("div", {}, null, [
+              elem("p", { textContent: "Do you want to discard this draft?" }),
+              elem("div", { className: "horizontal-buttons" }, null, [
+                elem("button", {
+                  textContent: "Cancel",
+                  onclick: () => {
+                    dialog.close();
+                    resolve(false);
+                  },
+                }),
+                elem("button", {
+                  textContent: "Discard",
+                  onclick: () => {
+                    dialog.close();
+                    resolve(true);
+                  },
+                }),
+              ]),
+            ]);
+            const dialog = dialogBox(content);
+          });
 
     if (result) {
       images.forEach((image) => URL.revokeObjectURL(image.objectURL));
