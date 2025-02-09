@@ -125,7 +125,7 @@ const interactionButton = (
           button,
         );
       };
-  } else if (type == "reply") {
+  } else if (type === "reply") {
     button.onclick = () => {
       const root: ComAtprotoRepoStrongRef.Main = (
         post.record as AppBskyFeedPost.Record

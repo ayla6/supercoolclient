@@ -1,10 +1,8 @@
-import { hydrateFeed } from "../elements/ui/feed";
 import { createFeedManager } from "../elements/ui/local_state_manager";
-import { postCard } from "../elements/ui/post_card";
 import { profileCard } from "../elements/ui/profile_card";
 import { elem } from "../elements/utils/elem";
 import { updatePage } from "../router";
-import { OnscrollFunction, RouteOutput, RouteOutputNotPromise } from "../types";
+import { RouteOutput, RouteOutputNotPromise } from "../types";
 
 export const searchRoute = async (
   currentSplitPath: string[],

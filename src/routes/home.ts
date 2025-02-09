@@ -40,7 +40,6 @@ export const homeRoute = async (
           ? "app.bsky.feed.getFeed"
           : "app.bsky.feed.getTimeline",
       params: { feed: feedGen.uri },
-      setLastFeed: true,
     });
   }
 
@@ -53,17 +52,14 @@ export const homeRoute = async (
     document.getElementById("content-holder"),
     sideBar,
     feedsData,
+    true,
   );
 
   const params = new URLSearchParams(window.location.search);
   let uri: string = params.get("feed");
   history.replaceState(null, "", window.location.pathname);
   if (!uri) {
-    if (localStorage.getItem("last-feed"))
-      uri = localStorage.getItem("last-feed");
-    else {
-      uri = "following";
-    }
+    uri = localStorage.getItem("last-feed") ?? "following";
   }
 
   const feedToLoad = feedsData.find((f) => f.feed === uri);

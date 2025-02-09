@@ -4,30 +4,55 @@ import { elem } from "../utils/elem";
 import { createSwipeAction } from "../utils/swipe_manager";
 import { feedNSID, hydrateFeed } from "./feed";
 
+interface Feed {
+  displayName: string;
+  feed: string;
+  nsid: feedNSID;
+  params: { [key: string]: any };
+  func?: (item: any) => HTMLDivElement;
+  extra?: HTMLElement;
+}
+
 export const createFeedManager = (
   contentHolder: HTMLElement,
   sideBar: HTMLDivElement,
-  feedsData: {
-    displayName: string;
-    feed: string;
-    nsid: feedNSID;
-    params: { [key: string]: any };
-    func?: (item: any) => HTMLDivElement;
-    setLastFeed?: boolean;
-    extra?: HTMLElement;
-  }[],
+  feedsData: Feed[],
+  home: boolean = false,
 ) => {
   const path = window.location.pathname;
 
+  const setHomeNavButton = (feed: Feed) => {
+    (
+      document
+        .getElementById("navbar")
+        .querySelector(`a[href="/"]`) as HTMLButtonElement
+    ).onclick = (e) => {
+      if (window.location.pathname === "/") {
+        e.preventDefault();
+        e.stopPropagation();
+        loadFeed(feed);
+      }
+    };
+  };
+
+  if (home) {
+    const feed = feedsData.find(
+      (f) => f.feed === (localStorage.getItem("last-feed") ?? "following"),
+    );
+    setHomeNavButton(feed);
+  }
+
   const feedNav = elem("div", { className: "side-nav" });
-  feedsData = feedsData.filter((feed) => feed !== undefined);
   for (const feed of feedsData) {
     const button = elem("a", {
       textContent: feed.displayName,
       href: `?v=${feed.feed}`,
       onclick: async (e) => {
         e.preventDefault();
-        if (feed.setLastFeed) localStorage.setItem("last-feed", feed.feed);
+        if (home) {
+          localStorage.setItem("last-feed", feed.feed);
+          setHomeNavButton(feed);
+        }
         loadFeed(feed);
       },
     });

@@ -103,6 +103,7 @@ export const updatePage = async (useCache: boolean) => {
   window.scrollTo({ top: 0 });
 
   const cachePage = cache.get(currentPath);
+
   if (
     (useCache && cachePage && Date.now() < cachePage.expirationDate) ||
     (currentPath === "/" && cachePage)
