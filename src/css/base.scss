@@ -182,7 +182,8 @@ select {
     }
 }
 
-.close-button {
+.close-button,
+.composer .close-button {
     position: absolute;
     right: 0;
     top: 0;
