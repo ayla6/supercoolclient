@@ -20,6 +20,7 @@ export const createFeedManager = (
   home: boolean = false,
 ) => {
   const path = window.location.pathname;
+  feedsData = feedsData.filter(Boolean);
 
   const setHomeNavButton = (feed: Feed) => {
     (
