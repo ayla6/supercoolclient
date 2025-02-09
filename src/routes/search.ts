@@ -13,8 +13,6 @@ export const searchRoute = async (
 ): RouteOutput => {
   const returnObjects: RouteOutputNotPromise = { title: "Search" };
 
-  const content = elem("div", { id: "content" });
-
   const urlParams = new URLSearchParams(window.location.search);
   const searchQuery = urlParams.get("q") ?? "";
 
@@ -32,50 +30,55 @@ export const searchRoute = async (
 
   const sideBar = elem("div", { id: "side-bar", className: "sticky" });
   sideBar.append(searchBar);
-  container.append(elem("div", { className: "buffer-top" }), sideBar, content);
+  container.append(
+    elem("div", { className: "buffer-top" }),
+    sideBar,
+    elem("div", { id: "content-holder" }, elem("div", { id: "content" })),
+  );
 
   if (searchQuery) {
-    const loadSearchOption = createFeedManager(container, sideBar, 'sort="');
-
-    const navButton = (feedGen: { uri: string; displayName: string }) => {
-      const { uri, displayName } = feedGen;
-      const nsid =
-        uri !== "people"
-          ? "app.bsky.feed.searchPosts"
-          : "app.bsky.actor.searchActors";
-      const params = {
-        q: searchQuery,
-        sort: uri !== "people" ? uri : undefined,
-      };
-      const button = elem("a", {
-        textContent: displayName,
-        onclick: async (e) => {
-          e.preventDefault();
-          loadSearchOption(
-            uri,
-            nsid,
-            params,
-            uri !== "people" ? postCard : profileCard,
-          );
+    const loadSearchOption = createFeedManager(
+      document.getElementById("content-holder"),
+      sideBar,
+      [
+        {
+          displayName: "Top",
+          feed: "top",
+          nsid: "app.bsky.feed.searchPosts",
+          params: {
+            q: searchQuery,
+            sort: "top",
+          },
         },
-      });
-      button.setAttribute("sort", uri);
-      button.setAttribute("ignore", "");
-      return button;
-    };
-    const feedNav = elem("div", { className: "side-nav" }, undefined, [
-      navButton({ uri: "top", displayName: "Top" }),
-      navButton({ uri: "latest", displayName: "Latest" }),
-      navButton({ uri: "people", displayName: "People" }),
-    ]);
-    sideBar.append(feedNav);
-
-    returnObjects.onscrollFunction = await loadSearchOption(
-      "top",
-      "app.bsky.feed.searchPosts",
-      { q: searchQuery, sort: "top" },
-      postCard,
+        {
+          displayName: "Latest",
+          feed: "latest",
+          nsid: "app.bsky.feed.searchPosts",
+          params: {
+            q: searchQuery,
+            sort: "latest",
+          },
+        },
+        {
+          displayName: "People",
+          feed: "people",
+          nsid: "app.bsky.actor.searchActors",
+          params: {
+            q: searchQuery,
+          },
+          func: profileCard,
+        },
+      ],
     );
+
+    returnObjects.onscrollFunction = await loadSearchOption({
+      feed: "top",
+      nsid: "app.bsky.feed.searchPosts",
+      params: {
+        q: searchQuery,
+        sort: "top",
+      },
+    });
   }
 
   if (!searchQuery) searchBar.focus();

@@ -1,40 +1,71 @@
 import { cache } from "../../router";
 import { FeedState, OnscrollFunction } from "../../types";
 import { elem } from "../utils/elem";
+import { createSwipeAction } from "../utils/swipe_manager";
 import { feedNSID, hydrateFeed } from "./feed";
 
 export const createFeedManager = (
-  container: HTMLDivElement,
+  contentHolder: HTMLElement,
   sideBar: HTMLDivElement,
-  match: string = 'href="?feed=',
+  feedsData: {
+    displayName: string;
+    feed: string;
+    nsid: feedNSID;
+    params: { [key: string]: any };
+    func?: (item: any) => HTMLDivElement;
+    setLastFeed?: boolean;
+    extra?: HTMLElement;
+  }[],
 ) => {
   const path = window.location.pathname;
+
+  const feedNav = elem("div", { className: "side-nav" });
+  for (const feed of feedsData) {
+    const button = elem("a", {
+      textContent: feed.displayName,
+      href: `?v=${feed.feed}`,
+      onclick: async (e) => {
+        e.preventDefault();
+        if (feed.setLastFeed) localStorage.setItem("last-feed", feed.feed);
+        loadFeed(feed);
+      },
+    });
+    button.setAttribute("ignore", "");
+    if (feed.extra) button.append(feed.extra);
+    feedNav.append(button);
+  }
+  sideBar.append(feedNav);
 
   let loadedFeed: string;
   const feedState: FeedState = Object.create(null);
 
-  const loadFeed = async (
-    feed: string,
-    nsid: feedNSID,
-    params: { [key: string]: any },
-    func?: (item: any) => HTMLDivElement,
-  ): Promise<OnscrollFunction> => {
-    const clonedParams = Object.assign({}, params);
+  const loadFeed = async (feed: {
+    feed: string;
+    nsid: feedNSID;
+    params: { [key: string]: any };
+    func?: (item: any) => HTMLDivElement;
+  }): Promise<OnscrollFunction> => {
+    const clonedParams = Object.assign({}, feed.params);
     window.onscroll = null;
 
-    const currentFeedState = feedState[feed];
+    const currentFeedState = feedState[feed.feed];
 
-    if (feed !== loadedFeed) {
+    if (feed.feed !== loadedFeed) {
       sideBar.querySelector(".active")?.classList.remove("active");
-      sideBar.querySelector(`a[${match}${feed}"]`)?.classList.add("active");
+      sideBar
+        .querySelector(`a[href="?v=${feed.feed}"]`)
+        ?.classList.add("active");
+      sideBar
+        .querySelector(`a[href="?v=${feed.feed}"]`)
+        ?.scrollIntoView({ block: "center" });
       if (loadedFeed) feedState[loadedFeed][2] = window.scrollY;
     }
 
-    let oldContent = container.querySelector("#content");
-    if (feed === loadedFeed || !currentFeedState) {
+    let oldContent = contentHolder.querySelector("#content");
+    if (feed.feed === loadedFeed || !currentFeedState) {
       if (!currentFeedState) {
         const tempChild = elem("div", { id: "content" });
-        container.replaceChild(tempChild, oldContent);
+        contentHolder.replaceChild(tempChild, oldContent);
         oldContent.remove();
         oldContent = tempChild;
       }
@@ -42,28 +73,49 @@ export const createFeedManager = (
       const content = elem("div", { id: "content" });
       const onscrollFunc: OnscrollFunction = await hydrateFeed(
         content,
-        nsid,
+        feed.nsid,
         clonedParams,
-        func,
+        feed.func,
       );
-      feedState[feed] = [content, onscrollFunc, 0];
+      feedState[feed.feed] = [content, onscrollFunc, 0];
     } else {
       window.scrollTo({ top: currentFeedState[2] });
     }
-    const content = feedState[feed][0];
-    container.replaceChild(content, oldContent);
+    const content = feedState[feed.feed][0];
+    contentHolder.replaceChild(content, oldContent);
     oldContent.remove();
     oldContent = null;
-    const onscrollFunction = feedState[feed][1];
+    const onscrollFunction = feedState[feed.feed][1];
     if (cache.has(path)) {
       const cacheEntry = cache.get(path);
       window.onscroll = onscrollFunction;
       cacheEntry.onscroll = onscrollFunction;
-      cacheEntry.feed = feed;
+      cacheEntry.feed = feed.feed;
     }
-    loadedFeed = feed;
+    loadedFeed = feed.feed;
     return onscrollFunction;
   };
+
+  createSwipeAction(contentHolder, (pos) => {
+    const swipeDiff = pos.endX - pos.startX;
+    const activeItem = sideBar.querySelector(".active");
+    if (Math.abs(swipeDiff) > 100 && activeItem) {
+      const sibling =
+        swipeDiff < 0
+          ? activeItem.nextElementSibling
+          : activeItem.previousElementSibling;
+      if (sibling) {
+        const position = Array.prototype.indexOf.call(
+          activeItem.parentNode.children,
+          sibling,
+        );
+        loadFeed(feedsData[position]);
+        sideBar
+          .querySelector(`a[href="?v=${feedsData[position].feed}"]`)
+          .scrollIntoView({ block: "center" });
+      }
+    }
+  });
 
   return loadFeed;
 };

@@ -47,7 +47,7 @@ export const composerBox = (
           elem("img", { src: image.objectURL }),
           elem("button", {
             textContent: "×",
-            className: "remove",
+            className: "close-button",
             onclick: () => {
               URL.revokeObjectURL(image.objectURL);
               images.splice(index, 1);

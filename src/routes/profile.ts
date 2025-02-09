@@ -16,37 +16,7 @@ const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   likes: ["app.bsky.feed.getActorLikes"],
 };
 
-const feedConfigs = {
-  following: {
-    endpoint: "app.bsky.graph.getFollows",
-    params: (did: string) => ({ actor: did }),
-    type: profileCard,
-  },
-  followers: {
-    endpoint: "app.bsky.graph.getFollowers",
-    params: (did: string) => ({ actor: did }),
-    type: profileCard,
-  },
-  search: {
-    endpoint: "app.bsky.feed.searchPosts",
-    params: (did: string) => ({
-      author: did,
-      q: decodeURIComponent(window.location.search).slice(1),
-    }),
-  },
-  default: {
-    endpoint: null,
-    params: (did: string, place: string) => ({
-      actor: did,
-      filter: urlEquivalents[place][1],
-    }),
-  },
-};
-
-const mediaNavButton = (
-  button: HTMLAnchorElement,
-  lastMedia: AppBskyFeedGetAuthorFeed.Output,
-) => {
+const mediaNavButton = (lastMedia: AppBskyFeedGetAuthorFeed.Output) => {
   const images = elem("div", { className: "images" });
   for (const post of lastMedia.feed) {
     if (images.children.length >= 4) break;
@@ -65,8 +35,7 @@ const mediaNavButton = (
       images.append(elem("img", { src: embed.thumbnail }));
     }
   }
-  button.append(images);
-  return button;
+  return images;
 };
 
 export const profileRoute = async (
@@ -95,28 +64,6 @@ export const profileRoute = async (
 
   if (currentSplitPath !== beingLoadedSplitPath) return;
 
-  const sideBar = elem("div", { id: "side-bar" });
-
-  const loadProfileFeed = createFeedManager(container, sideBar);
-
-  const navButton = (feed: string, text: string) => {
-    const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
-    const endpoint = feedConfig.endpoint ?? urlEquivalents[feed][0];
-    const params = feedConfig.params(atId, feed);
-    const type = feedConfig.type;
-
-    const button = elem("a", {
-      href: `?feed=${feed}`,
-      textContent: text,
-      onclick: (e) => {
-        e.preventDefault();
-        loadProfileFeed(feed, endpoint, params, type);
-      },
-    });
-    button.setAttribute("ignore", "");
-    return button;
-  };
-
   const searchBar = elem("input", {
     id: "search-bar",
     placeholder: "Search…",
@@ -132,19 +79,7 @@ export const profileRoute = async (
     }
   });
 
-  sideBar.append(
-    searchBar,
-    elem("div", { className: "side-nav" }, undefined, [
-      navButton("posts", "Posts"),
-      navButton("replies", "Posts and replies"),
-      manager.session?.did === profile.did
-        ? navButton("likes", "Likes")
-        : undefined,
-      navButton("following", "Following"),
-      navButton("followers", "Followers"),
-      mediaNavButton(navButton("media", "Media"), lastMedia),
-    ]),
-  );
+  const sideBar = elem("div", { id: "side-bar" }, searchBar);
 
   const header = elem("div", { className: "profile-header" }, undefined, [
     elem("div", { className: "info" }, undefined, [
@@ -192,22 +127,83 @@ export const profileRoute = async (
     elem("div", { className: "buffer-top" }),
     header,
     sideBar,
-    elem("div", { id: "content" }),
+    elem("div", { id: "content-holder" }, elem("div", { id: "content" })),
   );
 
   const bodyStyle = `background-image:
     url(${profile.banner?.replace("img/banner", "img/feed_fullsize").replace("jpeg", "webp")});`;
   document.body.setAttribute("style", bodyStyle);
 
-  const params = new URLSearchParams(window.location.search);
-  const feed = params.get("feed") ?? "posts";
-  const feedConfig = feedConfigs[feed] ?? feedConfigs.default;
-  const onscrollFunction = await loadProfileFeed(
-    feed,
-    feedConfig.endpoint ?? urlEquivalents[feed][0],
-    feedConfig.params(atId, feed),
-    feedConfig.type,
+  const loadProfileFeed = createFeedManager(
+    document.getElementById("content-holder"),
+    sideBar,
+    [
+      {
+        displayName: "Posts",
+        feed: "posts",
+        nsid: "app.bsky.feed.getAuthorFeed",
+        params: {
+          actor: did,
+          filter: "posts",
+        },
+      },
+      {
+        displayName: "Posts and replies",
+        feed: "replies",
+        nsid: "app.bsky.feed.getAuthorFeed",
+        params: {
+          actor: did,
+          filter: "replies",
+        },
+      },
+      manager.session?.did === profile.did
+        ? {
+            displayName: "Likes",
+            feed: "likes",
+            nsid: "app.bsky.feed.getActorLikes",
+            params: {
+              actor: did,
+            },
+          }
+        : undefined,
+      {
+        displayName: "Following",
+        feed: "following",
+        nsid: "app.bsky.graph.getFollows",
+        params: {
+          actor: did,
+        },
+        func: profileCard,
+      },
+      {
+        displayName: "Followers",
+        feed: "followers",
+        nsid: "app.bsky.graph.getFollowers",
+        params: {
+          actor: did,
+        },
+        func: profileCard,
+      },
+      {
+        displayName: "Media",
+        feed: "media",
+        nsid: "app.bsky.feed.getAuthorFeed",
+        params: {
+          actor: did,
+          filter: "posts_with_media",
+        },
+        extra: mediaNavButton(lastMedia),
+      },
+    ],
   );
 
+  const onscrollFunction = await loadProfileFeed({
+    feed: "posts",
+    nsid: "app.bsky.feed.getAuthorFeed",
+    params: {
+      actor: did,
+      filter: "posts",
+    },
+  });
   return { onscrollFunction, title: profile.handle, bodyStyle };
 };

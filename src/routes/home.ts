@@ -9,7 +9,6 @@ export const homeRoute = async (
   container: HTMLDivElement,
 ): RouteOutput => {
   const sideBar = elem("div", { id: "side-bar", className: "sticky" });
-  const feedNav = elem("div", { className: "side-nav" });
 
   const prefs = await rpc.get("app.bsky.actor.getPreferences", { params: {} });
   const { items: feeds } = prefs.data.preferences.find((e) => {
@@ -28,31 +27,33 @@ export const homeRoute = async (
     },
   });
 
-  const loadHomeFeed = createFeedManager(container, sideBar);
-
+  const feedsData = [];
   for (const feedGen of [
     { uri: "following", displayName: "Following" },
     ...feedGens.feeds,
   ]) {
-    const { uri, displayName } = feedGen;
-    const nsid =
-      uri !== "following"
-        ? "app.bsky.feed.getFeed"
-        : "app.bsky.feed.getTimeline";
-    const params = { feed: uri };
-    const button = elem("a", {
-      textContent: displayName,
-      href: `?feed=${uri}`,
-      onclick: async (e) => {
-        e.preventDefault();
-        localStorage.setItem("last-feed", uri);
-        loadHomeFeed(uri, nsid, params);
-      },
+    feedsData.push({
+      displayName: feedGen.displayName,
+      feed: feedGen.uri,
+      nsid:
+        feedGen.uri !== "following"
+          ? "app.bsky.feed.getFeed"
+          : "app.bsky.feed.getTimeline",
+      params: { feed: feedGen.uri },
+      setLastFeed: true,
     });
-    button.setAttribute("ignore", "");
-    feedNav.append(button);
   }
-  sideBar.append(feedNav);
+
+  container.append(
+    sideBar,
+    elem("div", { id: "content-holder" }, elem("div", { id: "content" })),
+  );
+
+  const loadHomeFeed = createFeedManager(
+    document.getElementById("content-holder"),
+    sideBar,
+    feedsData,
+  );
 
   const params = new URLSearchParams(window.location.search);
   let uri: string = params.get("feed");
@@ -65,14 +66,8 @@ export const homeRoute = async (
     }
   }
 
-  container.append(sideBar, elem("div", { id: "content" }));
-
-  const onscrollFunction = await loadHomeFeed(
-    uri,
-    uri !== "following" ? "app.bsky.feed.getFeed" : "app.bsky.feed.getTimeline",
-    { feed: uri },
-    undefined,
-  );
+  const feedToLoad = feedsData.find((f) => f.feed === uri);
+  const onscrollFunction = await loadHomeFeed(feedToLoad);
 
   return { onscrollFunction };
 };

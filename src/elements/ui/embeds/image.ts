@@ -3,6 +3,7 @@ import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
 import { changeImageFormat } from "../../utils/link_processing";
 import { dialogBox } from "../dialog";
+import { createSwipeAction } from "../../utils/swipe_manager";
 
 const loadImage = (
   image: AppBskyEmbedImages.ViewImage,
@@ -20,7 +21,23 @@ const loadImage = (
       target: " ",
       onclick: (e) => {
         e.preventDefault();
-        dialogBox(elem("img", { src: image.fullsize }));
+        const content = elem("div", { className: "image-view" }, undefined, [
+          elem("img", { src: image.fullsize }),
+          elem("button", {
+            textContent: "×",
+            className: "large close-button",
+            onclick: () => {
+              dialog.cleanup();
+            },
+          }),
+        ]);
+        const dialog = dialogBox(content);
+
+        createSwipeAction(dialog.element, (pos) => {
+          if (Math.abs(pos.endY - pos.startY) > 150) {
+            dialog.cleanup();
+          }
+        });
       },
     },
     img,
