@@ -38,3 +38,28 @@ export const dialogBox = (
     element: dialog,
   };
 };
+
+export const confirmDialog = async (prompt: string, confirm: string) => {
+  return await new Promise<boolean>((resolve) => {
+    const content = elem("div", { className: "popup" }, null, [
+      elem("p", {
+        textContent: prompt,
+      }),
+      elem("div", { className: "horizontal-buttons" }, null, [
+        elem("button", {
+          textContent: "Cancel",
+          onclick: () => {
+            dialog.cleanup(false);
+          },
+        }),
+        elem("button", {
+          textContent: confirm,
+          onclick: () => {
+            dialog.cleanup(true);
+          },
+        }),
+      ]),
+    ]);
+    const dialog = dialogBox(content, (close = false) => resolve(close));
+  });
+};

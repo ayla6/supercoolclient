@@ -32,17 +32,37 @@
         flex-flow: column;
         //flex-grow: 1;
         width: 100%;
+        gap: 1px;
         .display-name {
             font-size: 26px;
             font-weight: 700;
-            line-break: anywhere;
+            word-break: break-word;
+        }
+        .handle-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
         .handle {
             font-size: 18px;
             display: block;
             color: #777;
-            line-break: anywhere;
-            margin-bottom: 4px;
+            word-break: break-word;
+        }
+        .known-followers {
+            margin-top: auto;
+            font-size: 13px;
+            a {
+                color: var(--accent-color);
+            }
+            $pfp-size: 12px;
+            .mini-pfp {
+                vertical-align: middle;
+                width: $pfp-size;
+                height: $pfp-size;
+                margin-right: 2px;
+                border-radius: 1px;
+            }
         }
         .bio {
             white-space: pre-wrap;

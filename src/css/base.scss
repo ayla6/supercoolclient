@@ -34,6 +34,15 @@ a {
     }
 }
 
+.label {
+    background-color: $lighter-grey;
+    border-radius: 8px;
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 6px;
+    margin-bottom: 1px;
+}
+
 #content {
     display: flex;
     flex-flow: column;

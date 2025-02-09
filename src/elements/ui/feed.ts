@@ -13,7 +13,8 @@ export type feedNSID =
   | "app.bsky.feed.getLikes"
   | "app.bsky.feed.getRepostedBy"
   | "app.bsky.feed.getQuotes"
-  | "app.bsky.actor.searchActors";
+  | "app.bsky.actor.searchActors"
+  | "app.bsky.graph.getKnownFollowers";
 
 const dataLocations = {
   "app.bsky.feed.searchPosts": "posts",
@@ -23,6 +24,7 @@ const dataLocations = {
   "app.bsky.feed.getRepostedBy": "repostedBy",
   "app.bsky.feed.getQuotes": "posts",
   "app.bsky.actor.searchActors": "actors",
+  "app.bsky.graph.getKnownFollowers": "followers",
 };
 
 let feedBeingLoaded = false;

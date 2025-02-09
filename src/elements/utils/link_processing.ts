@@ -16,3 +16,5 @@ export const cutOutThePath = (uri: string) => {
   const slashIndex = uri.indexOf("/", 8);
   return slashIndex !== -1 ? uri.slice(8, slashIndex) : uri;
 };
+
+export const getRkey = (uri: string) => uri.slice(uri.lastIndexOf("/") + 1);

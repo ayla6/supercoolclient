@@ -6,7 +6,7 @@ import {
 import { manager, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
-import { dialogBox } from "./dialog";
+import { confirmDialog, dialogBox } from "./dialog";
 import { uploadImages } from "./composer-embeds/image";
 import { uploadVideo } from "./composer-embeds/video";
 
@@ -144,28 +144,7 @@ export const composerBox = (
     const result =
       !hasContent || override
         ? true
-        : await new Promise<boolean>((resolve) => {
-            const content = elem("div", { className: "popup" }, null, [
-              elem("p", { textContent: "Do you want to discard this draft?" }),
-              elem("div", { className: "horizontal-buttons" }, null, [
-                elem("button", {
-                  textContent: "Cancel",
-                  onclick: () => {
-                    dialog.cleanup(false);
-                  },
-                }),
-                elem("button", {
-                  textContent: "Discard",
-                  onclick: () => {
-                    dialog.cleanup(true);
-                  },
-                }),
-              ]),
-            ]);
-            const dialog = dialogBox(content, (close = false) =>
-              resolve(close),
-            );
-          });
+        : await confirmDialog("Do you want to discard this draft?", "Discard");
     console.log(result);
     if (result) {
       images.forEach((image) => URL.revokeObjectURL(image.objectURL));
