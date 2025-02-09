@@ -72,15 +72,14 @@ export const composerBox = (
 
   // Paste handler
   textbox.addEventListener("paste", (e) => {
-    e.preventDefault();
-    if (images?.length >= 4) return;
-
     const files = Array.from(e.clipboardData?.items || [])
       .filter((item) => item.type.startsWith("image/"))
       .map((item) => item.getAsFile())
       .filter(Boolean);
 
     if (files.length) {
+      e.preventDefault();
+      if (images?.length >= 4) return;
       handleImageInput(files as unknown as FileList);
     }
   });
