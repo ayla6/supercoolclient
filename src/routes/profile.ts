@@ -11,7 +11,7 @@ import { processText } from "../elements/utils/text_processing";
 import { manager, rpc } from "../login";
 import { beingLoadedSplitPath, profileRedirect, updatePage } from "../router";
 import { RouteOutput } from "../types";
-import { confirmDialog, dialogBox } from "../elements/ui/dialog";
+import { confirmDialog } from "../elements/ui/dialog";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -105,7 +105,7 @@ export const profileRoute = async (
       // Create follower link with avatar
       const followerLink = elem("span", { className: "follower-link" }, null, [
         elem("img", {
-          className: "mini-pfp",
+          className: "mini-avatar",
           src: changeImageFormat(follower.avatar),
         }),
         elem("a", {
@@ -159,9 +159,9 @@ export const profileRoute = async (
     elem("div", { className: "info" }, undefined, [
       elem(
         "a",
-        { className: "pfp-holder" },
+        { className: "avatar-holder" },
         elem("img", {
-          className: "pfp",
+          className: "avatar",
           src: changeImageFormat(profile.avatar),
         }),
       ),
@@ -269,7 +269,7 @@ export const profileRoute = async (
         nsid: "app.bsky.feed.getAuthorFeed",
         params: {
           actor: did,
-          filter: "posts",
+          filter: "posts_no_replies",
         },
       },
       {
@@ -278,7 +278,7 @@ export const profileRoute = async (
         nsid: "app.bsky.feed.getAuthorFeed",
         params: {
           actor: did,
-          filter: "replies",
+          filter: "posts_with_replies",
         },
       },
       manager.session?.did === profile.did
@@ -327,7 +327,7 @@ export const profileRoute = async (
     nsid: "app.bsky.feed.getAuthorFeed",
     params: {
       actor: did,
-      filter: "posts",
+      filter: "posts_no_replies",
     },
   });
   return { onscrollFunction, title: profile.handle, bodyStyle };

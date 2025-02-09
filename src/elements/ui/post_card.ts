@@ -4,6 +4,7 @@ import {
   ComAtprotoRepoStrongRef,
 } from "@atcute/client/lexicons";
 import {
+  changeImageFormat,
   getDidFromUri,
   getPathFromUri,
   idChoose,
@@ -180,10 +181,10 @@ export const postCard = (
 
   const profilePicture = elem(
     "a",
-    { className: "pfp-holder", href: authorHref },
+    { className: "avatar-holder", href: authorHref },
     elem("img", {
-      className: "pfp",
-      src: post.author.avatar,
+      className: "avatar",
+      src: changeImageFormat(post.author.avatar),
       loading: "lazy",
     }),
   );

@@ -1,6 +1,6 @@
 import { AppBskyActorDefs, Brand } from "@atcute/client/lexicons";
 import { elem } from "../utils/elem";
-import { idChoose } from "../utils/link_processing.ts";
+import { changeImageFormat, idChoose } from "../utils/link_processing.ts";
 
 export const profileCard = (profile: AppBskyActorDefs.ProfileView) => {
   const profileDid = profile.did;
@@ -9,13 +9,13 @@ export const profileCard = (profile: AppBskyActorDefs.ProfileView) => {
   return elem("div", { className: "card-holder profile" }, undefined, [
     elem(
       "div",
-      { className: "pfp-holder" },
+      { className: "avatar-holder" },
       elem(
         "a",
         { href: "/" + profileDid },
         elem("img", {
-          className: "pfp",
-          src: profile.avatar,
+          className: "avatar",
+          src: changeImageFormat(profile.avatar),
           loading: "lazy",
         }),
       ),

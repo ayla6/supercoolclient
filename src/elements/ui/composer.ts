@@ -9,6 +9,7 @@ import { postCard } from "./post_card";
 import { confirmDialog, dialogBox } from "./dialog";
 import { uploadImages } from "./composer-embeds/image";
 import { uploadVideo } from "./composer-embeds/video";
+import { changeImageFormat } from "../utils/link_processing";
 
 export const composerBox = (
   replyTo?: AppBskyFeedPost.ReplyRef,
@@ -188,7 +189,7 @@ export const composerBox = (
       elem(
         "div",
         { className: "avatar-area" },
-        elem("img", { src: sessionData.avatar }),
+        elem("img", { src: changeImageFormat(sessionData.avatar) }),
       ),
       textbox,
     ]),

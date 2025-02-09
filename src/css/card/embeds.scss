@@ -194,17 +194,17 @@ $border-total-width: 2px;
         margin: 0;
     }
 
-    $pfp-size: 12px;
-    .pfp-holder {
+    $avatar-size: 12px;
+    .avatar-holder {
         margin: 0;
         margin-right: 2px;
         &::after {
             display: none;
         }
     }
-    .pfp-holder,
-    .pfp {
-        width: $pfp-size;
-        height: $pfp-size;
+    .avatar-holder,
+    .avatar {
+        width: $avatar-size;
+        height: $avatar-size;
     }
 }

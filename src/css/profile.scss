@@ -9,13 +9,13 @@
     margin: 0 auto 8px;
     padding: 8px;
     gap: 8px;
-    .pfp-holder {
+    .avatar-holder {
         display: flex;
         margin-right: 8px;
         a {
             display: block;
         }
-        .pfp {
+        .avatar {
             width: 128px;
             height: 128px;
             border-radius: 4px;
@@ -55,11 +55,11 @@
             a {
                 color: var(--accent-color);
             }
-            $pfp-size: 12px;
-            .mini-pfp {
+            $avatar-size: 12px;
+            .mini-avatar {
                 vertical-align: middle;
-                width: $pfp-size;
-                height: $pfp-size;
+                width: $avatar-size;
+                height: $avatar-size;
                 margin-right: 2px;
                 border-radius: 1px;
             }
@@ -102,7 +102,7 @@
 @media (max-width: 920px) {
     .profile-header {
         flex-flow: column;
-        .pfp-holder .pfp {
+        .avatar-holder .avatar {
             width: 72px;
             height: 72px;
         }

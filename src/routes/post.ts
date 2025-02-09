@@ -33,8 +33,8 @@ const mutedPostsButton = (
     [
       elem(
         "div",
-        { className: "pfp-holder" },
-        elem("div", { className: "pfp" }),
+        { className: "avatar-holder" },
+        elem("div", { className: "avatar" }),
       ),
       elem("div", {
         className: "outputElement",

@@ -2,7 +2,8 @@
 
 .profile {
     .card {
-        min-height: $large-pfp-size + ($pfp-margin * 2) - ($content-padding * 2);
+        min-height: $large-avatar-size + ($avatar-margin * 2) -
+            ($content-padding * 2);
     }
 
     .bio {

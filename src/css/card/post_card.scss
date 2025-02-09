@@ -20,9 +20,9 @@
         position: absolute;
         width: $speech-bubble-width;
         height: $speech-bubble-height;
-        left: $large-pfp-size +
-            ($large-pfp-right-margin - $speech-bubble-width) + 3px;
-        top: $string-pfp-margin + 1px + ($large-pfp-size * 0.5) -
+        left: $large-avatar-size +
+            ($large-avatar-right-margin - $speech-bubble-width) + 3px;
+        top: $string-avatar-margin + 1px + ($large-avatar-size * 0.5) -
             ($speech-bubble-height * 0.5);
     }
 
@@ -142,11 +142,11 @@
             justify-content: center;
         }
 
-        .pfp-holder {
+        .avatar-holder {
             margin: 0 0 0 1px;
         }
 
-        .pfp-holder::after {
+        .avatar-holder::after {
             display: none;
         }
 

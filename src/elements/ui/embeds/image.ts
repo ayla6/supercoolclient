@@ -10,7 +10,6 @@ import {
 } from "../../utils/link_processing";
 import { dialogBox } from "../dialog";
 import { createSwipeAction } from "../../utils/swipe_manager";
-import { rpc } from "../../../login";
 import { getPdsEndpoint } from "@atcute/client/utils/did";
 
 const loadImage = (

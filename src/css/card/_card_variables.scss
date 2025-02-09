@@ -1,17 +1,17 @@
 @use "../variables" as *;
 
 // Posts and replies
-$pfp-margin: 0px;
-$large-pfp-size: 40px;
-$reply-pfp-size: 32px;
-$large-pfp-right-margin: 10px;
-$reply-pfp-right-margin: 10px;
+$avatar-margin: 0px;
+$large-avatar-size: 40px;
+$reply-avatar-size: 32px;
+$large-avatar-right-margin: 10px;
+$reply-avatar-right-margin: 10px;
 $string-width: 2px;
-$string-pfp-margin: 3px;
-$large-string-margin: ($large-pfp-size - $string-width) * 0.5 +
-    ($border-width + $pfp-margin);
-$reply-string-margin: ($reply-pfp-size - $string-width) * 0.5 +
-    ($border-width + $pfp-margin);
+$string-avatar-margin: 3px;
+$large-string-margin: ($large-avatar-size - $string-width) * 0.5 +
+    ($border-width + $avatar-margin);
+$reply-string-margin: ($reply-avatar-size - $string-width) * 0.5 +
+    ($border-width + $avatar-margin);
 $speech-bubble-height: 16px;
 $speech-bubble-width: 8px;
 

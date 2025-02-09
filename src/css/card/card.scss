@@ -37,25 +37,25 @@
         content: " ";
     }
 
-    .pfp-holder {
+    .avatar-holder {
         display: block;
         flex-shrink: 1;
         line-height: 0;
-        margin: $string-pfp-margin $large-pfp-right-margin $string-pfp-margin
-            $pfp-margin;
+        margin: $string-avatar-margin $large-avatar-right-margin
+            $string-avatar-margin $avatar-margin;
         border-radius: 3px;
         a {
             display: block;
         }
-        .pfp {
+        .avatar {
             border-radius: 2px;
         }
     }
 
-    .pfp-holder,
-    .pfp {
-        height: $large-pfp-size;
-        width: $large-pfp-size;
+    .avatar-holder,
+    .avatar {
+        height: $large-avatar-size;
+        width: $large-avatar-size;
     }
 
     &.show-muted {
@@ -67,25 +67,25 @@
             min-height: 16px;
         }
 
-        .pfp {
+        .avatar {
             background-color: #fff;
-            background-image: url("../svg/mute-pfp.svg");
+            background-image: url("../svg/mute-avatar.svg");
             background-size: cover;
         }
 
-        .pfp-holder {
+        .avatar-holder {
             margin: 0 8px;
         }
 
-        .pfp-holder,
-        .pfp {
+        .avatar-holder,
+        .avatar {
             height: 32px;
             width: 32px;
         }
 
         &:hover {
             .card,
-            .pfp {
+            .avatar {
                 background-color: $lighter-grey;
             }
         }

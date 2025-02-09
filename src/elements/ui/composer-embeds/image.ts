@@ -3,6 +3,7 @@ interface ImageWithURL {
   objectURL: string;
 }
 import { AppBskyEmbedDefs, AppBskyEmbedImages } from "@atcute/client/lexicons";
+import { rpc } from "../../../login";
 
 // Media upload functions
 export const uploadImages = async (input: ImageWithURL[]) => {

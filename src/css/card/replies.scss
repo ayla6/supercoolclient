@@ -24,31 +24,31 @@
 .reply-string,
 .reply-container .post .reply-string {
     margin-left: $reply-string-margin;
-    margin-right: $reply-string-margin + $string-pfp-margin;
+    margin-right: $reply-string-margin + $string-avatar-margin;
 }
 
 .reply-container.added-margin {
-    gap: $string-pfp-margin;
+    gap: $string-avatar-margin;
 }
 
 .reply-container {
     display: flex;
     flex-flow: row;
 
-    .pfp-holder {
-        margin-right: $reply-pfp-right-margin;
+    .avatar-holder {
+        margin-right: $reply-avatar-right-margin;
     }
 
-    .pfp-holder,
-    .pfp {
-        width: $reply-pfp-size;
-        height: $reply-pfp-size;
+    .avatar-holder,
+    .avatar {
+        width: $reply-avatar-size;
+        height: $reply-avatar-size;
     }
 
     .left-area::after {
-        left: $reply-pfp-size + ($reply-pfp-right-margin - $speech-bubble-width) +
-            3px;
-        top: $string-pfp-margin + 1px + ($reply-pfp-size * 0.5) -
+        left: $reply-avatar-size +
+            ($reply-avatar-right-margin - $speech-bubble-width) + 3px;
+        top: $string-avatar-margin + 1px + ($reply-avatar-size * 0.5) -
             ($speech-bubble-height * 0.5);
     }
 }
@@ -58,7 +58,7 @@
     margin-left: $reply-string-margin;
     border: $border-width solid $lighter-grey;
     border-width: 0 0 $string-width $string-width;
-    width: $reply-string-margin + $string-pfp-margin;
-    height: ($reply-pfp-size * 0.5) + $string-pfp-margin;
-    border-radius: 0 0 0 ($reply-string-margin + $string-pfp-margin);
+    width: $reply-string-margin + $string-avatar-margin;
+    height: ($reply-avatar-size * 0.5) + $string-avatar-margin;
+    border-radius: 0 0 0 ($reply-string-margin + $string-avatar-margin);
 }
