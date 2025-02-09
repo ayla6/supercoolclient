@@ -112,11 +112,11 @@ export const profileRoute = async (
         elem("b", { textContent: profile.postsCount.toLocaleString() }),
         document.createTextNode(" Posts"),
       ]),
-      elem("a", { href: `/${did}/following` }, undefined, [
+      elem("a", {}, undefined, [
         elem("b", { textContent: profile.followsCount.toLocaleString() }),
         document.createTextNode(" Following"),
       ]),
-      elem("a", { href: `/${did}/followers` }, undefined, [
+      elem("a", {}, undefined, [
         elem("b", { textContent: profile.followersCount.toLocaleString() }),
         document.createTextNode(" Followers"),
       ]),

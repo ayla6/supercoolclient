@@ -21,6 +21,7 @@ export const createFeedManager = (
 
   const feedNav = elem("div", { className: "side-nav" });
   for (const feed of feedsData) {
+    if (!feed) continue;
     const button = elem("a", {
       textContent: feed.displayName,
       href: `?v=${feed.feed}`,
