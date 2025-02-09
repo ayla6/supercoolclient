@@ -18,3 +18,12 @@ export const cutOutThePath = (uri: string) => {
 };
 
 export const getRkey = (uri: string) => uri.slice(uri.lastIndexOf("/") + 1);
+
+export const parseBlueskyImage = (imgUrl: string) => {
+  const lastSlash = imgUrl.lastIndexOf("/");
+  const cid = imgUrl.slice(lastSlash + 1, imgUrl.indexOf("@", lastSlash));
+  const plainIndex = imgUrl.indexOf("/plain/");
+  const nextSlash = imgUrl.indexOf("/", plainIndex + 7);
+  const did = imgUrl.slice(plainIndex + 7, nextSlash);
+  return { did, cid };
+};

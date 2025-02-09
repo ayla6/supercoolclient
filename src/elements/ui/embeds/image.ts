@@ -1,9 +1,17 @@
-import { AppBskyEmbedImages } from "@atcute/client/lexicons";
+import {
+  AppBskyEmbedImages,
+  ComAtprotoSyncGetBlob,
+} from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
-import { changeImageFormat } from "../../utils/link_processing";
+import {
+  changeImageFormat,
+  parseBlueskyImage,
+} from "../../utils/link_processing";
 import { dialogBox } from "../dialog";
 import { createSwipeAction } from "../../utils/swipe_manager";
+import { rpc } from "../../../login";
+import { getPdsEndpoint } from "@atcute/client/utils/did";
 
 const loadImage = (
   image: AppBskyEmbedImages.ViewImage,
@@ -21,8 +29,28 @@ const loadImage = (
       target: " ",
       onclick: (e) => {
         e.preventDefault();
+        const img = elem("img", { src: image.fullsize });
         const content = elem("div", { className: "image-view" }, undefined, [
-          elem("img", { src: image.fullsize }),
+          img,
+          elem("button", {
+            textContent: "See raw",
+            className: "see-raw-button",
+            onclick: async (e) => {
+              const { cid, did } = parseBlueskyImage(image.fullsize);
+              const pds = getPdsEndpoint(
+                await (
+                  await fetch(
+                    did.startsWith("did:web")
+                      ? `https://${did.split(":")[2]}/.well-known/did.json`
+                      : "https://plc.directory/" + did,
+                  )
+                ).json(),
+              );
+              img.src = `${pds}/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`;
+              (e.target as HTMLButtonElement).textContent = "Raw";
+              (e.target as HTMLButtonElement).onclick = null;
+            },
+          }),
           elem("button", {
             textContent: "×",
             className: "large close-button",
