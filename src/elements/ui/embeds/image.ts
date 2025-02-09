@@ -33,7 +33,7 @@ const loadImage = (
           img,
           elem("button", {
             textContent: "See raw",
-            className: "see-raw-button",
+            className: "ztop see-raw-button",
             onclick: async (e) => {
               const { cid, did } = parseBlueskyImage(image.fullsize);
               const pds = getPdsEndpoint(
@@ -52,7 +52,7 @@ const loadImage = (
           }),
           elem("button", {
             textContent: "×",
-            className: "large close-button",
+            className: "ztop large close-button",
             onclick: () => {
               dialog.cleanup();
             },
@@ -60,7 +60,7 @@ const loadImage = (
         ]);
         const dialog = dialogBox(content);
 
-        createSwipeAction(dialog.element, (pos) => {
+        createSwipeAction(dialog.element, (pos, e) => {
           if (Math.abs(pos.endY - pos.startY) > 150) {
             dialog.cleanup();
           }

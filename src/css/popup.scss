@@ -1,0 +1,89 @@
+@use "variables" as *;
+
+.popup {
+    // Box Model
+    box-sizing: border-box;
+    height: auto;
+    margin: auto;
+    margin-top: 50vh;
+    max-height: 600px;
+    max-width: 600px;
+    padding: 8px;
+    width: max-content;
+
+    // Display
+    display: flex;
+    flex-flow: column;
+    gap: 8px;
+
+    // Positioning
+    transform: translateY(-75%);
+
+    // Visual
+    background: $white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: $border-radius;
+
+    .dialog-options {
+        display: flex;
+        flex-flow: row wrap;
+        gap: 8px;
+        justify-content: space-evenly;
+    }
+
+    .confirm-delete {
+        background: linear-gradient(
+            #d32f2f,
+            color-mix(in srgb, #d32f2f, #000 20%)
+        );
+        color: white;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+        border-color: color-mix(in srgb, #d32f2f, #000 20%);
+    }
+}
+
+@media (max-width: 920px) {
+    .popup {
+        $font-size: 16px;
+        font-size: $font-size;
+
+        button {
+            padding: 8px 24px;
+        }
+
+        button,
+        select,
+        input {
+            font-size: $font-size;
+        }
+
+        select,
+        input {
+            height: 31px;
+        }
+
+        // Box Model
+        border-bottom: none;
+        border-radius: $border-radius $border-radius 0 0;
+        height: auto;
+        margin: 0;
+        max-height: 50vh;
+        max-width: 100%;
+        padding: 8px 8px 48px;
+        width: 100vw;
+
+        // Positioning
+        bottom: 0;
+        left: 0;
+        position: fixed;
+        right: 0;
+        transform: translateY(0);
+
+        .dialog-options {
+            display: flex;
+            flex-flow: column-reverse;
+            gap: 8px;
+            justify-content: space-evenly;
+        }
+    }
+}

@@ -25,6 +25,10 @@
     .space-between {
         justify-content: space-between;
     }
+    .horizontal-buttons {
+        display: flex;
+        gap: 8px;
+    }
     .textbox {
         font-size: 16px;
         outline: none;
@@ -68,6 +72,43 @@
     }
 }
 
+.language-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    .lang-button-container {
+        position: relative;
+    }
+    .remove-lang {
+        display: none;
+        position: absolute;
+        line-height: 8px;
+        top: -4px;
+        right: -4px;
+        padding: 4px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        &:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+    }
+    .active .remove-lang {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .active button {
+        background: linear-gradient(
+            var(--accent-color),
+            color-mix(in srgb, var(--accent-color), #000 20%)
+        );
+        color: white;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+        border-color: color-mix(in srgb, var(--accent-color), #000 20%);
+    }
+}
+
 @media (min-width: 920px) {
     .composer {
         margin-top: 10vh;
@@ -75,6 +116,7 @@
     }
 }
 @media (max-width: 920px) {
+    $font-size: 16px;
     .composer {
         margin: 0;
         border-radius: 0;
@@ -89,6 +131,21 @@
         .textbox {
             min-height: 100px;
             flex-grow: 1;
+        }
+
+        button {
+            padding: (4px * 1.5) (12px * 1.5);
+        }
+
+        button,
+        select,
+        input {
+            font-size: $font-size;
+        }
+
+        select,
+        input {
+            height: 31px;
         }
     }
 }

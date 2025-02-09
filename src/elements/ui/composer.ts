@@ -6,10 +6,11 @@ import {
 import { manager, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
-import { confirmDialog, dialogBox } from "./dialog";
+import { confirmDialog, dialogBox, inputDialog, selectDialog } from "./dialog";
 import { uploadImages } from "./composer-embeds/image";
 import { uploadVideo } from "./composer-embeds/video";
 import { changeImageFormat } from "../utils/link_processing";
+import { language_codes } from "../utils/language_codes";
 
 export const composerBox = (
   replyTo?: AppBskyFeedPost.ReplyRef,
@@ -26,7 +27,6 @@ export const composerBox = (
   }
   let images: ImageWithURL[] = [];
   let video: File;
-  let language: string = "en";
 
   let cleaning = false;
 
@@ -122,6 +122,7 @@ export const composerBox = (
               record: { uri: quote.uri, cid: quote.cid },
             }
         : embed,
+      langs: [language],
     };
 
     await rpc.call("com.atproto.repo.createRecord", {
@@ -183,7 +184,94 @@ export const composerBox = (
       createFileInput("video", false, (files) => (video = files[0])).click(),
   });
 
-  // Compose the UI
+  const languageButtons = elem("div", { className: "language-buttons" });
+  const languages = JSON.parse(
+    localStorage.getItem("composer-langs") || '["en"]',
+  );
+  localStorage.setItem("composer-langs", JSON.stringify(languages));
+  let language = localStorage.getItem("last-selected-lang") || languages[0];
+
+  const handleLangClick = (lang: string) => {
+    language = lang;
+    localStorage.setItem("last-selected-lang", lang);
+    languageButtons
+      .querySelectorAll(".lang-button-container")
+      .forEach((btn) =>
+        btn.classList.toggle(
+          "active",
+          btn.querySelector("button")?.textContent === lang.toUpperCase(),
+        ),
+      );
+  };
+
+  const handleLangRemove = async (lang: string, container: HTMLElement) => {
+    if (languages.length > 1) {
+      const confirmed = await confirmDialog(
+        "Are you sure you want to remove this language?",
+        "Remove",
+      );
+      if (confirmed) {
+        languages.splice(languages.indexOf(lang), 1);
+        localStorage.setItem("composer-langs", JSON.stringify(languages));
+        container.remove();
+        if (language === lang) {
+          language = languages[0];
+          localStorage.setItem("last-selected-lang", language);
+          languageButtons.firstElementChild?.classList.add("active");
+        }
+      }
+    }
+  };
+
+  const createLanguageButton = (lang: string) => {
+    const container = elem("div", {
+      className: `lang-button-container${lang === language ? " active" : ""}`,
+    });
+    container.append(
+      elem("button", {
+        textContent: lang.toUpperCase(),
+        onclick: () => handleLangClick(lang),
+      }),
+      elem("span", {
+        className: "remove-lang",
+        textContent: "×",
+        onclick: (e) => {
+          e.stopPropagation();
+          handleLangRemove(lang, container);
+        },
+      }),
+    );
+    return container;
+  };
+
+  languages.forEach((lang: string) => {
+    languageButtons.appendChild(createLanguageButton(lang));
+  });
+
+  languageButtons.appendChild(
+    elem("button", {
+      textContent: "+",
+      onclick: async () => {
+        const newLangName = await selectDialog(
+          "Select language to add",
+          language_codes.map((lang) => lang.name),
+          "Add",
+        );
+        const newLang = language_codes.find(
+          (code) => code.name === newLangName,
+        )?.code;
+        if (newLang && !languages.includes(newLang)) {
+          languages.push(newLang);
+          languageButtons.insertBefore(
+            createLanguageButton(newLang),
+            languageButtons.lastElementChild,
+          );
+          localStorage.setItem("composer-langs", JSON.stringify(languages));
+        }
+      },
+    }),
+  );
+
   const composer = elem("div", { className: "composer" }, null, [
     elem("div", { className: "text-area" }, undefined, [
       elem(
@@ -198,6 +286,7 @@ export const composerBox = (
       elem("div", { className: "embeds" }, postCard(quote, false, false, true)),
     elem("div", { className: "horizontal-buttons" }, null, [
       imageButton,
+      languageButtons,
       //videoButton,
     ]),
     elem("div", { className: "horizontal-buttons space-between" }, null, [

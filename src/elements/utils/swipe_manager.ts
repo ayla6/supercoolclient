@@ -1,62 +1,83 @@
 export const createSwipeAction = (
   object: HTMLElement,
-  action: (coords: {
-    startX: number;
-    startY: number;
-    endX: number;
-    endY: number;
-  }) => void,
+  action: (
+    coords: { startX: number; startY: number; endX: number; endY: number },
+    e?: TouchEvent,
+  ) => void,
 ) => {
-  let startX: number;
-  let startY: number;
-  let endX: number;
-  let endY: number;
+  interface TouchCoords {
+    x: number;
+    y: number;
+  }
+
+  let startCoords: TouchCoords | null = null;
   let isHorizontalScroll = false;
   let isVerticalScroll = false;
+  let ignore = false;
 
-  object.addEventListener(
-    "touchstart",
-    function (event) {
-      startX = event.changedTouches[0].screenX;
-      startY = event.changedTouches[0].screenY;
-      isHorizontalScroll = false;
-      isVerticalScroll = false;
-    },
-    false,
-  );
+  const resetState = () => {
+    startCoords = null;
+    isHorizontalScroll = false;
+    isVerticalScroll = false;
+    ignore = false;
+  };
 
-  object.addEventListener(
-    "touchmove",
-    function (event) {
-      const currentX = event.changedTouches[0].screenX;
-      const currentY = event.changedTouches[0].screenY;
-      const deltaX = Math.abs(currentX - startX);
-      const deltaY = Math.abs(currentY - startY);
+  const handleTouchStart = (e: TouchEvent) => {
+    if (e.touches.length > 1) {
+      ignore = true;
+      startCoords = null;
+      return;
+    }
+    startCoords = {
+      x: e.changedTouches[0].screenX,
+      y: e.changedTouches[0].screenY,
+    };
+    ignore = false;
+  };
 
-      if (!isHorizontalScroll && !isVerticalScroll) {
-        if (deltaX > deltaY) {
-          isHorizontalScroll = true;
-        } else if (deltaY > deltaX) {
-          isVerticalScroll = true;
-        }
-      }
+  const handleTouchMove = (e: TouchEvent) => {
+    if (ignore || !startCoords) return;
 
-      if (isHorizontalScroll) {
-        event.preventDefault();
-      }
-    },
-    { passive: false },
-  );
+    const currentX = e.changedTouches[0].screenX;
+    const currentY = e.changedTouches[0].screenY;
+    const deltaX = Math.abs(currentX - startCoords.x);
+    const deltaY = Math.abs(currentY - startCoords.y);
 
-  object.addEventListener(
-    "touchend",
-    function (event) {
-      endX = event.changedTouches[0].screenX;
-      endY = event.changedTouches[0].screenY;
-      action({ startX, startY, endX, endY });
-      isHorizontalScroll = false;
-      isVerticalScroll = false;
-    },
-    false,
-  );
+    if (!isHorizontalScroll && !isVerticalScroll) {
+      isHorizontalScroll = deltaX > deltaY;
+      isVerticalScroll = deltaY > deltaX;
+    }
+
+    if (isHorizontalScroll) {
+      e.preventDefault();
+    }
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (ignore || !startCoords) {
+      resetState();
+      return;
+    }
+
+    const endCoords = {
+      x: e.changedTouches[0].screenX,
+      y: e.changedTouches[0].screenY,
+    };
+
+    action(
+      {
+        startX: startCoords.x,
+        startY: startCoords.y,
+        endX: endCoords.x,
+        endY: endCoords.y,
+      },
+      e,
+    );
+
+    resetState();
+  };
+
+  object.addEventListener("touchstart", handleTouchStart, false);
+  object.addEventListener("touchmove", handleTouchMove, { passive: false });
+  object.addEventListener("touchend", handleTouchEnd, false);
 };

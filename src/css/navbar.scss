@@ -25,7 +25,7 @@
         padding: 0 12px;
         color: #fff;
         font-size: $font-size;
-        height: $navbar-height;
+        height: 100%;
         max-width: unset;
 
         svg {
@@ -45,6 +45,7 @@
 
 @media (max-width: 920px) {
     #navbar {
+        height: $navbar-height-mobile;
         justify-content: space-between;
         span {
             display: none;
@@ -55,6 +56,22 @@
             min-width: 0;
             justify-content: center;
             flex-grow: 1;
+        }
+        a svg {
+            transform: scale(1.1);
+        }
+    }
+    #navbar #composer-button {
+        $size: 60px;
+        bottom: $navbar-height-mobile;
+        width: $size;
+        height: $size;
+        margin: 12px;
+        position: absolute;
+        right: 0;
+        border-radius: $size;
+        svg {
+            transform: scale(1.25);
         }
     }
 }

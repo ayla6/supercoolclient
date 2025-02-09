@@ -22,6 +22,7 @@ export const loadNavbar = () => {
       ? navButton("Profile", "/" + manager.session.did, profileSVG)
       : "",
     elem("button", {
+      id: "composer-button",
       innerHTML: `${postSVG}<span>Post</span>`,
       onclick: () => composerBox(),
     }),

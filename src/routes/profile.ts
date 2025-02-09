@@ -190,12 +190,15 @@ export const profileRoute = async (
       (() => {
         if (manager.session.did === profile.did)
           return elem("button", {
-            className: "button",
             textContent: "Edit Profile",
           });
         return elem("button", {
           className: "button follow",
-          textContent: profile.viewer.following ? "✓ Following" : "+ Follow",
+          textContent: profile.viewer.following
+            ? "✓ Following"
+            : profile.viewer.followedBy
+              ? "+ Follow Back"
+              : "+ Follow",
           onclick: async (e) => {
             if (profile.viewer.following) {
               const rkey = getRkey(profile.viewer.following);
@@ -204,7 +207,10 @@ export const profileRoute = async (
                 "Unfollow",
               );
               if (result) {
-                (e.target as HTMLButtonElement).textContent = "+ Follow";
+                (e.target as HTMLButtonElement).textContent = profile.viewer
+                  .followedBy
+                  ? "+ Follow Back"
+                  : "+ Follow";
                 rpc.call("com.atproto.repo.deleteRecord", {
                   data: {
                     repo: manager.session.did,
