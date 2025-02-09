@@ -20,8 +20,8 @@ export const createFeedManager = (
   const path = window.location.pathname;
 
   const feedNav = elem("div", { className: "side-nav" });
+  feedsData = feedsData.filter((feed) => feed !== undefined);
   for (const feed of feedsData) {
-    if (!feed) continue;
     const button = elem("a", {
       textContent: feed.displayName,
       href: `?v=${feed.feed}`,
@@ -110,6 +110,7 @@ export const createFeedManager = (
           activeItem.parentNode.children,
           sibling,
         );
+        console.log(feedsData, position);
         loadFeed(feedsData[position]);
         sideBar
           .querySelector(`a[href="?v=${feedsData[position].feed}"]`)
