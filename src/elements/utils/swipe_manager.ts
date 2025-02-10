@@ -107,35 +107,12 @@ export const pullToRefresh = (
 
   const createSpinner = () => {
     const spinner = document.createElement("div");
-    spinner.style.cssText = `
-      width: 20px;
-      height: 20px;
-      border: 2px solid #fff;
-      border-top: 2px solid transparent;
-      border-radius: 50%;
-      display: block;
-    `;
     return spinner;
   };
 
   const createPullIndicator = (spinner: HTMLElement) => {
     const indicator = document.createElement("div");
-    indicator.style.cssText = `
-      position: fixed;
-      top: 0px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--accent-color);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s;
-      color: white;
-      opacity: 0;
-    `;
+    indicator.id = "pull-indicator";
     indicator.appendChild(spinner);
     return indicator;
   };
@@ -148,7 +125,7 @@ export const pullToRefresh = (
 
   const spinner = createSpinner();
   const pullDownIndicator = createPullIndicator(spinner);
-  document.body.appendChild(pullDownIndicator);
+  container.appendChild(pullDownIndicator);
   addSpinAnimation();
 
   const handleTouchStart = (e: TouchEvent) => {
