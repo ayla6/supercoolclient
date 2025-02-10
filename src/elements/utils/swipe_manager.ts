@@ -15,25 +15,32 @@ export const createSwipeAction = (
   let isVerticalScroll = false;
   let ignore = false;
 
-  const resetState = () => ({
-    startCoords: null,
-    isHorizontalScroll: false,
-    isVerticalScroll: false,
-    ignore: false,
-  });
+  const resetState = () => {
+    startCoords = null;
+    isHorizontalScroll = false;
+    isVerticalScroll = false;
+    ignore = false;
+  };
 
   const handleTouchStart = (e: TouchEvent) => {
-    // Ignore multi-touch gestures
-    if (e.touches.length > 1 || (e.target as HTMLElement).closest(".multi")) {
-      startCoords = null;
+    if (e.touches.length > 1) {
       ignore = true;
+      startCoords = null;
       return;
     }
 
-    // Check for active refresh state
-    if (document.querySelector('[data-refreshing="true"]')) {
-      startCoords = null;
+    const element = e.target as HTMLElement;
+    if (element.closest(".multi")) {
       ignore = true;
+      startCoords = null;
+      return;
+    }
+
+    // Check if any refreshing is happening
+    const refreshIndicator = document.querySelector('[data-refreshing="true"]');
+    if (refreshIndicator) {
+      ignore = true;
+      startCoords = null;
       return;
     }
 
@@ -47,35 +54,39 @@ export const createSwipeAction = (
   const handleTouchMove = (e: TouchEvent) => {
     if (ignore || !startCoords) return;
 
-    const { screenX: currentX, screenY: currentY } = e.changedTouches[0];
+    const currentX = e.changedTouches[0].screenX;
+    const currentY = e.changedTouches[0].screenY;
     const deltaX = Math.abs(currentX - startCoords.x);
     const deltaY = Math.abs(currentY - startCoords.y);
 
     if (!isHorizontalScroll && !isVerticalScroll) {
       isHorizontalScroll = deltaX > deltaY;
-      isVerticalScroll = !isHorizontalScroll;
+      isVerticalScroll = deltaY > deltaX;
     }
   };
 
   const handleTouchEnd = (e: TouchEvent) => {
     if (ignore || !startCoords) {
-      Object.assign(this, resetState());
+      resetState();
       return;
     }
 
-    const { screenX: endX, screenY: endY } = e.changedTouches[0];
+    const endCoords = {
+      x: e.changedTouches[0].screenX,
+      y: e.changedTouches[0].screenY,
+    };
 
     action(
       {
         startX: startCoords.x,
         startY: startCoords.y,
-        endX,
-        endY,
+        endX: endCoords.x,
+        endY: endCoords.y,
       },
       e,
     );
 
-    Object.assign(this, resetState());
+    resetState();
   };
 
   object.addEventListener("touchstart", handleTouchStart, false);
@@ -89,25 +100,29 @@ export const pullToRefresh = (
   onRefresh: () => Promise<void>,
   showThreshold: number = 20,
 ) => {
-  const state = {
-    startY: 0,
-    currentY: 0,
-    refreshing: false,
-    pulling: false,
-  };
+  let startY = 0;
+  let currentY = 0;
+  let refreshing = false;
+  let pulling = false;
 
-  const styles = {
-    spinner: `
+  const createSpinner = () => {
+    const spinner = document.createElement("div");
+    spinner.style.cssText = `
       width: 20px;
       height: 20px;
       border: 2px solid #fff;
       border-top: 2px solid transparent;
       border-radius: 50%;
       display: block;
-    `,
-    indicator: `
+    `;
+    return spinner;
+  };
+
+  const createPullIndicator = (spinner: HTMLElement) => {
+    const indicator = document.createElement("div");
+    indicator.style.cssText = `
       position: fixed;
-      top: 0;
+      top: 0px;
       left: 50%;
       transform: translateX(-50%);
       width: 40px;
@@ -120,18 +135,7 @@ export const pullToRefresh = (
       transition: transform 0.2s;
       color: white;
       opacity: 0;
-    `,
-  };
-
-  const createSpinner = () => {
-    const spinner = document.createElement("div");
-    spinner.style.cssText = styles.spinner;
-    return spinner;
-  };
-
-  const createPullIndicator = (spinner: HTMLElement) => {
-    const indicator = document.createElement("div");
-    indicator.style.cssText = styles.indicator;
+    `;
     indicator.appendChild(spinner);
     return indicator;
   };
@@ -148,31 +152,31 @@ export const pullToRefresh = (
   addSpinAnimation();
 
   const handleTouchStart = (e: TouchEvent) => {
-    if (container.scrollTop > 0 || state.refreshing) return;
-
-    state.startY = e.touches[0].clientY;
-    state.pulling = true;
-
+    if (
+      (document.documentElement.scrollTop || document.body.scrollTop) > 0 ||
+      refreshing
+    )
+      return;
+    startY = e.touches[0].clientY;
+    pulling = true;
     pullDownIndicator.style.opacity = "0";
     spinner.style.animation = "none";
     spinner.style.transform = "rotate(0deg)";
   };
 
   const handleTouchMove = (e: TouchEvent) => {
-    if (!state.pulling) return;
+    if (!pulling) return;
 
-    state.currentY = e.touches[0].clientY;
-    const pullDistance = Math.max(0, state.currentY - state.startY);
+    currentY = e.touches[0].clientY;
+    const pullDistance = Math.max(0, currentY - startY);
     const newDistance = Math.min(threshold, pullDistance * 0.4);
 
     if (newDistance > 0) {
       e.preventDefault();
-
       if (newDistance > showThreshold) {
+        pullDownIndicator.style.opacity = "1";
         const adjustedDistance = newDistance - showThreshold;
         const rotation = (adjustedDistance / (threshold - showThreshold)) * 360;
-
-        pullDownIndicator.style.opacity = "1";
         pullDownIndicator.style.transform = `translateX(-50%) translateY(${adjustedDistance}px)`;
         spinner.style.transform = `rotate(${rotation}deg)`;
       } else {
@@ -183,13 +187,12 @@ export const pullToRefresh = (
   };
 
   const handleTouchEnd = async () => {
-    if (!state.pulling) return;
-    state.pulling = false;
+    if (!pulling) return;
+    pulling = false;
 
-    const pullDistance = Math.max(0, state.currentY - state.startY) * 0.4;
-
-    if (pullDistance > threshold && !state.refreshing) {
-      state.refreshing = true;
+    const pullDistance = Math.max(0, currentY - startY) * 0.4;
+    if (pullDistance > threshold && !refreshing) {
+      refreshing = true;
       pullDownIndicator.dataset.refreshing = "true";
       spinner.style.animation = "spin 1s linear infinite";
       pullDownIndicator.style.transform = `translateX(-50%) translateY(${threshold - showThreshold}px)`;
@@ -197,7 +200,7 @@ export const pullToRefresh = (
       try {
         await onRefresh();
       } finally {
-        state.refreshing = false;
+        refreshing = false;
         delete pullDownIndicator.dataset.refreshing;
         spinner.style.animation = "none";
         pullDownIndicator.style.transform = "translateX(-50%) translateY(0)";
