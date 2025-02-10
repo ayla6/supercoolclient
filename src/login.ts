@@ -13,8 +13,11 @@ export let manager = new CredentialManager({
 export let rpc = new XRPC({ handler: manager });
 export let sessionData: AppBskyActorDefs.ProfileViewDetailed;
 
-export const login = async () => {
-  if (manager.session) return manager;
+export const login = async (credentials?: {
+  identifier: string;
+  password: string;
+}) => {
+  if (manager.session && !credentials) return manager;
 
   const session = localStorage.getItem("session");
   if (session) {
@@ -22,24 +25,28 @@ export const login = async () => {
     try {
       await manager.resume(savedSessionData);
     } catch {}
+  } else if (credentials) {
+    manager = new CredentialManager({
+      service: "https://bsky.social",
+      onSessionUpdate(session) {
+        savedSessionData = session;
+        localStorage.setItem("session", JSON.stringify(session));
+      },
+    });
+    await manager.login(credentials);
+    window.location.reload();
   } else {
-    const id = prompt("user");
-    if (id) {
-      await manager.login({
-        identifier: id,
-        password: prompt("app password"),
-      });
-    } else {
-      manager = new CredentialManager({
-        service: "https://public.api.bsky.app",
-      });
-    }
-    rpc = new XRPC({ handler: manager });
+    manager = new CredentialManager({
+      service: "https://public.api.bsky.app",
+    });
   }
-  sessionData = (
-    await rpc.get("app.bsky.actor.getProfile", {
-      params: { actor: manager.session.did },
-    })
-  ).data;
+  rpc = new XRPC({ handler: manager });
+  //}
+  if (manager.session)
+    sessionData = (
+      await rpc.get("app.bsky.actor.getProfile", {
+        params: { actor: manager.session.did },
+      })
+    ).data;
   return manager;
 };

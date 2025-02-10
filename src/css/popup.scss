@@ -40,6 +40,21 @@
         text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
         border-color: color-mix(in srgb, #d32f2f, #000 20%);
     }
+
+    .field {
+        min-width: 250px;
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        input {
+            flex-grow: 1;
+        }
+    }
+
+    .title {
+        font-size: $font-size * 1.5;
+        font-weight: 700;
+    }
 }
 
 @media (max-width: 920px) {

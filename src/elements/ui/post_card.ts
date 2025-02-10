@@ -107,33 +107,34 @@ const interactionButton = (
   );
   button.setAttribute("role", "button");
 
-  if (type === "like" || type === "repost") {
-    let isActive = Boolean(hasViewer ? post.viewer[type] : false);
-    button.classList.toggle("active", isActive);
+  if (manager.session)
+    if (type === "like" || type === "repost") {
+      let isActive = Boolean(hasViewer ? post.viewer[type] : false);
+      button.classList.toggle("active", isActive);
 
-    if (hasViewer)
+      if (hasViewer)
+        button.onclick = () => {
+          isActive = !isActive;
+          updateInteraction(
+            isActive,
+            post.cid,
+            post.uri,
+            post[type + "Count"],
+            post.viewer[type],
+            type,
+            countSpan,
+            button,
+          );
+        };
+    } else if (type === "reply") {
       button.onclick = () => {
-        isActive = !isActive;
-        updateInteraction(
-          isActive,
-          post.cid,
-          post.uri,
-          post[type + "Count"],
-          post.viewer[type],
-          type,
-          countSpan,
-          button,
-        );
+        composerBox(post);
       };
-  } else if (type === "reply") {
-    button.onclick = () => {
-      composerBox(post);
-    };
-  } else if (type === "quote") {
-    button.onclick = () => {
-      composerBox(undefined, post);
-    };
-  }
+    } else if (type === "quote") {
+      button.onclick = () => {
+        composerBox(undefined, post);
+      };
+    }
 
   return button;
 };

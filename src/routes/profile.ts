@@ -172,73 +172,72 @@ export const profileRoute = async (
         }),
         elem("span", { className: "handle-container" }, null, [
           elem("span", { className: "handle", innerHTML: "@" + handle }),
-          profile.viewer.followedBy
+          profile.viewer?.followedBy
             ? elem("span", { className: "label", textContent: "Follows you" })
             : undefined,
         ]),
         elem("div", {
           className: "bio",
-          innerHTML: profile.description
-            ? processText(profile.description)
-            : "",
+          innerHTML: profile.description && processText(profile.description),
         }),
-        createKnownFollowers(),
+        manager.session && createKnownFollowers(),
       ]),
     ]),
 
     elem("div", { className: "stats" }, undefined, [
-      (() => {
-        if (manager.session.did === profile.did)
+      manager.session &&
+        (() => {
+          if (manager.session.did === profile.did)
+            return elem("button", {
+              textContent: "Edit Profile",
+            });
           return elem("button", {
-            textContent: "Edit Profile",
-          });
-        return elem("button", {
-          className: "button follow",
-          textContent: profile.viewer.following
-            ? "✓ Following"
-            : profile.viewer.followedBy
-              ? "+ Follow Back"
-              : "+ Follow",
-          onclick: async (e) => {
-            if (profile.viewer.following) {
-              const rkey = getRkey(profile.viewer.following);
-              const result = await confirmDialog(
-                "Do you want to unfollow this account?",
-                "Unfollow",
-              );
-              if (result) {
-                (e.target as HTMLButtonElement).textContent = profile.viewer
-                  .followedBy
-                  ? "+ Follow Back"
-                  : "+ Follow";
-                rpc.call("com.atproto.repo.deleteRecord", {
-                  data: {
-                    repo: manager.session.did,
-                    rkey: rkey,
-                    collection: "app.bsky.graph.follow",
-                  },
-                });
-                profile.viewer.following = undefined;
+            className: "button follow",
+            textContent: profile.viewer.following
+              ? "✓ Following"
+              : profile.viewer.followedBy
+                ? "+ Follow Back"
+                : "+ Follow",
+            onclick: async (e) => {
+              if (profile.viewer.following) {
+                const rkey = getRkey(profile.viewer.following);
+                const result = await confirmDialog(
+                  "Do you want to unfollow this account?",
+                  "Unfollow",
+                );
+                if (result) {
+                  (e.target as HTMLButtonElement).textContent = profile.viewer
+                    .followedBy
+                    ? "+ Follow Back"
+                    : "+ Follow";
+                  rpc.call("com.atproto.repo.deleteRecord", {
+                    data: {
+                      repo: manager.session.did,
+                      rkey: rkey,
+                      collection: "app.bsky.graph.follow",
+                    },
+                  });
+                  profile.viewer.following = undefined;
+                }
+              } else {
+                (e.target as HTMLButtonElement).textContent = "✓ Following";
+                profile.viewer.following = (
+                  await rpc.call("com.atproto.repo.createRecord", {
+                    data: {
+                      record: {
+                        $type: "app.bsky.graph.follow",
+                        subject: profile.did,
+                        createdAt: new Date().toISOString(),
+                      } as AppBskyGraphFollow.Record,
+                      repo: manager.session.did,
+                      collection: "app.bsky.graph.follow",
+                    },
+                  })
+                ).data.uri;
               }
-            } else {
-              (e.target as HTMLButtonElement).textContent = "✓ Following";
-              profile.viewer.following = (
-                await rpc.call("com.atproto.repo.createRecord", {
-                  data: {
-                    record: {
-                      $type: "app.bsky.graph.follow",
-                      subject: profile.did,
-                      createdAt: new Date().toISOString(),
-                    } as AppBskyGraphFollow.Record,
-                    repo: manager.session.did,
-                    collection: "app.bsky.graph.follow",
-                  },
-                })
-              ).data.uri;
-            }
-          },
-        });
-      })(),
+            },
+          });
+        })(),
       elem("a", { href: `/${did}` }, undefined, [
         elem("b", { textContent: profile.postsCount.toLocaleString() }),
         document.createTextNode(" Posts"),

@@ -1,13 +1,18 @@
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { elem } from "../elements/utils/elem";
-import { rpc } from "../login";
+import { manager, rpc } from "../login";
 import { RouteOutput } from "../types";
+import { unsignedHomeRoute } from "./unsigned_home";
 
 export const homeRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
   container: HTMLDivElement,
 ): RouteOutput => {
+  if (!manager.session) {
+    unsignedHomeRoute(undefined, undefined, container);
+    return;
+  }
   const sideBar = elem("div", { id: "side-bar", className: "sticky" });
 
   const prefs = await rpc.get("app.bsky.actor.getPreferences", { params: {} });
