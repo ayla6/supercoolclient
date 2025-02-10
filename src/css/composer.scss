@@ -110,6 +110,35 @@
     }
 }
 
+.composer-reply-to {
+    .embeds:has(.post) {
+        display: none;
+    }
+    .post-content {
+        flex-direction: row;
+        .text-content {
+            flex-grow: 1;
+        }
+    }
+    .embeds {
+        width: max-content;
+    }
+    .media-container {
+        .image {
+            display: none;
+            aspect-ratio: 1 / 1;
+            width: 100px !important;
+            height: 100px !important;
+            img {
+                object-fit: cover;
+            }
+        }
+        .image:first-child {
+            display: block;
+        }
+    }
+}
+
 @media (min-width: 920px) {
     .composer {
         margin-top: 10vh;

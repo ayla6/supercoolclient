@@ -127,21 +127,7 @@ const interactionButton = (
       };
   } else if (type === "reply") {
     button.onclick = () => {
-      const root: ComAtprotoRepoStrongRef.Main = (
-        post.record as AppBskyFeedPost.Record
-      ).reply
-        ? (post.record as AppBskyFeedPost.Record).reply.root
-        : {
-            cid: post.cid,
-            uri: post.uri,
-          };
-      composerBox({
-        parent: {
-          cid: post.cid,
-          uri: post.uri,
-        },
-        root: root,
-      });
+      composerBox(post);
     };
   } else if (type === "quote") {
     button.onclick = () => {

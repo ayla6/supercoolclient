@@ -13,7 +13,7 @@ import { changeImageFormat } from "../utils/link_processing";
 import { language_codes } from "../utils/language_codes";
 
 export const composerBox = (
-  replyTo?: AppBskyFeedPost.ReplyRef,
+  reply?: AppBskyFeedDefs.PostView,
   quote?: AppBskyFeedDefs.PostView,
 ) => {
   // Main container elements
@@ -36,7 +36,7 @@ export const composerBox = (
     role: "textbox",
     contentEditable: "true",
     translate: false,
-    ariaPlaceholder: "Say anything you want",
+    ariaPlaceholder: reply ? "Type your reply" : "Say anything you want",
   });
 
   // Image handling functions
@@ -109,7 +109,18 @@ export const composerBox = (
       $type: "app.bsky.feed.post",
       createdAt: new Date().toISOString(),
       text: textbox.textContent,
-      reply: replyTo,
+      reply: {
+        parent: {
+          cid: reply.cid,
+          uri: reply.uri,
+        },
+        root: (reply.record as AppBskyFeedPost.Record).reply
+          ? (reply.record as AppBskyFeedPost.Record).reply.root
+          : {
+              cid: reply.cid,
+              uri: reply.uri,
+            },
+      },
       embed: quote
         ? embed
           ? {
@@ -273,6 +284,12 @@ export const composerBox = (
   );
 
   const composer = elem("div", { className: "composer" }, null, [
+    reply &&
+      elem(
+        "div",
+        { className: "embeds composer-reply-to" },
+        postCard(reply, false, false, true),
+      ),
     elem("div", { className: "text-area" }, undefined, [
       elem(
         "div",
