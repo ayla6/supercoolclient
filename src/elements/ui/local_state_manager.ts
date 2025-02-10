@@ -1,7 +1,7 @@
 import { cache } from "../../router";
 import { FeedState, OnscrollFunction } from "../../types";
 import { elem } from "../utils/elem";
-import { createSwipeAction } from "../utils/swipe_manager";
+import { createSwipeAction, pullToRefresh } from "../utils/swipe_manager";
 import { feedNSID, hydrateFeed } from "./feed";
 
 interface Feed {
@@ -142,6 +142,10 @@ export const createFeedManager = (
           .scrollIntoView({ block: "center" });
       }
     }
+  });
+
+  pullToRefresh(contentHolder, 80, async () => {
+    await loadFeed(feedsData.find((f) => f.feed === loadedFeed));
   });
 
   return loadFeed;
