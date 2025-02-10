@@ -131,7 +131,8 @@
 
 // Reply Component
 .composer-reply-to {
-    .embeds .post {
+    .embeds .post,
+    .embeds .has-controls {
         display: none;
     }
     .post-content {
