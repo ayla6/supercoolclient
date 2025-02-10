@@ -199,7 +199,9 @@ select {
 .see-raw-button {
     left: 0;
     top: 0;
-    height: 30px;
+    button {
+        height: 30px;
+    }
 }
 
 .ztop {

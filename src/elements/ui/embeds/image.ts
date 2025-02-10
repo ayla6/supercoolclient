@@ -28,28 +28,49 @@ const loadImage = (
       target: " ",
       onclick: (e) => {
         e.preventDefault();
-        const img = elem("img", { src: image.fullsize });
+        let notDefaultFormat = false;
+        const img = elem("img", { src: changeImageFormat(image.fullsize) });
+        const seeRawButton = elem("button", {
+          textContent: "See raw",
+          onclick: async (e) => {
+            const { cid, did } = parseBlueskyImage(image.fullsize);
+            const pds = getPdsEndpoint(
+              await (
+                await fetch(
+                  did.startsWith("did:web")
+                    ? `https://${did.split(":")[2]}/.well-known/did.json`
+                    : "https://plc.directory/" + did,
+                )
+              ).json(),
+            );
+            img.src = `${pds}/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`;
+            seeRawButton.textContent = "Raw";
+            pngWebpButton.textContent = "See WebP";
+            notDefaultFormat = true;
+          },
+        });
+        const pngWebpButton = elem("button", {
+          textContent: "See as PNG",
+          onclick: async (e) => {
+            img.src = changeImageFormat(
+              image.fullsize,
+              notDefaultFormat ? "webp" : "png",
+            );
+            pngWebpButton.textContent = `See as ${notDefaultFormat ? "PNG" : "WebP"}`;
+            seeRawButton.textContent = "See raw";
+            notDefaultFormat = !notDefaultFormat;
+          },
+        });
         const content = elem("div", { className: "image-view" }, undefined, [
           img,
-          elem("button", {
-            textContent: "See raw",
-            className: "ztop see-raw-button",
-            onclick: async (e) => {
-              const { cid, did } = parseBlueskyImage(image.fullsize);
-              const pds = getPdsEndpoint(
-                await (
-                  await fetch(
-                    did.startsWith("did:web")
-                      ? `https://${did.split(":")[2]}/.well-known/did.json`
-                      : "https://plc.directory/" + did,
-                  )
-                ).json(),
-              );
-              img.src = `${pds}/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`;
-              (e.target as HTMLButtonElement).textContent = "Raw";
-              (e.target as HTMLButtonElement).onclick = null;
+          elem(
+            "div",
+            {
+              className: "ztop see-raw-button",
             },
-          }),
+            undefined,
+            [seeRawButton, pngWebpButton],
+          ),
           elem("button", {
             textContent: "×",
             className: "ztop large close-button",
