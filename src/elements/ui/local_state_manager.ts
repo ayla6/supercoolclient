@@ -136,7 +136,6 @@ export const createFeedManager = (
           activeItem.parentNode.children,
           sibling,
         );
-        console.log(feedsData, position);
         loadFeed(feedsData[position]);
         sideBar
           .querySelector(`a[href="?v=${feedsData[position].feed}"]`)

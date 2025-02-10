@@ -109,18 +109,20 @@ export const composerBox = (
       $type: "app.bsky.feed.post",
       createdAt: new Date().toISOString(),
       text: textbox.textContent,
-      reply: {
-        parent: {
-          cid: reply.cid,
-          uri: reply.uri,
-        },
-        root: (reply.record as AppBskyFeedPost.Record).reply
-          ? (reply.record as AppBskyFeedPost.Record).reply.root
-          : {
+      reply: reply
+        ? {
+            parent: {
               cid: reply.cid,
               uri: reply.uri,
             },
-      },
+            root: (reply.record as AppBskyFeedPost.Record).reply
+              ? (reply.record as AppBskyFeedPost.Record).reply.root
+              : {
+                  cid: reply.cid,
+                  uri: reply.uri,
+                },
+          }
+        : undefined,
       embed: quote
         ? embed
           ? {
@@ -157,7 +159,6 @@ export const composerBox = (
       !hasContent || override
         ? true
         : await confirmDialog("Do you want to discard this draft?", "Discard");
-    console.log(result);
     if (result) {
       images.forEach((image) => URL.revokeObjectURL(image.objectURL));
       document.body.style.overflow = null;
