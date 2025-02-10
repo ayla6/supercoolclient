@@ -91,14 +91,12 @@ const loadImage = (
     img,
   );
 
-  const fullsize = image.fullsize;
-
   imageHolder.style.cssText = getProperSize(image.aspectRatio, isSingleImage);
   if (image.aspectRatio && image.aspectRatio.height <= 350) {
-    img.src = fullsize;
+    img.src = changeImageFormat(image.fullsize);
   } else img.src = changeImageFormat(image.thumb);
 
-  imageHolder.href = fullsize;
+  imageHolder.href = changeImageFormat(image.fullsize, "png");
   return imageHolder;
 };
 
