@@ -30,6 +30,41 @@ export const composerBox = (
 
   let cleaning = false;
 
+  // Create character counter wheel
+  const charCounter = elem("div", { className: "char-counter" });
+  const wheel = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  wheel.setAttribute("width", "30");
+  wheel.setAttribute("height", "30");
+  wheel.setAttribute("viewBox", "0 0 30 30");
+
+  const circle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle",
+  );
+  circle.setAttribute("cx", "15");
+  circle.setAttribute("cy", "15");
+  circle.setAttribute("r", "12");
+  circle.setAttribute("fill", "none");
+  circle.setAttribute("stroke-width", "3");
+  circle.setAttribute("transform", "rotate(-90 15 15)");
+
+  // Add grey outline circle
+  const outlineCircle = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "circle",
+  );
+  outlineCircle.setAttribute("cx", "15");
+  outlineCircle.setAttribute("cy", "15");
+  outlineCircle.setAttribute("r", "12");
+  outlineCircle.setAttribute("fill", "none");
+  outlineCircle.setAttribute("stroke-width", "3");
+  outlineCircle.setAttribute("stroke", "#ddd");
+
+  const countText = elem("span", { className: "count-text" });
+  wheel.appendChild(outlineCircle);
+  wheel.appendChild(circle);
+  charCounter.append(countText, wheel);
+
   // Create main textbox
   const textbox = elem("div", {
     className: "text-box",
@@ -38,6 +73,26 @@ export const composerBox = (
     translate: false,
     ariaPlaceholder: reply ? "Type your reply" : "Say anything you want",
   });
+
+  // Add character counter update
+  const updateCharCount = () => {
+    const text = textbox.textContent || "";
+    const count = [...text].length;
+    const maxCount = 300;
+    const percent = Math.min((count / maxCount) * 100, 100);
+
+    circle.style.strokeDasharray = `${(percent * 75.4) / 100} 75.4`;
+    countText.textContent = `${maxCount - count}`;
+
+    if (count > maxCount) {
+      circle.style.stroke = "#d32f2f";
+    } else {
+      circle.style.stroke = "var(--accent-color)";
+    }
+  };
+
+  textbox.addEventListener("input", updateCharCount);
+  updateCharCount();
 
   // Image handling functions
   const updateImagePreviews = () => {
@@ -310,7 +365,7 @@ export const composerBox = (
     ]),
     elem("div", { className: "horizontal-buttons space-between" }, null, [
       cancelButton,
-      postButton,
+      elem("div", {}, null, [charCounter, postButton]),
     ]),
   ]);
 

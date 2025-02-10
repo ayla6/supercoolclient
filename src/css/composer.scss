@@ -40,6 +40,12 @@
     .horizontal-buttons {
         display: flex;
         gap: 8px;
+        flex-direction: row;
+        > div {
+            gap: 8px;
+            display: flex;
+            flex-direction: row;
+        }
     }
 
     // Content Elements
@@ -48,6 +54,7 @@
         outline: none;
         overflow-y: auto;
         flex-grow: 1;
+        word-break: break-all;
         &:empty:before {
             color: $medium-grey;
             content: attr(aria-placeholder);
@@ -147,6 +154,15 @@
             display: block;
         }
     }
+}
+
+.char-counter {
+    display: flex;
+    align-items: center;
+    user-select: none;
+    display: flex;
+    flex-grow: row;
+    gap: 4px;
 }
 
 // Responsive Styles

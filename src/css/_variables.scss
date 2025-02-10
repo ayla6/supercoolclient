@@ -9,6 +9,7 @@ $darkish-grey: #666;
 $medium-grey: #999;
 $light-grey: #ccc;
 $lighter-grey: #eee;
+$red: #d32f2f;
 $container-color: rgba(255, 255, 255, 0.3);
 
 $serif: georgia, serif;
@@ -19,19 +20,16 @@ $border: $border-width solid rgba(0, 0, 0, 0.1);
 $navbar-height: 40px;
 $navbar-height-mobile: 50px;
 
-@mixin accent-button {
-    background: linear-gradient(
-        var(--accent-color),
-        color-mix(in srgb, var(--accent-color), #000 20%)
-    );
+@mixin accent-button($color: var(--accent-color)) {
+    background: linear-gradient($color, color-mix(in srgb, $color, #000 20%));
     color: white;
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
-    border-color: color-mix(in srgb, var(--accent-color), #000 20%);
+    border-color: color-mix(in srgb, $color, #000 20%);
 
     &:hover {
         background: linear-gradient(
-            color-mix(in srgb, var(--accent-color), #fff 10%),
-            color-mix(in srgb, var(--accent-color), #000 10%)
+            color-mix(in srgb, $color, #fff 10%),
+            color-mix(in srgb, $color, #000 10%)
         );
     }
 }
