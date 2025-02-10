@@ -18,3 +18,13 @@ $border: $border-width solid rgba(0, 0, 0, 0.1);
 
 $navbar-height: 40px;
 $navbar-height-mobile: 50px;
+
+@mixin accent-button {
+    background: linear-gradient(
+        var(--accent-color),
+        color-mix(in srgb, var(--accent-color), #000 20%)
+    );
+    color: white;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    border-color: color-mix(in srgb, var(--accent-color), #000 20%);
+}

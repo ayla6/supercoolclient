@@ -26,7 +26,7 @@ export const createFeedManager = (
     (
       document
         .getElementById("navbar")
-        .querySelector(`a[href="/"]`) as HTMLButtonElement
+        .querySelector(`a[href="/"]`) as HTMLLinkElement
     ).onclick = (e) => {
       if (window.location.pathname === "/") {
         e.preventDefault();

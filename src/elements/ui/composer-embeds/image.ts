@@ -28,7 +28,7 @@ export const uploadImages = async (input: ImageWithURL[]) => {
       // Constants
       const MAX_FILE_SIZE = 976.56 * 1024; // ~1MB
       const MAX_DIMENSION = 2000;
-      const DEFAULT_QUALITY = 95;
+      const DEFAULT_QUALITY = 100;
 
       // Helper functions
       const createCanvas = (width: number, height: number) => {

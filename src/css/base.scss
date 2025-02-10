@@ -141,7 +141,7 @@ code {
 }
 
 #search-bar {
-    height: 27px;
+    height: 33px;
 }
 
 input {
@@ -152,7 +152,7 @@ input {
     padding: 8px 12px;
     box-sizing: border-box;
     font-size: $font-size;
-    height: 27px;
+    height: 33px;
     &::placeholder {
         color: $medium-grey;
         content: attr(aria-placeholder);
@@ -168,7 +168,7 @@ select {
     padding: 4px 28px 4px 12px;
     box-sizing: border-box;
     font-size: $font-size;
-    height: 27px;
+    height: 33px;
 }
 
 .image-view {
@@ -294,6 +294,10 @@ select {
 }
 
 @media (max-width: 920px) {
+    #search-bar {
+        height: 27px;
+    }
+
     $header-height: 40px;
     $font-size: 15px;
 

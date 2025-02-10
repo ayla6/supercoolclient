@@ -43,6 +43,10 @@
     }
 }
 
+#navbar button {
+    @include accent-button;
+}
+
 @media (max-width: 920px) {
     #navbar {
         height: $navbar-height-mobile;

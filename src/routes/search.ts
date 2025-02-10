@@ -79,7 +79,17 @@ export const searchRoute = async (
     });
   }
 
-  if (!searchQuery) searchBar.focus();
+  (
+    document
+      .getElementById("navbar")
+      .querySelector(`a[href="/search"]`) as HTMLLinkElement
+  ).onclick = (e) => {
+    if (window.location.pathname === "/search") {
+      e.preventDefault();
+      e.stopPropagation();
+      searchBar.focus();
+    }
+  };
 
   return returnObjects;
 };
