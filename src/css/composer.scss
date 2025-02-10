@@ -1,5 +1,6 @@
 @use "variables" as *;
 
+// Layout Components
 .background {
     position: fixed;
     left: 0;
@@ -8,52 +9,6 @@
     height: 100vh;
     background-color: #0005;
     z-index: 2;
-}
-
-.composer {
-    margin: 20vh auto;
-    border-radius: $border-radius;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 600px;
-    max-height: 600px;
-    padding: 8px;
-    background: $white;
-    display: flex;
-    flex-flow: column;
-    gap: 4px;
-    .space-between {
-        justify-content: space-between;
-    }
-    .horizontal-buttons {
-        display: flex;
-        gap: 8px;
-    }
-    .textbox {
-        font-size: 16px;
-        outline: none;
-        overflow-y: auto;
-        flex-grow: 1;
-        &:empty:before {
-            color: $medium-grey;
-            content: attr(aria-placeholder);
-            cursor: text;
-        }
-    }
-    .image-preview {
-        display: flex;
-        gap: 4px;
-        .image {
-            width: 25%;
-            position: relative;
-            img {
-                box-sizing: border-box;
-                border-radius: $border-radius;
-                border: 1px solid rgba(0, 0, 0, 0.1);
-                width: 100%;
-            }
-        }
-    }
 }
 
 .text-area {
@@ -72,13 +27,73 @@
     }
 }
 
+// Main Composer Component
+.composer {
+    margin: 20vh auto;
+    border-radius: $border-radius;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+    max-height: 600px;
+    padding: 8px;
+    background: $white;
+    display: flex;
+    flex-flow: column;
+    gap: 4px;
+
+    // Utility Classes
+    .space-between {
+        justify-content: space-between;
+    }
+    .horizontal-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    // Content Elements
+    .textbox {
+        font-size: 16px;
+        outline: none;
+        overflow-y: auto;
+        flex-grow: 1;
+        &:empty:before {
+            color: $medium-grey;
+            content: attr(aria-placeholder);
+            cursor: text;
+        }
+    }
+
+    .image-preview {
+        display: flex;
+        gap: 4px;
+        .image {
+            width: 25%;
+            position: relative;
+            img {
+                box-sizing: border-box;
+                border-radius: $border-radius;
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                width: 100%;
+            }
+        }
+    }
+
+    .post .small-link {
+        display: none;
+    }
+}
+
+// Language Selection
 .language-buttons {
     display: flex;
     gap: 8px;
-    flex-wrap: wrap;
+    overflow: scroll;
+    max-width: 100%;
+
     .lang-button-container {
         position: relative;
     }
+
     .remove-lang {
         color: $white;
         display: none;
@@ -94,24 +109,29 @@
             background: rgba(0, 0, 0, 0.2);
         }
     }
-    .active .remove-lang {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .active button {
-        background: linear-gradient(
-            var(--accent-color),
-            color-mix(in srgb, var(--accent-color), #000 20%)
-        );
-        color: white;
-        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
-        border-color: color-mix(in srgb, var(--accent-color), #000 20%);
+
+    .active {
+        .remove-lang {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(
+                var(--accent-color),
+                color-mix(in srgb, var(--accent-color), #000 20%)
+            );
+            color: white;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+            border-color: color-mix(in srgb, var(--accent-color), #000 20%);
+        }
     }
 }
 
+// Reply Component
 .composer-reply-to {
-    .embeds:has(.post) {
+    .embeds .post {
         display: none;
     }
     .post-content {
@@ -122,15 +142,18 @@
     }
     .embeds {
         width: max-content;
+        flex-shrink: 0;
     }
     .media-container {
         .image {
             display: none;
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 1 / 1 !important;
             width: 100px !important;
             height: 100px !important;
             img {
                 object-fit: cover;
+                width: 100px;
+                height: 100px;
             }
         }
         .image:first-child {
@@ -139,12 +162,14 @@
     }
 }
 
+// Responsive Styles
 @media (min-width: 920px) {
     .composer {
         margin-top: 10vh;
         min-height: 200px;
     }
 }
+
 @media (max-width: 920px) {
     $font-size: 16px;
     .composer {
@@ -158,6 +183,7 @@
         height: 100vh;
         min-height: 0;
         flex-grow: 1;
+
         .textbox {
             min-height: 100px;
             flex-grow: 1;
