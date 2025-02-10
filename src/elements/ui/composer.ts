@@ -32,7 +32,7 @@ export const composerBox = (
 
   // Create main textbox
   const textbox = elem("div", {
-    className: "textbox",
+    className: "text-box",
     role: "textbox",
     contentEditable: "true",
     translate: false,
@@ -170,6 +170,7 @@ export const composerBox = (
 
   // UI Elements
   const postButton = elem("button", {
+    className: "accent-button",
     textContent: "Post",
     onclick: () => {
       if (textbox.textContent || images.length || video) {

@@ -42,12 +42,11 @@ export const loginDialog = async () => {
     elem("div", { className: "dialog-options" }, null, [
       elem("button", {
         textContent: "Cancel",
-        className: "btn btn-cancel",
         onclick: () => dialog.cleanup(),
       }),
       elem("button", {
         textContent: "Login",
-        className: "btn btn-primary",
+        className: "accent-button",
         onclick: handleLogin,
       }),
     ]),
