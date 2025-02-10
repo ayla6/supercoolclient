@@ -93,7 +93,6 @@ export const createSwipeAction = (
   object.addEventListener("touchmove", handleTouchMove, { passive: false });
   object.addEventListener("touchend", handleTouchEnd, false);
 };
-
 export const pullToRefresh = (
   container: HTMLElement,
   threshold: number = 80,
@@ -104,6 +103,8 @@ export const pullToRefresh = (
   let currentY = 0;
   let refreshing = false;
   let pulling = false;
+
+  const margin = 40;
 
   const createSpinner = () => {
     const spinner = document.createElement("div");
@@ -154,11 +155,11 @@ export const pullToRefresh = (
         pullDownIndicator.style.opacity = "1";
         const adjustedDistance = newDistance - showThreshold;
         const rotation = (adjustedDistance / (threshold - showThreshold)) * 360;
-        pullDownIndicator.style.transform = `translateX(-50%) translateY(${adjustedDistance}px)`;
+        pullDownIndicator.style.transform = `translateX(-50%) translateY(${adjustedDistance + margin}px)`;
         spinner.style.transform = `rotate(${rotation}deg)`;
       } else {
         pullDownIndicator.style.opacity = "0";
-        pullDownIndicator.style.transform = "translateX(-50%) translateY(0)";
+        pullDownIndicator.style.transform = "translateX(-50%) translateY(40px)";
       }
     }
   };
@@ -172,7 +173,7 @@ export const pullToRefresh = (
       refreshing = true;
       pullDownIndicator.dataset.refreshing = "true";
       spinner.style.animation = "spin 1s linear infinite";
-      pullDownIndicator.style.transform = `translateX(-50%) translateY(${threshold - showThreshold}px)`;
+      pullDownIndicator.style.transform = `translateX(-50%) translateY(${threshold - showThreshold + margin}px)`;
 
       try {
         await onRefresh();
@@ -180,11 +181,11 @@ export const pullToRefresh = (
         refreshing = false;
         delete pullDownIndicator.dataset.refreshing;
         spinner.style.animation = "none";
-        pullDownIndicator.style.transform = "translateX(-50%) translateY(0)";
+        pullDownIndicator.style.transform = `translateX(-50%) translateY(${margin}px)`;
         pullDownIndicator.style.opacity = "0";
       }
     } else {
-      pullDownIndicator.style.transform = "translateX(-50%) translateY(0)";
+      pullDownIndicator.style.transform = `translateX(-50%) translateY(${margin}px)`;
       pullDownIndicator.style.opacity = "0";
     }
   };
