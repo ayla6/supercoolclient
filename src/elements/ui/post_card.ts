@@ -16,7 +16,7 @@ import { formatDate, formatTimeDifference } from "../utils/date";
 import { handleEmbed } from "./embeds/embed_handlers";
 import { languagesToNotTranslate } from "../../config.ts";
 import { composerBox } from "./composer.ts";
-import { setPreloaded } from "../utils/preloadedPost.ts";
+import { setPreloaded } from "../utils/preloaded_post.ts";
 
 const plural = {
   reply: "replies",

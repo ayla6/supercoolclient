@@ -28,6 +28,14 @@ export const createSwipeAction = (
       startCoords = null;
       return;
     }
+
+    const element = e.target as HTMLElement;
+    if (element.closest(".multi")) {
+      ignore = true;
+      startCoords = null;
+      return;
+    }
+
     startCoords = {
       x: e.changedTouches[0].screenX,
       y: e.changedTouches[0].screenY,
@@ -46,10 +54,6 @@ export const createSwipeAction = (
     if (!isHorizontalScroll && !isVerticalScroll) {
       isHorizontalScroll = deltaX > deltaY;
       isVerticalScroll = deltaY > deltaX;
-    }
-
-    if (isHorizontalScroll) {
-      e.preventDefault();
     }
   };
 

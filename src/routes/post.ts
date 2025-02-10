@@ -14,7 +14,7 @@ import {
 import { rpc } from "../login";
 import { beingLoadedSplitPath, profileRedirect } from "../router";
 import { RouteOutput } from "../types";
-import { preloadedPost, setPreloaded } from "../elements/utils/preloadedPost";
+import { preloadedPost, setPreloaded } from "../elements/utils/preloaded_post";
 
 const mutedPostsButton = (
   outputElement: HTMLElement,

@@ -7,7 +7,7 @@ export const getPathFromUri = (uri: string) =>
 export const getDidFromUri = (uri: string) => uri.slice(5, uri.indexOf("/", 6));
 
 export const changeImageFormat = (uri: string, format = "webp") =>
-  uri.slice(0, -4) + format;
+  uri ? uri.slice(0, -4) + format : undefined;
 
 export const getUriFromSplitPath = ([did, , postId]: string[]) =>
   `at://${did}/app.bsky.feed.post/${postId}`;
