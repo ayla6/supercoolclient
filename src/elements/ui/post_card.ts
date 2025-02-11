@@ -162,10 +162,11 @@ export const postCard = (
   const card = elem("div", { className: "card" });
 
   if (!fullView) {
-    card.style.cursor = "pointer";
     card.onclick = (e) => {
       if (window.getSelection()?.toString()) return;
       if ((e.target as HTMLElement).closest("a, button")) return;
+      const embeds = (e.target as HTMLElement).closest(".embeds");
+      if (embeds && !embeds.contains(card)) return;
       preload();
     };
     card.setAttribute("works-as-link", "");

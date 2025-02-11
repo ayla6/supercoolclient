@@ -126,6 +126,13 @@
     }
 }
 
+.post .card {
+    cursor: pointer;
+}
+.post.full > .card {
+    cursor: unset;
+}
+
 .post.full > .card > {
     .header {
         width: fit-content;

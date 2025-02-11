@@ -2,6 +2,7 @@
 
 .profile {
     .card {
+        cursor: pointer;
         min-height: $large-avatar-size + ($avatar-margin * 2) -
             ($content-padding * 2);
     }

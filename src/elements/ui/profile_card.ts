@@ -22,7 +22,6 @@ export const profileCard = (profile: AppBskyActorDefs.ProfileView) => {
     }),
   ]);
 
-  card.style.cursor = "pointer";
   card.setAttribute("works-as-link", "");
   card.setAttribute("href", "/" + profileDid);
 
