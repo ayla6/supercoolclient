@@ -31,5 +31,7 @@ $navbar-height-mobile: 50px;
             color-mix(in srgb, $color, #fff 10%),
             color-mix(in srgb, $color, #000 10%)
         );
+        border-color: color-mix(in srgb, $color, #000 10%);
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
     }
 }
