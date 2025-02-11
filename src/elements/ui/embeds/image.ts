@@ -8,7 +8,7 @@ import {
   changeImageFormat,
   parseBlueskyImage,
 } from "../../utils/link_processing";
-import { dialogBox } from "../dialog";
+import { popupBox } from "../dialog";
 import { createSwipeAction } from "../../utils/swipe_manager";
 import { getPdsEndpoint } from "@atcute/client/utils/did";
 
@@ -79,7 +79,7 @@ const loadImage = (
             },
           }),
         ]);
-        const dialog = dialogBox(content);
+        const dialog = popupBox(content);
 
         createSwipeAction(dialog.element, (pos, e) => {
           if (Math.abs(pos.endY - pos.startY) > 150) {

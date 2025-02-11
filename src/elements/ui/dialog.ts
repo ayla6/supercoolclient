@@ -1,12 +1,13 @@
 import { elem } from "../utils/elem";
 
-export const dialogBox = (
+export const popupBox = (
   dialog: HTMLElement,
   onCleanup?: (result: any) => void,
 ) => {
   const background = elem("div", { className: "background" });
 
   const cleanup = (result: any = false) => {
+    document.removeEventListener("keydown", escapeKeyHandler);
     document.body.style.overflow = null;
     background.remove();
     if (onCleanup) onCleanup(result);
@@ -22,12 +23,13 @@ export const dialogBox = (
   background.onclick = () => cleanup();
 
   // Handle escape key
-  document.addEventListener("keydown", function handler(e) {
+  const escapeKeyHandler = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
+      console.log("hey");
       cleanup();
-      document.removeEventListener("keydown", handler);
     }
-  });
+  };
+  document.addEventListener("keydown", escapeKeyHandler);
 
   // Add to document
   document.body.append(background);
@@ -61,7 +63,7 @@ export const confirmDialog = async (prompt: string, confirm: string) => {
         }),
       ]),
     ]);
-    const dialog = dialogBox(content, (close = false) => resolve(close));
+    const dialog = popupBox(content, (close = false) => resolve(close));
   });
 };
 
@@ -90,7 +92,7 @@ export const inputDialog = async (prompt: string, confirm: string) => {
         }),
       ]),
     ]);
-    const dialog = dialogBox(content, (close = "") => resolve(close));
+    const dialog = popupBox(content, (close = "") => resolve(close));
   });
 };
 
@@ -131,6 +133,6 @@ export const selectDialog = async (
         }),
       ]),
     ]);
-    const dialog = dialogBox(content, (close = "") => resolve(close));
+    const dialog = popupBox(content, (close = "") => resolve(close));
   });
 };

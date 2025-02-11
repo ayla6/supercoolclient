@@ -1,6 +1,6 @@
 import { login } from "../../login";
 import { elem } from "../utils/elem";
-import { dialogBox } from "./dialog";
+import { popupBox } from "./dialog";
 
 export const loginDialog = async () => {
   const identifier = elem("input", {
@@ -52,6 +52,6 @@ export const loginDialog = async () => {
     ]),
   ]);
 
-  const dialog = dialogBox(content);
+  const dialog = popupBox(content);
   return dialog;
 };

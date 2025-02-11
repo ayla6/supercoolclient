@@ -1,7 +1,7 @@
 import { AppBskyActorProfile } from "@atcute/client/lexicons";
 import { manager, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
-import { dialogBox } from "./dialog";
+import { popupBox } from "./dialog";
 
 export const editProfileDialog = async () => {
   const oldRecord = (
@@ -71,6 +71,6 @@ export const editProfileDialog = async () => {
         }),
       ]),
     ]);
-    const dialog = dialogBox(content, () => resolve(false));
+    const dialog = popupBox(content, () => resolve(false));
   });
 };

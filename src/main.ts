@@ -32,7 +32,6 @@ document.addEventListener("click", (e) => {
   updatePage(false);
 });
 document.addEventListener("mousedown", (e) => {
-  console.log("hey");
   const anchor =
     e.target instanceof HTMLDivElement
       ? e.target.closest("[works-as-link]")
@@ -49,7 +48,7 @@ document.addEventListener("mousedown", (e) => {
   e.preventDefault();
   window.open(url.href, "_blank");
 });
-addEventListener("popstate", () => updatePage(true));
+window.addEventListener("popstate", (e) => updatePage(true));
 setInterval(cleanCache, 5 * 60 * 1000);
 
 /*const record: AppSCCProfile.Record = {

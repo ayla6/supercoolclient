@@ -6,7 +6,7 @@ import {
 import { manager, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
-import { confirmDialog, dialogBox, inputDialog, selectDialog } from "./dialog";
+import { confirmDialog, popupBox, inputDialog, selectDialog } from "./dialog";
 import { uploadImages } from "./composer-embeds/image";
 import { uploadVideo } from "./composer-embeds/video";
 import { changeImageFormat } from "../utils/link_processing";
@@ -215,6 +215,7 @@ export const composerBox = (
         ? true
         : await confirmDialog("Do you want to discard this draft?", "Discard");
     if (result) {
+      document.removeEventListener("keydown", escapeKeyHandler);
       images.forEach((image) => URL.revokeObjectURL(image.objectURL));
       document.body.style.overflow = null;
       background.remove();
@@ -374,11 +375,13 @@ export const composerBox = (
   background.append(composer);
   background.onclick = () => cleanup();
 
-  document.addEventListener("keydown", function handler(e) {
+  // Handle escape key
+  const escapeKeyHandler = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
-      if (cleanup()) document.removeEventListener("keydown", handler);
+      cleanup();
     }
-  });
+  };
+  document.addEventListener("keydown", escapeKeyHandler);
 
   // Final setup
   document.body.append(background);
