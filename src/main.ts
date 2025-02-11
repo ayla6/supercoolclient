@@ -12,7 +12,7 @@ document.addEventListener("click", (e) => {
     return;
   if (anchor instanceof HTMLDivElement) {
     if (window.getSelection()?.toString()) return;
-    if ((e.target as HTMLDivElement).closest("a, button")) return;
+    if (anchor.closest("a, button")) return;
   }
   const href =
     anchor instanceof HTMLAnchorElement
@@ -30,6 +30,24 @@ document.addEventListener("click", (e) => {
 
   history.pushState(null, "", url);
   updatePage(false);
+});
+document.addEventListener("mousedown", (e) => {
+  console.log("hey");
+  const anchor =
+    e.target instanceof HTMLDivElement
+      ? e.target.closest("[works-as-link]")
+      : null;
+  if (!anchor || e.button !== 1) return;
+  if (anchor.closest("a, button")) return;
+  const href = new URL(anchor.getAttribute("href"), window.location.origin)
+    .href;
+  if (!href) return;
+
+  const url = new URL(href);
+  if (window.location.origin !== url.origin) return;
+
+  e.preventDefault();
+  window.open(url.href, "_blank");
 });
 addEventListener("popstate", () => updatePage(true));
 setInterval(cleanCache, 5 * 60 * 1000);
