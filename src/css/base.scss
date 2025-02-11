@@ -30,6 +30,23 @@ body {
     @include accent-button;
 }
 
+.text-box {
+    padding: 8px 12px;
+    border-radius: $border-radius;
+    border: $border;
+    font-size: $font-size;
+    outline: none;
+    overflow-y: auto;
+    flex-grow: 1;
+    word-break: break-all;
+    &:empty:before {
+        font-size: $font-size;
+        color: $medium-grey;
+        content: attr(aria-placeholder);
+        cursor: text;
+    }
+}
+
 #container {
     position: relative;
     top: 40px;
@@ -166,7 +183,7 @@ code {
 
 input {
     outline: none;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: $border;
     border-radius: $border-radius;
     background-color: $white;
     padding: 8px 12px;
@@ -181,7 +198,7 @@ input {
 }
 select {
     appearance: none;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: $border;
     border-radius: $border-radius;
     background: $white url("../svg/chevron-compact-down.svg") no-repeat right
         8px center / 16px;

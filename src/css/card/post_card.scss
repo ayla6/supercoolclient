@@ -166,7 +166,7 @@
 
     .interaction {
         $size: 14px;
-        font-size: 14px;
+        font-size: $size;
         margin-right: $size * 0.5;
         .icon {
             height: $size;

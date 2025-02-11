@@ -8,10 +8,11 @@ import { profileCard } from "../elements/ui/profile_card";
 import { elem } from "../elements/utils/elem";
 import { changeImageFormat, getRkey } from "../elements/utils/link_processing";
 import { processText } from "../elements/utils/text_processing";
-import { manager, rpc } from "../login";
+import { manager, rpc, sessionData } from "../login";
 import { beingLoadedSplitPath, profileRedirect, updatePage } from "../router";
 import { RouteOutput } from "../types";
 import { confirmDialog } from "../elements/ui/dialog";
+import { editProfileDialog } from "../elements/ui/edit_profile";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -190,6 +191,21 @@ export const profileRoute = async (
           if (manager.session.did === profile.did)
             return elem("button", {
               textContent: "Edit Profile",
+              onclick: async () => {
+                if (!(await editProfileDialog())) return;
+                console.log("hello");
+                Object.assign(
+                  sessionData,
+                  await rpc.get("app.bsky.actor.getProfile", {
+                    params: { actor: manager.session.did },
+                  }),
+                );
+                await profileRoute(
+                  currentSplitPath,
+                  previousSplitPath,
+                  container,
+                );
+              },
             });
           return elem("button", {
             className: profile.viewer.following ? "" : " follow",
@@ -255,7 +271,7 @@ export const profileRoute = async (
     ]),
   ]);
 
-  container.append(
+  container.replaceChildren(
     elem("div", { className: "buffer-top" }),
     header,
     sideBar,

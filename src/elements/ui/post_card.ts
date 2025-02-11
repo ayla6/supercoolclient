@@ -1,8 +1,4 @@
-import {
-  AppBskyFeedDefs,
-  AppBskyFeedPost,
-  ComAtprotoRepoStrongRef,
-} from "@atcute/client/lexicons";
+import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import {
   changeImageFormat,
   getDidFromUri,
@@ -113,7 +109,8 @@ const interactionButton = (
       button.classList.toggle("active", isActive);
 
       if (hasViewer)
-        button.onclick = () => {
+        button.onclick = (e) => {
+          e.stopPropagation();
           isActive = !isActive;
           updateInteraction(
             isActive,
@@ -127,11 +124,13 @@ const interactionButton = (
           );
         };
     } else if (type === "reply") {
-      button.onclick = () => {
+      button.onclick = (e) => {
+        e.stopPropagation();
         composerBox(post);
       };
     } else if (type === "quote") {
-      button.onclick = () => {
+      button.onclick = (e) => {
+        e.stopPropagation();
         composerBox(undefined, post);
       };
     }
@@ -161,6 +160,17 @@ export const postCard = (
     className: "card-holder post" + (fullView ? " full" : ""),
   });
   const card = elem("div", { className: "card" });
+
+  if (!fullView) {
+    card.style.cursor = "pointer";
+    card.onclick = (e) => {
+      if (window.getSelection()?.toString()) return;
+      if ((e.target as HTMLElement).closest("a, button")) return;
+      preload();
+    };
+    card.setAttribute("works-as-link", "");
+    card.setAttribute("href", href);
+  }
 
   const preload = () => {
     setPreloaded(post);

@@ -6,7 +6,6 @@
     height: auto;
     margin: auto;
     margin-top: 50vh;
-    max-height: 600px;
     max-width: 600px;
     padding: 8px;
     width: max-content;
@@ -21,7 +20,7 @@
 
     // Visual
     background: $white;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: $border;
     border-radius: $border-radius;
 
     .dialog-options {
@@ -48,6 +47,12 @@
     .title {
         font-size: $font-size * 1.5;
         font-weight: 700;
+    }
+
+    .text-box {
+        min-height: 100px;
+        min-width: 300px;
+        max-width: 100%;
     }
 }
 
@@ -76,7 +81,6 @@
         border-radius: $border-radius $border-radius 0 0;
         height: auto;
         margin: 0;
-        max-height: 50vh;
         max-width: 100%;
         padding: 8px 8px 48px;
         width: 100vw;

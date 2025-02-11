@@ -4,11 +4,26 @@ import { login, manager, rpc } from "./login";
 import { cleanCache, updatePage } from "./router";
 
 document.addEventListener("click", (e) => {
-  const anchor = e.target instanceof Element ? e.target.closest("a") : null;
+  const anchor =
+    e.target instanceof Element
+      ? e.target.closest("a") || e.target.closest("[works-as-link]")
+      : null;
   if (!anchor || e.ctrlKey || e.button !== 0 || anchor.hasAttribute("ignore"))
     return;
+  if (anchor instanceof HTMLDivElement) {
+    if (window.getSelection()?.toString()) return;
+    if ((e.target as HTMLDivElement).closest("a, button")) return;
+  }
+  const href =
+    anchor instanceof HTMLAnchorElement
+      ? anchor.href
+      : new URL(
+          (anchor as HTMLDivElement).getAttribute("href"),
+          window.location.origin,
+        ).href;
+  if (!href) return;
 
-  const url = new URL(anchor.href);
+  const url = new URL(href);
   if (window.location.origin !== url.origin) return;
 
   e.preventDefault();
