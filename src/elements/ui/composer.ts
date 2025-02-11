@@ -217,7 +217,6 @@ export const composerBox = (
     if (result) {
       document.removeEventListener("keydown", escapeKeyHandler);
       images.forEach((image) => URL.revokeObjectURL(image.objectURL));
-      document.body.style.overflow = null;
       background.remove();
     }
     cleaning = false;
@@ -385,6 +384,5 @@ export const composerBox = (
 
   // Final setup
   document.body.append(background);
-  document.body.style.overflow = "hidden";
   textbox.focus();
 };

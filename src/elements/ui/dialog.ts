@@ -8,7 +8,6 @@ export const popupBox = (
 
   const cleanup = (result: any = false) => {
     document.removeEventListener("keydown", escapeKeyHandler);
-    document.body.style.overflow = null;
     background.remove();
     if (onCleanup) onCleanup(result);
   };
@@ -33,7 +32,6 @@ export const popupBox = (
 
   // Add to document
   document.body.append(background);
-  document.body.style.overflow = "hidden";
 
   return {
     cleanup,

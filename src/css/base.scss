@@ -26,6 +26,10 @@ body {
     z-index: 2;
 }
 
+body:has(.background) {
+    overflow-y: hidden;
+}
+
 .accent-button {
     @include accent-button;
 }
