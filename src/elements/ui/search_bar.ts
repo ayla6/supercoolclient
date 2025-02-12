@@ -12,7 +12,7 @@ export const createSearchBar = (addToSearch?: string, hideOnMobile = false) => {
       history.pushState(
         null,
         "",
-        `/search?q=from:${addToSearch ? addToSearch + " " : ""}${searchBar.value}`,
+        `/search?q=${addToSearch ? addToSearch + " " : ""}${searchBar.value}`,
       );
       updatePage(false);
     }

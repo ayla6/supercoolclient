@@ -70,7 +70,7 @@ export const profileRoute = async (
 
   if (currentSplitPath !== beingLoadedSplitPath) return;
 
-  const searchBar = createSearchBar(profile.handle ?? profile.did);
+  const searchBar = createSearchBar("from:" + (profile.handle ?? profile.did));
 
   const sideBar = elem("div", { id: "side-bar" }, searchBar);
 

@@ -26,6 +26,7 @@ export const searchRoute = async (
   );
 
   if (searchQuery) {
+    searchBar.value = searchQuery;
     const loadSearchOption = createFeedManager(
       document.getElementById("content-holder"),
       sideBar,
