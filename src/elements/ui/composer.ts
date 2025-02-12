@@ -388,11 +388,7 @@ export const composerBox = (
 
   const composer = elem("div", { className: "composer" }, null, [
     reply &&
-      elem(
-        "div",
-        { className: "embeds composer-reply-to" },
-        postCard(reply, false, false, true),
-      ),
+      elem("div", { className: "embeds" }, postCard(reply, false, false, true)),
     textAreasHolder,
     quote &&
       elem("div", { className: "embeds" }, postCard(quote, false, false, true)),

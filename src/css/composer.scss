@@ -161,9 +161,10 @@
 }
 
 // Reply Component
-.composer-reply-to {
+.composer .embeds {
     .embeds .post,
-    .embeds .has-controls {
+    .embeds .has-controls,
+    .embeds :has(.video-thumbnail) {
         display: none;
     }
     .post-content {
