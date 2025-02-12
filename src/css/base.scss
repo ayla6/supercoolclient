@@ -377,6 +377,10 @@ select {
 }
 
 @media (max-width: 920px) {
+    .hide-on-mobile {
+        display: none;
+    }
+
     #search-bar {
         height: 29px;
     }

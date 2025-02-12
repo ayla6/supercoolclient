@@ -1,5 +1,6 @@
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { profileCard } from "../elements/ui/profile_card";
+import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";
 import { updatePage } from "../router";
 import { RouteOutput, RouteOutputNotPromise } from "../types";
@@ -14,17 +15,7 @@ export const searchRoute = async (
   const urlParams = new URLSearchParams(window.location.search);
   const searchQuery = urlParams.get("q") ?? "";
 
-  const searchBar = elem("input", {
-    id: "search-bar",
-    placeholder: "Search…",
-    value: searchQuery,
-  });
-  searchBar.addEventListener("keypress", (e) => {
-    if (e.key === "Enter" && searchBar.value) {
-      history.pushState(null, "", `/search?q=${searchBar.value}`);
-      updatePage(false);
-    }
-  });
+  const searchBar = createSearchBar();
 
   const sideBar = elem("div", { id: "side-bar", className: "sticky" });
   sideBar.append(searchBar);

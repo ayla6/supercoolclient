@@ -1,4 +1,5 @@
 import { createFeedManager } from "../elements/ui/local_state_manager";
+import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";
 import { manager, rpc } from "../login";
 import { RouteOutput } from "../types";
@@ -13,7 +14,11 @@ export const homeRoute = async (
     unsignedHomeRoute(undefined, undefined, container);
     return;
   }
-  const sideBar = elem("div", { id: "side-bar", className: "sticky" });
+  const sideBar = elem(
+    "div",
+    { id: "side-bar", className: "sticky" },
+    createSearchBar(undefined, true),
+  );
 
   const prefs = await rpc.get("app.bsky.actor.getPreferences", { params: {} });
   const { items: feeds } = prefs.data.preferences.find((e) => {

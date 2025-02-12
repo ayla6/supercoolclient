@@ -13,6 +13,7 @@ import { beingLoadedSplitPath, profileRedirect, updatePage } from "../router";
 import { RouteOutput } from "../types";
 import { confirmDialog } from "../elements/ui/dialog";
 import { editProfileDialog } from "../elements/ui/edit_profile";
+import { createSearchBar } from "../elements/ui/search_bar";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -69,20 +70,7 @@ export const profileRoute = async (
 
   if (currentSplitPath !== beingLoadedSplitPath) return;
 
-  const searchBar = elem("input", {
-    id: "search-bar",
-    placeholder: "Search…",
-  });
-  searchBar.addEventListener("keypress", (e) => {
-    if (e.key === "Enter" && searchBar.value) {
-      history.pushState(
-        null,
-        "",
-        `/search?q=from:${profile.handle ?? profile.did} ${searchBar.value}`,
-      );
-      updatePage(false);
-    }
-  });
+  const searchBar = createSearchBar(profile.handle ?? profile.did);
 
   const sideBar = elem("div", { id: "side-bar" }, searchBar);
 
