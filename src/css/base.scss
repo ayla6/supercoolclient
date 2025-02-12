@@ -42,12 +42,18 @@ body:has(.background) {
     outline: none;
     overflow-y: auto;
     flex-grow: 1;
-    word-break: break-all;
-    &:empty:before {
+
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    white-space: break-spaces;
+
+    &:before {
         font-size: $font-size;
         color: $medium-grey;
-        content: attr(aria-placeholder);
+    }
+    &:empty:before {
         cursor: text;
+        content: attr(aria-placeholder);
     }
 }
 
@@ -96,7 +102,7 @@ a {
 
 button {
     font-size: 13px;
-    padding: 4px 12px;
+    padding: 5px 12px;
     cursor: pointer;
     border-radius: 4px;
     border: $border-width solid $light-grey;
@@ -107,6 +113,11 @@ button {
         border-color: #c8c8c8;
         background-color: #f8f8f8;
         background: linear-gradient(#f8f8f8, #d8d8d8);
+    }
+    &.square {
+        width: 29px;
+        height: 29px;
+        padding: 0;
     }
 }
 button.active {
@@ -168,7 +179,10 @@ code {
 .small {
     font-size: 12px;
     color: $darkish-grey;
-    word-break: break-all;
+
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    white-space: break-spaces;
 }
 
 .small-link {
@@ -364,7 +378,7 @@ select {
 
 @media (max-width: 920px) {
     #search-bar {
-        height: 27px;
+        height: 29px;
     }
 
     $header-height: 40px;

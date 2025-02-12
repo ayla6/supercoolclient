@@ -4,11 +4,12 @@ interface ImageWithURL {
 }
 import { AppBskyEmbedDefs, AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { rpc } from "../../../login";
+import { ComposedImage, PostImageEmbed } from "@atcute/bluesky-threading";
 
 // Media upload functions
 export const uploadImages = async (input: ImageWithURL[]) => {
-  const images: AppBskyEmbedImages.Main = {
-    $type: "app.bsky.embed.images",
+  const images: PostImageEmbed = {
+    type: "image",
     images: [],
   };
 
@@ -192,10 +193,8 @@ export const uploadImages = async (input: ImageWithURL[]) => {
     console.log("Server upload complete");
 
     images.images.push({
-      $type: "app.bsky.embed.image",
       aspectRatio,
-      alt: "",
-      image: blob,
+      blob: blob,
     });
   }
   return images;

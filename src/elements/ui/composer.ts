@@ -1,8 +1,4 @@
-import {
-  AppBskyEmbedVideo,
-  AppBskyFeedDefs,
-  AppBskyFeedPost,
-} from "@atcute/client/lexicons";
+import { AppBskyFeedDefs } from "@atcute/client/lexicons";
 import { manager, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
@@ -11,6 +7,7 @@ import { uploadImages } from "./composer-embeds/image";
 import { uploadVideo } from "./composer-embeds/video";
 import { changeImageFormat } from "../utils/link_processing";
 import { language_codes } from "../utils/language_codes";
+import { PostMediaEmbed, publishThread } from "@atcute/bluesky-threading";
 
 export const composerBox = (
   reply?: AppBskyFeedDefs.PostView,
@@ -18,16 +15,18 @@ export const composerBox = (
 ) => {
   // Main container elements
   const background = elem("div", { className: "background" });
-  const imagePreviewContainer = elem("div", { className: "image-preview" });
 
   // State
   interface ImageWithURL {
     file: File;
     objectURL: string;
   }
-  let images: ImageWithURL[] = [];
+  let images: ImageWithURL[][] = [];
   let video: File;
 
+  let textboxes: HTMLDivElement[] = [];
+  let imagePreviews: HTMLDivElement[] = [];
+  let selectedTextbox: HTMLDivElement;
   let cleaning = false;
 
   // Create character counter wheel
@@ -65,18 +64,9 @@ export const composerBox = (
   wheel.appendChild(circle);
   charCounter.append(countText, wheel);
 
-  // Create main textbox
-  const textbox = elem("div", {
-    className: "text-box",
-    role: "textbox",
-    contentEditable: "true",
-    translate: false,
-    ariaPlaceholder: reply ? "Type your reply" : "Say anything you want",
-  });
-
   // Add character counter update
-  const updateCharCount = () => {
-    const text = textbox.textContent || "";
+  const updateCharCount = (textbox?: HTMLDivElement) => {
+    const text = textbox?.textContent || "";
     const count = [...text].length;
     const maxCount = 300;
     const percent = Math.min((count / maxCount) * 100, 100);
@@ -90,15 +80,15 @@ export const composerBox = (
       circle.style.stroke = "var(--accent-color)";
     }
   };
-
-  textbox.addEventListener("input", updateCharCount);
   updateCharCount();
 
   // Image handling functions
   const updateImagePreviews = () => {
-    imagePreviewContainer.innerHTML = "";
-    images.forEach((image, index) => {
-      imagePreviewContainer.appendChild(
+    const selectedTextAreaIndex = textboxes.indexOf(selectedTextbox);
+    const imagePreview = imagePreviews[selectedTextAreaIndex];
+    imagePreview.innerHTML = "";
+    images[selectedTextAreaIndex].forEach((image, index) => {
+      imagePreview.appendChild(
         elem("div", { className: "image" }, null, [
           elem("img", { src: image.objectURL }),
           elem("button", {
@@ -122,23 +112,9 @@ export const composerBox = (
       file,
       objectURL: URL.createObjectURL(file),
     }));
-    images.push(...newImages);
+    images[textboxes.indexOf(selectedTextbox)].push(...newImages);
     updateImagePreviews();
   };
-
-  // Paste handler
-  textbox.addEventListener("paste", (e) => {
-    const files = Array.from(e.clipboardData?.items || [])
-      .filter((item) => item.type.startsWith("image/"))
-      .map((item) => item.getAsFile())
-      .filter(Boolean);
-
-    if (files.length) {
-      e.preventDefault();
-      if (images?.length >= 4) return;
-      handleImageInput(files as unknown as FileList);
-    }
-  });
 
   // File input helpers
   const createFileInput = (
@@ -156,49 +132,26 @@ export const composerBox = (
 
   // Post creation
   const createPost = async () => {
-    let embed: any;
-    if (images.length) embed = await uploadImages(images);
-    if (video) embed = await uploadVideo(video);
+    let media: PostMediaEmbed[] = [];
+    for (let i = 0; i < images.length; i++) {
+      if (images[i].length) media[i] = await uploadImages(images[i]);
+    }
+    //if (video) embed = await uploadVideo(video);
 
-    const record: AppBskyFeedPost.Record = {
-      $type: "app.bsky.feed.post",
-      createdAt: new Date().toISOString(),
-      text: textbox.textContent,
-      reply: reply
-        ? {
-            parent: {
-              cid: reply.cid,
-              uri: reply.uri,
-            },
-            root: (reply.record as AppBskyFeedPost.Record).reply
-              ? (reply.record as AppBskyFeedPost.Record).reply.root
-              : {
-                  cid: reply.cid,
-                  uri: reply.uri,
-                },
-          }
-        : undefined,
-      embed: quote
-        ? embed
-          ? {
-              $type: "app.bsky.embed.recordWithMedia",
-              media: embed,
-              record: { record: { uri: quote.uri, cid: quote.cid } },
-            }
-          : {
-              $type: "app.bsky.embed.record",
-              record: { uri: quote.uri, cid: quote.cid },
-            }
-        : embed,
-      langs: [language],
-    };
-
-    await rpc.call("com.atproto.repo.createRecord", {
-      data: {
-        record,
-        collection: "app.bsky.feed.post",
-        repo: manager.session.did,
-      },
+    await publishThread(rpc, {
+      author: manager.session.did,
+      languages: [language],
+      reply: reply,
+      posts: textboxes.map((textbox, i) => ({
+        content: { text: textbox.innerText?.trim() || "" },
+        embed: {
+          record:
+            i === 0 && quote
+              ? { type: "quote", uri: quote.uri, cid: quote.cid }
+              : undefined,
+          media: media?.[i],
+        },
+      })),
     });
 
     cleanup(true);
@@ -209,26 +162,107 @@ export const composerBox = (
     if (cleaning) return;
     cleaning = true;
 
-    const hasContent = textbox.textContent || images[0] || video;
+    const hasContent =
+      textboxes.some((textbox) => textbox.innerText) ||
+      images.some((imageGroup) => imageGroup.length > 0);
     const result =
       !hasContent || override
         ? true
         : await confirmDialog("Do you want to discard this draft?", "Discard");
     if (result) {
       document.removeEventListener("keydown", escapeKeyHandler);
-      images.forEach((image) => URL.revokeObjectURL(image.objectURL));
+      images.forEach((imageGroup) =>
+        imageGroup.forEach((image) => URL.revokeObjectURL(image.objectURL)),
+      );
       background.remove();
     }
     cleaning = false;
     return result;
   };
 
+  const createTextArea = () => {
+    const textbox = elem("div", {
+      className: "text-box",
+      role: "textbox",
+      contentEditable: "true",
+      translate: false,
+      ariaPlaceholder: reply ? "Type your reply" : "Say anything you want",
+    });
+    textbox.addEventListener("input", () => updateCharCount(textbox));
+    textbox.addEventListener("paste", (e) => {
+      const files = Array.from(e.clipboardData?.items || [])
+        .filter((item) => item.type.startsWith("image/"))
+        .map((item) => item.getAsFile())
+        .filter(Boolean);
+
+      if (files.length) {
+        e.preventDefault();
+        if (images?.length >= 4) return;
+        handleImageInput(files as unknown as FileList);
+      }
+    });
+    textbox.addEventListener("focus", () => {
+      selectedTextbox = textbox;
+      updateCharCount(textbox);
+      textAreasHolder
+        .querySelectorAll(".post-container")
+        .forEach((container) => container.classList.remove("focus"));
+      container.classList.add("focus");
+    });
+
+    const imagePreview = elem("div", { className: "image-preview" });
+
+    const removeButton = elem("button", {
+      textContent: "×",
+      className: "remove-post-button",
+      onclick: () => {
+        const index = textboxes.indexOf(textbox);
+        if (index > -1) {
+          images[index].forEach((image) =>
+            URL.revokeObjectURL(image.objectURL),
+          );
+          textboxes.splice(index, 1);
+          imagePreviews.splice(index, 1);
+          images.splice(index, 1);
+          container.remove();
+        }
+        textboxes[Math.max(index - 1, 0)].focus();
+      },
+    });
+
+    textboxes.push(textbox);
+    imagePreviews.push(imagePreview);
+    images.push([]);
+
+    const container = elem("div", { className: "post-container" }, undefined, [
+      elem("div", { className: "text-area" }, undefined, [
+        elem("div", { className: "avatar-area" }, undefined, [
+          elem("img", { src: changeImageFormat(sessionData.avatar) }),
+        ]),
+        textbox,
+        removeButton,
+      ]),
+      imagePreview,
+    ]);
+    return container;
+  };
+
   // UI Elements
+  const textAreasHolder = elem(
+    "div",
+    { className: "text-areas-holder" },
+    createTextArea(),
+  );
+
   const postButton = elem("button", {
     className: "accent-button",
     textContent: "Post",
     onclick: () => {
-      if (textbox.textContent || images.length || video) {
+      if (
+        textboxes.every((textbox) => textbox.innerText?.trim()) ||
+        images.length ||
+        video
+      ) {
         createPost();
       }
     },
@@ -241,13 +275,24 @@ export const composerBox = (
     },
   });
 
+  const addPostButton = elem("button", {
+    textContent: "+",
+    className: "square",
+    onclick: () => {
+      textAreasHolder.append(createTextArea());
+      textboxes.at(-1)?.focus();
+    },
+  });
+
   const imageButton = elem("button", {
     textContent: "🖼️",
+    className: "square",
     onclick: () => createFileInput("image", true, handleImageInput).click(),
   });
 
   const videoButton = elem("button", {
     textContent: "📽️",
+    className: "square",
     onclick: () =>
       createFileInput("video", false, (files) => (video = files[0])).click(),
   });
@@ -319,6 +364,7 @@ export const composerBox = (
   languageButtons.appendChild(
     elem("button", {
       textContent: "+",
+      className: "square",
       onclick: async () => {
         const newLangName = await selectDialog(
           "Select language to add",
@@ -347,20 +393,12 @@ export const composerBox = (
         { className: "embeds composer-reply-to" },
         postCard(reply, false, false, true),
       ),
-    elem("div", { className: "text-area" }, undefined, [
-      elem(
-        "div",
-        { className: "avatar-area" },
-        elem("img", { src: changeImageFormat(sessionData.avatar) }),
-      ),
-      textbox,
-    ]),
-    imagePreviewContainer,
+    textAreasHolder,
     quote &&
       elem("div", { className: "embeds" }, postCard(quote, false, false, true)),
-    elem("div", { className: "horizontal-buttons" }, null, [
-      imageButton,
-      languageButtons,
+    elem("div", { className: "horizontal-buttons space-between" }, null, [
+      elem("div", {}, null, [imageButton, languageButtons]),
+      addPostButton,
       //videoButton,
     ]),
     elem("div", { className: "horizontal-buttons space-between" }, null, [
@@ -384,5 +422,5 @@ export const composerBox = (
 
   // Final setup
   document.body.append(background);
-  textbox.focus();
+  textboxes[0].focus();
 };
