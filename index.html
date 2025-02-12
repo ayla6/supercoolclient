@@ -1,14 +1,41 @@
 <!doctype html>
 <html>
     <head>
+        <link rel="manifest" href="scc.webmanifest" />
         <meta charset="UTF-8" />
         <meta
             name="viewport"
             content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
         />
         <link rel="stylesheet" href="src/css/index.scss" />
+        <link
+            rel="icon"
+            type="image/png"
+            sizes="192x192"
+            href="/src/icons/icon-512.png"
+        />
     </head>
     <body>
+        <script>
+            // Register service worker
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker
+                        .register("sw.js")
+                        .then((registration) => {
+                            console.log(
+                                "ServiceWorker registration successful",
+                            );
+                        })
+                        .catch((err) => {
+                            console.log(
+                                "ServiceWorker registration failed: ",
+                                err,
+                            );
+                        });
+                });
+            }
+        </script>
         <script type="module" src="src/main.ts"></script>
         <div id="navbar"></div>
         <div id="container"><div id="content"></div></div>
