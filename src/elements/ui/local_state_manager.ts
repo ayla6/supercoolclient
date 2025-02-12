@@ -144,9 +144,14 @@ export const createFeedManager = (
     }
   });
 
-  pullToRefresh(contentHolder, 80, async () => {
-    await loadFeed(feedsData.find((f) => f.feed === loadedFeed));
-  });
+  pullToRefresh(
+    contentHolder,
+    80,
+    document.getElementById("search-bar") ? 40 : 0,
+    async () => {
+      await loadFeed(feedsData.find((f) => f.feed === loadedFeed));
+    },
+  );
 
   return loadFeed;
 };

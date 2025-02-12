@@ -93,18 +93,17 @@ export const createSwipeAction = (
   object.addEventListener("touchmove", handleTouchMove, { passive: false });
   object.addEventListener("touchend", handleTouchEnd, false);
 };
+
 export const pullToRefresh = (
   container: HTMLElement,
-  threshold: number = 80,
+  threshold: number = 160,
+  margin: number = 40,
   onRefresh: () => Promise<void>,
-  showThreshold: number = 20,
 ) => {
   let startY = 0;
   let currentY = 0;
   let refreshing = false;
   let pulling = false;
-
-  const margin = 40;
 
   const createSpinner = () => {
     const spinner = document.createElement("div");
@@ -147,20 +146,17 @@ export const pullToRefresh = (
 
     currentY = e.touches[0].clientY;
     const pullDistance = Math.max(0, currentY - startY);
-    const newDistance = Math.min(threshold, pullDistance * 0.4);
+    const newDistance = Math.min(threshold * 2, pullDistance * 0.4);
 
     if (newDistance > 0) {
       e.preventDefault();
-      if (newDistance > showThreshold) {
-        pullDownIndicator.style.opacity = "1";
-        const adjustedDistance = newDistance - showThreshold;
-        const rotation = (adjustedDistance / (threshold - showThreshold)) * 360;
-        pullDownIndicator.style.transform = `translateX(-50%) translateY(${adjustedDistance + margin}px)`;
-        spinner.style.transform = `rotate(${rotation}deg)`;
-      } else {
-        pullDownIndicator.style.opacity = "0";
-        pullDownIndicator.style.transform = "translateX(-50%) translateY(40px)";
-      }
+      pullDownIndicator.style.opacity = Math.min(
+        1,
+        newDistance / 40,
+      ).toString();
+      const rotation = (newDistance / threshold) * 360;
+      pullDownIndicator.style.transform = `translateX(-50%) translateY(${newDistance + margin}px)`;
+      spinner.style.transform = `rotate(${rotation}deg)`;
     }
   };
 
@@ -172,8 +168,8 @@ export const pullToRefresh = (
     if (pullDistance > threshold && !refreshing) {
       refreshing = true;
       pullDownIndicator.dataset.refreshing = "true";
-      spinner.style.animation = "spin 1s linear infinite";
-      pullDownIndicator.style.transform = `translateX(-50%) translateY(${threshold - showThreshold + margin}px)`;
+      spinner.style.animation = "spin 0.5s linear infinite";
+      pullDownIndicator.style.transform = `translateX(-50%) translateY(${threshold + margin}px)`;
 
       try {
         await onRefresh();
