@@ -343,7 +343,7 @@ export const postCard = (
   if (
     record.text &&
     record.langs?.[0] &&
-    !languagesToNotTranslate.includes(record.langs[0])
+    !languagesToNotTranslate.has(record.langs[0])
   ) {
     translateButton = elem("a", {
       className: "small-link",

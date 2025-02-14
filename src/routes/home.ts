@@ -11,9 +11,9 @@ export const homeRoute = async (
   container: HTMLDivElement,
 ): RouteOutput => {
   if (!manager.session) {
-    unsignedHomeRoute(undefined, undefined, container);
-    return;
+    return unsignedHomeRoute(undefined, undefined, container);
   }
+
   const sideBar = elem(
     "div",
     { id: "side-bar", className: "sticky" },
