@@ -14,3 +14,9 @@
         opacity: 0;
     }
 }
+
+@media (max-width: 920px) {
+    .tray {
+        margin-bottom: $navbar-height-mobile + 8px;
+    }
+}
