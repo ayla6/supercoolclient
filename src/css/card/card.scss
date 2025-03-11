@@ -31,6 +31,15 @@
         margin-bottom: 8px;
         min-width: 0;
         gap: 2px;
+
+        .timestamp,
+        .grayed {
+            color: #999;
+        }
+    }
+
+    &.clickable .card {
+        cursor: pointer;
     }
 
     .display-name::before {
@@ -89,5 +98,34 @@
                 background-color: $lighter-grey;
             }
         }
+    }
+}
+
+.card .header {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    font-size: 12px;
+    //line-height: 12px;
+    //margin-bottom: 2px;
+
+    .handle {
+        font-weight: 700;
+    }
+
+    .handle-area {
+        line-break: anywhere;
+        display: flex;
+        gap: 3px;
+        align-items: center;
+    }
+
+    .icon {
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: inline-block;
+        height: 10px;
+        width: 10px;
     }
 }

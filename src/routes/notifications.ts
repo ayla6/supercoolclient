@@ -1,14 +1,16 @@
+import { hydrateNotificationFeed } from "../elements/ui/notification_feed";
 import { elem } from "../elements/utils/elem";
-import { rpc } from "../login";
 import { RouteOutput } from "../types";
 
-export const notificationsRoute = async (): RouteOutput => {
+export const notificationsRoute = async (
+  currentSplitPath: string[],
+  previousSplitPath: string[],
+  container: HTMLDivElement,
+): RouteOutput => {
   const content = elem("div", { id: "content" });
-  const container = elem("div", { id: "container" }, content);
+  container.append(content);
 
-  console.log(
-    await rpc.get("app.bsky.notification.listNotifications", { params: {} }),
-  );
+  const onscrollFunction = await hydrateNotificationFeed(content);
 
-  return { title: "Notifications" };
+  return { onscrollFunction, title: "Notifications" };
 };

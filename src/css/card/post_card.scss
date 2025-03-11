@@ -25,10 +25,6 @@
         top: $string-avatar-margin + 1px + ($large-avatar-size * 0.5) -
             ($speech-bubble-height * 0.5);
     }
-
-    .timestamp {
-        color: #999;
-    }
 }
 
 .post-content {
@@ -52,34 +48,6 @@
 }
 
 .post .header {
-    display: flex;
-    flex-flow: row;
-    justify-content: space-between;
-    font-size: 12px;
-    //line-height: 12px;
-    //margin-bottom: 2px;
-
-    .handle {
-        font-weight: 700;
-    }
-
-    .handle-area {
-        line-break: anywhere;
-        display: flex;
-        gap: 3px;
-        align-items: center;
-    }
-
-    .icon {
-        background-image: icon.$reposted;
-        background-size: contain;
-        background-position: center;
-        background-repeat: no-repeat;
-        display: inline-block;
-        height: 10px;
-        width: 10px;
-    }
-
     .repost {
         background-color: #609928;
         background-image: linear-gradient(#609928, #588d25);
@@ -90,6 +58,9 @@
         padding: 0px 4px;
         padding-top: 1px;
         //vertical-align: top;
+        .icon {
+            background-image: icon.$reposted;
+        }
     }
 }
 
