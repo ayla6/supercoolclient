@@ -8,6 +8,7 @@ import { uploadVideo } from "./composer-embeds/video";
 import { changeImageFormat } from "../utils/link_processing";
 import { language_codes } from "../utils/language_codes";
 import { PostMediaEmbed, publishThread } from "@atcute/bluesky-threading";
+import { createTray } from "./tray";
 
 export const composerBox = (
   reply?: AppBskyFeedDefs.PostView,
@@ -157,6 +158,8 @@ export const composerBox = (
         },
       })),
     });
+
+    createTray("Your post was published!");
 
     cleanup(true);
   };

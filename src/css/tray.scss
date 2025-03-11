@@ -1,0 +1,16 @@
+@use "variables" as *;
+
+.tray {
+    background-color: var(--accent-color);
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    padding: 4px 8px;
+    margin: 8px;
+    color: $white;
+    border-radius: $border-radius;
+    transition: opacity 0.3s ease-in-out;
+    &.fade {
+        opacity: 0;
+    }
+}
