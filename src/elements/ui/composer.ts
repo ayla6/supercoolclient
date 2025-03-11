@@ -132,6 +132,10 @@ export const composerBox = (
 
   // Post creation
   const createPost = async () => {
+    // prettier-ignore
+    if (!textboxes.every((textbox, index) => textbox.innerText?.trim() || images[index]?.length))
+      return;
+
     let media: PostMediaEmbed[] = [];
     for (let i = 0; i < images.length; i++) {
       if (images[i].length) media[i] = await uploadImages(images[i]);
@@ -213,13 +217,7 @@ export const composerBox = (
     textbox.addEventListener("keydown", (e) => {
       if (e.ctrlKey && e.key === "Enter") {
         e.preventDefault(); // Prevent default newline behavior
-        if (
-          textboxes.every((textbox) => textbox.innerText?.trim()) ||
-          images.length ||
-          video
-        ) {
-          createPost();
-        }
+        createPost();
       }
     });
 
@@ -270,15 +268,7 @@ export const composerBox = (
   const postButton = elem("button", {
     className: "accent-button",
     textContent: "Post",
-    onclick: () => {
-      if (
-        textboxes.every((textbox) => textbox.innerText?.trim()) ||
-        images.length ||
-        video
-      ) {
-        createPost();
-      }
-    },
+    onclick: () => createPost(),
   });
 
   const cancelButton = elem("button", {
