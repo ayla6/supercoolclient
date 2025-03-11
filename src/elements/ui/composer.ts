@@ -210,6 +210,19 @@ export const composerBox = (
       container.classList.add("focus");
     });
 
+    textbox.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key === "Enter") {
+        e.preventDefault(); // Prevent default newline behavior
+        if (
+          textboxes.every((textbox) => textbox.innerText?.trim()) ||
+          images.length ||
+          video
+        ) {
+          createPost();
+        }
+      }
+    });
+
     const imagePreview = elem("div", { className: "image-preview" });
 
     const removeButton = elem("button", {

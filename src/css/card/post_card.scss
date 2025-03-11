@@ -246,6 +246,7 @@
 @media (max-width: 920px) {
     .stats-buttons {
         $size: 14px;
+        justify-content: space-around;
         gap: $size * 0.5;
         .interaction {
             font-size: $size;
