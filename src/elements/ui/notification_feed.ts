@@ -66,7 +66,7 @@ const loadNotifications = async (params: { limit: number; cursor: string }) => {
     const leftArea = elem("div", { className: "left-area" }, undefined, [
       elem(
         "a",
-        { className: "avatar-holder" },
+        { className: "avatar-holder", href: `/${notification.author.did}` },
         elem("img", {
           className: "avatar",
           src: notification.author.avatar,
