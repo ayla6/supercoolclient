@@ -1,7 +1,7 @@
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";
-import { manager, rpc } from "../login";
+import { manager, rpc, feeds } from "../login";
 import { RouteOutput } from "../types";
 import { unsignedHomeRoute } from "./unsigned_home";
 
@@ -19,11 +19,6 @@ export const homeRoute = async (
     { id: "side-bar", className: "sticky" },
     createSearchBar(undefined, true),
   );
-
-  const prefs = await rpc.get("app.bsky.actor.getPreferences", { params: {} });
-  const { items: feeds } = prefs.data.preferences.find((e) => {
-    return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
-  });
 
   const { data: feedGens } = await rpc.get("app.bsky.feed.getFeedGenerators", {
     params: {

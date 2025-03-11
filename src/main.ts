@@ -1,6 +1,6 @@
 import { fillMissingSettings } from "./config";
 import { loadNavbar } from "./elements/ui/navbar";
-import { login, manager, rpc } from "./login";
+import { login } from "./login";
 import { cleanCache, updatePage } from "./router";
 
 document.addEventListener("click", (e) => {

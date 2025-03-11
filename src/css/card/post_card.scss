@@ -243,6 +243,16 @@
     }
 }
 
+.warning-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: $font-size;
+    .warning-text {
+        font-weight: 400;
+    }
+}
+
 @media (max-width: 920px) {
     .stats-buttons {
         $size: 14px;

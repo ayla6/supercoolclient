@@ -8,6 +8,8 @@ export let manager = new CredentialManager({
 });
 export let rpc = new XRPC({ handler: manager });
 export let sessionData: AppBskyActorDefs.ProfileViewDetailed;
+export let contentLabels = {};
+export let feeds = [];
 
 export const login = async (credentials?: {
   identifier: string;
@@ -40,4 +42,22 @@ export const login = async (credentials?: {
         params: { actor: manager.session.did },
       })
     ).data;
+
+  const preferences =
+    sessionData && (await rpc.get("app.bsky.actor.getPreferences", {}));
+
+  contentLabels = preferences?.data.preferences
+    .filter((e) => {
+      return e.$type === "app.bsky.actor.defs#contentLabelPref";
+    })
+    .reduce((acc, label) => {
+      if (label.label && label.visibility) {
+        acc[label.label] = label.visibility;
+      }
+      return acc;
+    }, {});
+
+  feeds = preferences?.data.preferences.find((e) => {
+    return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
+  }).items;
 };

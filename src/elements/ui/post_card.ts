@@ -5,7 +5,7 @@ import {
   getPathFromUri,
   idChoose,
 } from "../utils/link_processing.ts";
-import { manager, rpc } from "../../login";
+import { manager, rpc, contentLabels } from "../../login";
 import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
@@ -147,7 +147,22 @@ export const postCard = (
   hasReplies = false,
   isEmbed = false,
 ) => {
+  console.log(postHousing);
   const post = "post" in postHousing ? postHousing.post : postHousing;
+
+  if (post.labels && post.labels.some((l) => contentLabels[l.val] === "hide"))
+    return fullView
+      ? elem(
+          "div",
+          { className: "card-holder" },
+          elem("div", {
+            className: "simple-card",
+            textContent: `This post is hidden because it contains the label ${post.labels.find((l) => contentLabels[l.val] === "hide")?.val}, which is set to hide.`,
+          }),
+        )
+      : elem("div");
+  // gonna make this second part better latter maybe
+
   const record = post.record as AppBskyFeedPost.Record;
   const author = post.author;
   const atId = idChoose(author);
@@ -308,7 +323,44 @@ export const postCard = (
       multipleEmbeds ? undefined : embeds,
       multipleEmbeds ? embeds : undefined,
     );
-    content.appendChild(embedsElem);
+    if (
+      post.labels &&
+      post.labels.some((l) => contentLabels[l.val] === "warn")
+    ) {
+      let embeddedShown = false;
+      const warningLabel = post.labels.find(
+        (l) => contentLabels[l.val] === "warn",
+      );
+      const buttonStatus = elem("span", {
+        textContent: embeddedShown ? "Hide content" : "Show content",
+      });
+      const warningButton = elem(
+        "button",
+        {
+          className: "warning-button",
+          onclick: (e) => {
+            e.stopPropagation();
+            embeddedShown = !embeddedShown;
+            buttonStatus.textContent = embeddedShown
+              ? "Hide content"
+              : "Show content";
+            embedsElem.style.display = embeddedShown ? "block" : "none";
+          },
+        },
+        undefined,
+        [
+          elem("span", {
+            className: "warning-text",
+            textContent: `Content Warning: ${warningLabel?.val}`,
+          }),
+          buttonStatus,
+        ],
+      );
+
+      embedsElem.style.display = "none";
+      content.appendChild(warningButton);
+      content.appendChild(embedsElem);
+    } else content.appendChild(embedsElem);
   }
   card.appendChild(content);
 
