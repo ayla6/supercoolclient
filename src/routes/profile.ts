@@ -181,7 +181,6 @@ export const profileRoute = async (
               textContent: "Edit Profile",
               onclick: async () => {
                 if (!(await editProfileDialog())) return;
-                console.log("hello");
                 Object.assign(
                   sessionData,
                   await rpc.get("app.bsky.actor.getProfile", {

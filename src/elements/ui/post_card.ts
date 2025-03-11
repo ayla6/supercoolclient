@@ -147,7 +147,6 @@ export const postCard = (
   hasReplies = false,
   isEmbed = false,
 ) => {
-  console.log(postHousing);
   const post = "post" in postHousing ? postHousing.post : postHousing;
 
   if (post.labels && post.labels.some((l) => contentLabels[l.val] === "hide"))
