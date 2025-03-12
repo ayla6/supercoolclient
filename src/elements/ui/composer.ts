@@ -26,6 +26,7 @@ const MAX_TEXT_LENGTH = {
 export const composerBox = (
   reply?: AppBskyFeedDefs.PostView,
   quote?: AppBskyFeedDefs.PostView,
+  ageEncrypted: boolean = false,
 ) => {
   // Main container elements
   const background = elem("div", { className: "background" });
@@ -43,8 +44,6 @@ export const composerBox = (
   let imagePreviews: HTMLDivElement[] = [];
   let selectedTextbox: HTMLDivElement;
   let cleaning = false;
-
-  let ageEncrypted: boolean = false;
 
   // Create character counter wheel
   const charCounter = elem("div", { className: "char-counter" });
@@ -151,14 +150,21 @@ export const composerBox = (
 
   // Post creation
   const createPost = async () => {
+    let error = false;
     // prettier-ignore
     if (!textboxes.every((textbox, index) => textbox.innerText?.trim() || images[index]?.length)) {
       createTray('Some posts are empty!')
-      return;
+      error = true;
     }
-    if (ageEncrypted && textboxes.length > 1) {
-      createTray("Threading on encrypted posts is not supported yet!");
-      return;
+    if (ageEncrypted) {
+      if (textboxes.length > 1) {
+        createTray("Threading on encrypted posts is not supported yet!");
+        error = true;
+      }
+      if (textboxes.some((textbox, index) => images[index]?.length)) {
+        createTray("Images are not supported on encrypted posts yet!");
+        error = true;
+      }
     }
     if (
       !textboxes.every((textbox, index) => {
@@ -170,8 +176,9 @@ export const composerBox = (
       })
     ) {
       createTray("Some posts are too long!");
-      return;
+      error = true;
     }
+    if (error) return;
 
     let blankImage: Blob;
     let media: PostMediaEmbed[] = [];
