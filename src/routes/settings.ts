@@ -37,10 +37,6 @@ const saveSettings = async () => {
   const allowList = await Promise.all(
     Array.from(listItems).map(async (item) => {
       const text = item.querySelector("span").textContent;
-      console.log(
-        text,
-        text.match(/https:\/\/.*\/profile\/?did:.*\/lists\/.*/),
-      );
       return text.startsWith("did:")
         ? text
         : text.match(/https:\/\/.*\/profile\/?did:.*\/lists\/.*/)
@@ -61,14 +57,14 @@ const saveSettings = async () => {
   createTray("Allow list of identities saved successfully!");
 
   const processedDids = [];
-  for (const did of allowList) {
-    if (did.includes("/app.bsky.graph.list/")) {
+  for (const item of allowList) {
+    if (item.match(/at:\/\/did:.*\/app\.bsky\.graph\.list\/.*/)) {
       const { data } = await rpc.get("app.bsky.graph.getList", {
-        params: { list: did },
+        params: { list: item },
       });
-      processedDids.push(...data.items.map((item) => item.subject.did));
-    } else {
-      processedDids.push(did);
+      processedDids.push(...data.items.map((did) => did.subject.did));
+    } else if (item.match(/did:.*/)) {
+      processedDids.push(item);
     }
   }
   const publicKeys: (string | null)[] = [];
@@ -160,16 +156,17 @@ export const settingsRoute = async (
             ),
             elem("input", {
               type: "text",
-              id: "new-dids",
-              placeholder: "Add new did",
+              id: "new-item",
+              placeholder:
+                "A handle, a did or a list (either a link or a proper at:// uri)",
             }),
             elem("button", {
               textContent: "+",
               onclick: () => {
                 const input = document.getElementById(
-                  "new-dids",
+                  "new-item",
                 ) as HTMLInputElement;
-                const list = document.getElementById("dids-list");
+                const list = document.getElementById("allow-list");
                 if (input.value) {
                   const item = elem(
                     "div",
