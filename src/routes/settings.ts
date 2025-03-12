@@ -143,7 +143,10 @@ export const settingsRoute = async (
       elem("div", { className: "card" }, undefined, [
         elem("span", { textContent: "Settings", className: "section-title" }),
 
-        elem("span", { textContent: "Appearance", className: "small-title" }),
+        elem("span", {
+          textContent: "Appearance",
+          className: "small-section-title",
+        }),
         elem("div", { className: "settings-holder" }, undefined, [
           elem("div", { className: "setting" }, undefined, [
             elem("label", { textContent: "Accent color:" }),
@@ -154,7 +157,7 @@ export const settingsRoute = async (
           ]),
         ]),
 
-        elem("span", { textContent: "Age", className: "small-title" }),
+        elem("span", { textContent: "Age", className: "small-section-title" }),
         elem("p", {}, undefined, [
           elem("a", {
             className: "link",
