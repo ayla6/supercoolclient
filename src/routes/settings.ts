@@ -16,8 +16,8 @@ const saveSettings = async () => {
 
     rpc.call("com.atproto.repo.putRecord", {
       data: {
-        repo: sessionData.did,
         rkey: "3publicagekey",
+        repo: sessionData.did,
         collection: "app.bsky.feed.post",
         record: {
           $type: "app.bsky.feed.post",

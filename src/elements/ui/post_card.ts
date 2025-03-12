@@ -18,10 +18,7 @@ import { languagesToNotTranslate } from "../../config.ts";
 import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import * as age from "age-encryption";
-import { PostRecordEmbed } from "@atcute/bluesky-threading";
 
-const AGE_ENCRYPTED_POST =
-  "=== AGE ENCRYPTED POST ===\n=== JUST IGNORE IT :) ===";
 const ageDecrypter = new age.Decrypter();
 privateKey && ageDecrypter.addIdentity(privateKey);
 
@@ -197,25 +194,25 @@ export const postCard = (
     }),
   );
 
-  if (
-    record.text === AGE_ENCRYPTED_POST &&
-    post.embed.$type === "app.bsky.embed.images#view"
-  ) {
+  const isAgeEncrypted =
+    (record.text === "AGE ENCRYPTED POST" &&
+      post.record["dev.pages.supercoolclient.secret"]) ||
+    (record.text === "=== AGE ENCRYPTED POST ===\n=== JUST IGNORE IT :) ===" &&
+      (post.embed as AppBskyEmbedImages.View)?.images[0].alt);
+  if (isAgeEncrypted) {
     setTimeout(async () => {
-      const text = (post.embed as AppBskyEmbedImages.View).images[0].alt;
+      const text = isAgeEncrypted;
       try {
         const decrypted = await ageDecrypter.decrypt(
           age.armor.decode(text),
           "text",
         );
         record.text = decrypted;
-      } catch (e) {
-        record.text = "Failed to decrypt post";
-      }
-      record.embed = undefined;
-      post.embed = undefined;
-      post.labels = undefined;
-      postElem.replaceWith(postCard(post, fullView));
+        record.embed = undefined;
+        post.embed = undefined;
+        post.labels = undefined;
+        postElem.replaceWith(postCard(post, fullView));
+      } catch (e) {}
     }, 0);
     return postElem;
   }

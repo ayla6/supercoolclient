@@ -1,4 +1,4 @@
-import { AppBskyFeedDefs } from "@atcute/client/lexicons";
+import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { manager, privateKey, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
@@ -10,9 +10,6 @@ import { language_codes } from "../utils/language_codes";
 import { PostMediaEmbed, publishThread } from "@atcute/bluesky-threading";
 import { createTray } from "./tray";
 import * as age from "age-encryption";
-
-const AGE_ENCRYPTED_POST =
-  "=== AGE ENCRYPTED POST ===\n=== JUST IGNORE IT :) ===";
 const ageEncrypter = new age.Encrypter();
 const pubKeys = JSON.parse(
   localStorage.getItem("allowed-public-keys-age") || "[]",
@@ -148,8 +145,14 @@ export const composerBox = (
   // Post creation
   const createPost = async () => {
     // prettier-ignore
-    if (!textboxes.every((textbox, index) => textbox.innerText?.trim() || images[index]?.length))
+    if (!textboxes.every((textbox, index) => textbox.innerText?.trim() || images[index]?.length)) {
+      createTray('Some posts are empty!')
       return;
+    }
+    if (ageEncrypted && textboxes.length > 1) {
+      createTray("Threading on encrypted posts is not supported yet!");
+      return;
+    }
 
     let blankImage: Blob;
     let media: PostMediaEmbed[] = [];
@@ -163,43 +166,59 @@ export const composerBox = (
       blankImage = await fetch(blankImageData).then((r) => r.blob());
     }
     //if (video) embed = await uploadVideo(video);
-
-    await publishThread(rpc, {
-      author: manager.session.did,
-      languages: [language],
-      reply: reply,
-      posts: await Promise.all(
-        textboxes.map(async (textbox, i) => ({
-          content: {
-            text: ageEncrypted
-              ? AGE_ENCRYPTED_POST
-              : textbox.innerText?.trim() || "",
-          },
-          embed: {
-            record:
-              i === 0 && quote
-                ? { type: "quote", uri: quote.uri, cid: quote.cid }
-                : undefined,
-            media: ageEncrypted
+    if (!ageEncrypted) {
+      await publishThread(rpc, {
+        author: manager.session.did,
+        languages: [language],
+        reply: reply,
+        posts: await Promise.all(
+          textboxes.map(async (textbox, i) => ({
+            content: {
+              text: textbox.innerText?.trim() || "",
+              "dev.pages.supercoolclient.secret": age.armor.encode(
+                await ageEncrypter.encrypt(textbox.innerText?.trim() || ""),
+              ),
+            },
+            embed: {
+              record:
+                i === 0 && quote
+                  ? { type: "quote", uri: quote.uri, cid: quote.cid }
+                  : undefined,
+              media: media?.[i],
+            },
+          })),
+        ),
+      });
+    } else {
+      await rpc.call("com.atproto.repo.createRecord", {
+        data: {
+          repo: sessionData.did,
+          collection: "app.bsky.feed.post",
+          record: {
+            $type: "app.bsky.feed.post",
+            reply: reply
               ? {
-                  type: "image",
-                  images: [
-                    {
-                      blob: blankImage,
-                      alt: age.armor.encode(
-                        await ageEncrypter.encrypt(
-                          textbox.innerText?.trim() || "",
-                        ),
-                      ),
-                    },
-                  ],
-                  labels: ["graphic-media"],
+                  root: {
+                    cid: (reply.record as AppBskyFeedPost.Record).reply.root
+                      .cid,
+                    uri: (reply.record as AppBskyFeedPost.Record).reply.root
+                      .uri,
+                  },
+                  parent: {
+                    cid: reply.cid,
+                    uri: reply.uri,
+                  },
                 }
-              : media?.[i],
-          },
-        })),
-      ),
-    });
+              : undefined,
+            createdAt: new Date().toISOString(),
+            text: "AGE ENCRYPTED POST",
+            "dev.pages.supercoolclient.secret": age.armor.encode(
+              await ageEncrypter.encrypt(textboxes[0].innerText?.trim() || ""),
+            ),
+          } as AppBskyFeedPost.Record,
+        },
+      });
+    }
 
     createTray("Your post was published!");
 
