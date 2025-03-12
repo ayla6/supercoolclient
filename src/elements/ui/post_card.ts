@@ -1,11 +1,15 @@
-import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
+import {
+  AppBskyEmbedImages,
+  AppBskyFeedDefs,
+  AppBskyFeedPost,
+} from "@atcute/client/lexicons";
 import {
   changeImageFormat,
   getDidFromUri,
   getPathFromUri,
   idChoose,
 } from "../utils/link_processing.ts";
-import { manager, rpc, contentLabels } from "../../login";
+import { manager, rpc, contentLabels, privateKey } from "../../login";
 import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
@@ -13,6 +17,13 @@ import { handleEmbed } from "./embeds/embed_handlers";
 import { languagesToNotTranslate } from "../../config.ts";
 import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
+import * as age from "age-encryption";
+import { PostRecordEmbed } from "@atcute/bluesky-threading";
+
+const AGE_ENCRYPTED_POST =
+  "=== AGE ENCRYPTED POST ===\n=== JUST IGNORE IT :) ===";
+const ageDecrypter = new age.Decrypter();
+privateKey && ageDecrypter.addIdentity(privateKey);
 
 const plural = {
   reply: "replies",
@@ -156,7 +167,8 @@ export const postCard = (
           { className: "card-holder" },
           elem("div", {
             className: "simple-card",
-            textContent: `This post is hidden because it contains the label ${post.labels.find((l) => contentLabels[l.val] === "hide")?.val}, which is set to hide.`,
+            textContent: `This post is hidden because it contains the label
+            ${post.labels.find((l) => contentLabels[l.val] === "hide")?.val}, which is set to hide.`,
           }),
         )
       : elem("div");
@@ -175,6 +187,57 @@ export const postCard = (
   });
   const card = elem("div", { className: "card" });
 
+  const profilePicture = elem(
+    "a",
+    { className: "avatar-holder", href: authorHref },
+    elem("img", {
+      className: "avatar",
+      src: changeImageFormat(post.author.avatar),
+      loading: "lazy",
+    }),
+  );
+
+  if (
+    record.text === AGE_ENCRYPTED_POST &&
+    post.embed.$type === "app.bsky.embed.images#view"
+  ) {
+    card.onclick = async () => {
+      const text = (post.embed as AppBskyEmbedImages.View).images[0].alt;
+      try {
+        const decrypted = await ageDecrypter.decrypt(
+          age.armor.decode(text),
+          "text",
+        );
+        record.text = decrypted;
+        record.embed = undefined;
+        post.embed = undefined;
+      } catch (e) {
+        record.text = "Failed to decrypt post";
+        record.embed = undefined;
+        post.embed = undefined;
+      }
+      record.embed = undefined;
+      post.embed = undefined;
+      postElem.replaceWith(postCard(post));
+    };
+    card.append(
+      elem(
+        "div",
+        { className: "post-content" },
+        elem("div", {
+          className: "text-content",
+          textContent: `🔒 Decrypt post by ${author.handle}`,
+        }),
+      ),
+    );
+    card.style.padding = "16px";
+    postElem.append(
+      elem("div", { className: "left-area" }, profilePicture),
+      card,
+    );
+    return postElem;
+  }
+
   if (!fullView) {
     card.onclick = (e) => {
       if (window.getSelection()?.toString()) return;
@@ -190,16 +253,6 @@ export const postCard = (
   const preload = () => {
     setPreloaded(post);
   };
-
-  const profilePicture = elem(
-    "a",
-    { className: "avatar-holder", href: authorHref },
-    elem("img", {
-      className: "avatar",
-      src: changeImageFormat(post.author.avatar),
-      loading: "lazy",
-    }),
-  );
 
   if (isEmbed) {
     card.appendChild(

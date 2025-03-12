@@ -1,6 +1,7 @@
 interface ImageWithURL {
   file: File;
   objectURL: string;
+  altText?: string;
 }
 import { AppBskyEmbedDefs, AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { rpc } from "../../../login";
@@ -13,7 +14,7 @@ export const uploadImages = async (input: ImageWithURL[]) => {
     images: [],
   };
 
-  for (const { file, objectURL } of input) {
+  for (const { file, objectURL, altText } of input) {
     const img = new Image();
     const aspectRatio = await new Promise<AppBskyEmbedDefs.AspectRatio>(
       (resolve) => {

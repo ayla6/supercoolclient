@@ -1,5 +1,5 @@
 import { AppBskyFeedDefs } from "@atcute/client/lexicons";
-import { manager, rpc, sessionData } from "../../login";
+import { manager, privateKey, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
 import { confirmDialog, popupBox, inputDialog, selectDialog } from "./dialog";
@@ -9,6 +9,17 @@ import { changeImageFormat } from "../utils/link_processing";
 import { language_codes } from "../utils/language_codes";
 import { PostMediaEmbed, publishThread } from "@atcute/bluesky-threading";
 import { createTray } from "./tray";
+import * as age from "age-encryption";
+
+const AGE_ENCRYPTED_POST =
+  "=== AGE ENCRYPTED POST ===\n=== JUST IGNORE IT :) ===";
+const ageEncrypter = new age.Encrypter();
+const pubKeys = JSON.parse(
+  localStorage.getItem("allowed-public-keys-age") || "[]",
+);
+for (const key of pubKeys) {
+  ageEncrypter.addRecipient(key);
+}
 
 export const composerBox = (
   reply?: AppBskyFeedDefs.PostView,
@@ -21,6 +32,7 @@ export const composerBox = (
   interface ImageWithURL {
     file: File;
     objectURL: string;
+    altText?: string;
   }
   let images: ImageWithURL[][] = [];
   let video: File;
@@ -29,6 +41,8 @@ export const composerBox = (
   let imagePreviews: HTMLDivElement[] = [];
   let selectedTextbox: HTMLDivElement;
   let cleaning = false;
+
+  let ageEncrypted: boolean = false;
 
   // Create character counter wheel
   const charCounter = elem("div", { className: "char-counter" });
@@ -137,9 +151,16 @@ export const composerBox = (
     if (!textboxes.every((textbox, index) => textbox.innerText?.trim() || images[index]?.length))
       return;
 
+    let blankImage;
     let media: PostMediaEmbed[] = [];
-    for (let i = 0; i < images.length; i++) {
-      if (images[i].length) media[i] = await uploadImages(images[i]);
+    if (!ageEncrypted) {
+      for (let i = 0; i < images.length; i++) {
+        if (images[i].length) media[i] = await uploadImages(images[i]);
+      }
+    } else {
+      const blankImageData =
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+      blankImage = await fetch(blankImageData).then((r) => r.blob());
     }
     //if (video) embed = await uploadVideo(video);
 
@@ -147,16 +168,37 @@ export const composerBox = (
       author: manager.session.did,
       languages: [language],
       reply: reply,
-      posts: textboxes.map((textbox, i) => ({
-        content: { text: textbox.innerText?.trim() || "" },
-        embed: {
-          record:
-            i === 0 && quote
-              ? { type: "quote", uri: quote.uri, cid: quote.cid }
-              : undefined,
-          media: media?.[i],
-        },
-      })),
+      posts: await Promise.all(
+        textboxes.map(async (textbox, i) => ({
+          content: {
+            text: ageEncrypted
+              ? AGE_ENCRYPTED_POST
+              : textbox.innerText?.trim() || "",
+          },
+          embed: {
+            record:
+              i === 0 && quote
+                ? { type: "quote", uri: quote.uri, cid: quote.cid }
+                : undefined,
+            media: ageEncrypted
+              ? {
+                  type: "image",
+                  images: [
+                    {
+                      blob: blankImage,
+                      alt: age.armor.encode(
+                        await ageEncrypter.encrypt(
+                          textbox.innerText?.trim() || "",
+                        ),
+                      ),
+                    },
+                  ],
+                  labels: ["graphic-media"],
+                }
+              : media?.[i],
+          },
+        })),
+      ),
     });
 
     createTray("Your post was published!");
@@ -392,6 +434,17 @@ export const composerBox = (
     }),
   );
 
+  const lockButton = elem("button", {
+    textContent: ageEncrypted ? "🔒" : "🔓",
+    className: "square",
+    onclick: () => {
+      ageEncrypted = !ageEncrypted;
+      lockButton.textContent = ageEncrypted ? "🔒" : "🔓";
+      lockButton.style.backgroundColor = ageEncrypted ? "#00ff00" : "#ff0000";
+    },
+  });
+  lockButton.style.background = ageEncrypted ? "#00ff00" : "#ff0000";
+
   const composer = elem("div", { className: "composer" }, null, [
     reply &&
       elem("div", { className: "embeds" }, postCard(reply, false, false, true)),
@@ -399,7 +452,11 @@ export const composerBox = (
     quote &&
       elem("div", { className: "embeds" }, postCard(quote, false, false, true)),
     elem("div", { className: "horizontal-buttons space-between" }, null, [
-      elem("div", {}, null, [imageButton, languageButtons]),
+      elem("div", {}, null, [
+        privateKey ? lockButton : undefined,
+        imageButton,
+        languageButtons,
+      ]),
       addPostButton,
       //videoButton,
     ]),

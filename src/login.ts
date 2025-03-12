@@ -10,6 +10,7 @@ export let rpc = new XRPC({ handler: manager });
 export let sessionData: AppBskyActorDefs.ProfileViewDetailed;
 export let contentLabels = {};
 export let feeds = [];
+export const privateKey = localStorage.getItem("private-key");
 
 export const login = async (credentials?: {
   identifier: string;

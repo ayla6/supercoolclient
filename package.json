@@ -21,6 +21,7 @@
     "@atcute/bluesky-richtext-segmenter": "^1.0.4",
     "@atcute/bluesky-threading": "^3.0.0",
     "@atcute/client": "^2.0.4",
+    "age-encryption": "^0.2.1",
     "hls.js": "^1.5.17"
   }
 }
