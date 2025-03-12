@@ -120,7 +120,8 @@ export const settingsRoute = async (
         ]),
         elem("div", { className: "setting" }, undefined, [
           elem("label", {
-            textContent: "Custom DIDs List: (you can also use handles)",
+            textContent:
+              "People that can see your posts: (the handles get turned into dids once saved)",
           }),
           elem("div", { id: "dids-list" }, undefined, [
             ...JSON.parse(localStorage.getItem("allowed-dids-age") || "[]").map(
