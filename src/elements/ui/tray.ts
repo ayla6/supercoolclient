@@ -15,6 +15,7 @@ export const createTray = (text: string, timeout: number = 3000) => {
     textContent: text,
   });
   trayArea.appendChild(trayElement);
+  console.log(text);
 
   setTimeout(() => {
     trayElement.classList.remove("fade");

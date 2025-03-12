@@ -2,6 +2,8 @@ import { AppBskyFeedPost } from "@atcute/client/lexicons";
 import { elem } from "../elements/utils/elem";
 import { rpc, sessionData } from "../login";
 import { RouteOutput } from "../types";
+import { createTray } from "../elements/ui/tray";
+import { getUriFromSplitPath } from "../elements/utils/link_processing";
 
 const saveSettings = async () => {
   const publicKey = (document.getElementById("public-key") as HTMLInputElement)
@@ -27,30 +29,51 @@ const saveSettings = async () => {
       },
     });
 
-    console.log("Saved keys successfully!");
+    createTray("Key pair saved successfully!");
   }
 
-  console.log("saving dids");
-  const didsList = document.getElementById("dids-list");
-  const listItems = didsList.getElementsByClassName("list-item");
-  const dids = await Promise.all(
+  const allowListElem = document.getElementById("allow-list");
+  const listItems = allowListElem.getElementsByClassName("list-item");
+  const allowList = await Promise.all(
     Array.from(listItems).map(async (item) => {
       const text = item.querySelector("span").textContent;
+      console.log(
+        text,
+        text.match(/https:\/\/.*\/profile\/?did:.*\/lists\/.*/),
+      );
       return text.startsWith("did:")
         ? text
-        : (
-            await rpc.get("com.atproto.identity.resolveHandle", {
-              params: { handle: text },
-            })
-          ).data.did;
+        : text.match(/https:\/\/.*\/profile\/?did:.*\/lists\/.*/)
+          ? getUriFromSplitPath(
+              new URL(text).pathname.split("/").slice(2),
+              "app.bsky.graph.list",
+            )
+          : text.match(/at:\/\/did:.*\/app\.bsky\.graph\.list\/.*/)
+            ? text
+            : (
+                await rpc.get("com.atproto.identity.resolveHandle", {
+                  params: { handle: text },
+                })
+              ).data.did;
     }),
   );
-  localStorage.setItem("allowed-dids-age", JSON.stringify(dids));
-  console.log("Saved allowed DID list successfully!");
-  console.log("saving public keys");
+  localStorage.setItem("allowed-dids-age", JSON.stringify(allowList));
+  createTray("Allow list of identities saved successfully!");
+
+  const processedDids = [];
+  for (const did of allowList) {
+    if (did.includes("/app.bsky.graph.list/")) {
+      const { data } = await rpc.get("app.bsky.graph.getList", {
+        params: { list: did },
+      });
+      processedDids.push(...data.items.map((item) => item.subject.did));
+    } else {
+      processedDids.push(did);
+    }
+  }
   const publicKeys: (string | null)[] = [];
-  for (let i = 0; i < dids.length; i += 25) {
-    const didsBatch = dids.slice(i, i + 25);
+  for (let i = 0; i < processedDids.length; i += 25) {
+    const didsBatch = processedDids.slice(i, i + 25);
     const posts = await rpc.get("app.bsky.feed.getPosts", {
       params: {
         uris: didsBatch.map(
@@ -66,12 +89,12 @@ const saveSettings = async () => {
       if (post) {
         publicKeys.push((post.record as AppBskyFeedPost.Record).text as string);
       } else {
-        console.log(`couldn't get public key for ${did}`);
+        console.log(`Couldn't get public key for ${did}`);
       }
     }
   }
   localStorage.setItem("allowed-public-keys-age", JSON.stringify(publicKeys));
-  console.log("public keys saved!");
+  createTray("Allow list of keys saved successfully!");
 };
 
 export const settingsRoute = async (
@@ -86,7 +109,7 @@ export const settingsRoute = async (
       "div",
       { className: "card-holder" },
       elem("div", { className: "card" }, undefined, [
-        elem("p", { textContent: "the ugliest Settings you have ever seen" }),
+        elem("h2", { textContent: "Settings" }),
         elem("a", {
           href: "https://agewasm.marin-basic.com/",
           target: "_blank",
@@ -121,11 +144,11 @@ export const settingsRoute = async (
         elem("div", { className: "setting" }, undefined, [
           elem("label", {
             textContent:
-              "People that can see your posts: (the handles get turned into dids once saved)",
+              "People that can see your posts: (Handles, DIDs or lists)",
           }),
-          elem("div", { id: "dids-list" }, undefined, [
+          elem("div", { id: "allow-list" }, undefined, [
             ...JSON.parse(localStorage.getItem("allowed-dids-age") || "[]").map(
-              (did) =>
+              (did: string) =>
                 elem("div", { className: "list-item" }, undefined, [
                   elem("span", { textContent: did }),
                   elem("button", {
