@@ -12,10 +12,7 @@ export const changeImageFormat = (uri: string, format = "webp") =>
 export const getUriFromSplitPath = (
   [did, , postId]: string[],
   type: string = "app.bsky.feed.post",
-) => {
-  console.log(did, postId);
-  return `at://${did}/${type}/${postId}`;
-};
+) => `at://${did}/${type}/${postId}`;
 
 export const cutOutThePath = (uri: string) => {
   const slashIndex = uri.indexOf("/", 8);

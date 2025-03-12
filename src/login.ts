@@ -20,7 +20,7 @@ export const login = async (credentials?: {
   if (!session && !credentials) return;
 
   manager = new CredentialManager({
-    service: "https://bsky.social",
+    service: "https://api.bsky.social",
     onSessionUpdate(session) {
       savedSessionData = session;
       localStorage.setItem("session", JSON.stringify(session));

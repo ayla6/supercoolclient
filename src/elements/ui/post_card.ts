@@ -201,20 +201,26 @@ export const postCard = (
       (post.embed as AppBskyEmbedImages.View)?.images[0].alt);
   if (isAgeEncrypted) {
     setTimeout(async () => {
+      let success = false;
       const text = isAgeEncrypted;
+      let decryptedText: string;
       try {
-        const decrypted = await ageDecrypter.decrypt(
+        decryptedText = await ageDecrypter.decrypt(
           age.armor.decode(text),
           "text",
         );
-        record.text = decrypted;
+        success = true;
+      } catch (e) {
+        success = false;
+      }
+      if (success) {
+        record.text = decryptedText;
         record.embed = undefined;
         post.embed = undefined;
         post.labels = undefined;
         postElem.replaceWith(postCard(postHousing, fullView));
-      } catch (e) {}
+      }
     }, 0);
-    return postElem;
   }
 
   if (!fullView) {
