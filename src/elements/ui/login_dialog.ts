@@ -43,7 +43,7 @@ export const loginDialog = async () => {
 
   const content = elem("div", { className: "popup login-popup" }, null, [
     elem("span", {
-      className: "title",
+      className: "section-title",
       textContent: "Sign in",
     }),
 

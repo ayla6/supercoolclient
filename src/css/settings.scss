@@ -1,0 +1,38 @@
+@use "variables" as *;
+
+.setting {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+#allow-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.list-item {
+    padding: 4px;
+    background-color: $lighter-grey;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    border-radius: $border-radius;
+    span {
+        padding: 8px 12px;
+    }
+    span,
+    input {
+        width: 100%;
+    }
+}
+
+.color-picker {
+    display: flex;
+    gap: 4px;
+    .color-input {
+        padding: 4px;
+    }
+}

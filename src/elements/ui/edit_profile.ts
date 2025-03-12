@@ -29,7 +29,7 @@ export const editProfileDialog = async () => {
   return await new Promise<boolean>((resolve) => {
     const content = elem("div", { className: "popup" }, null, [
       elem("span", {
-        className: "title",
+        className: "section-title",
         textContent: "Edit profile",
       }),
       elem("span", {
