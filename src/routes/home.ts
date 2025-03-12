@@ -1,3 +1,5 @@
+import { AppBskyFeedGetFeedGenerators } from "@atcute/client/lexicons";
+import { feedNSID } from "../elements/ui/feed";
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";
@@ -20,17 +22,27 @@ export const homeRoute = async (
     createSearchBar(undefined, true),
   );
 
-  const { data: feedGens } = await rpc.get("app.bsky.feed.getFeedGenerators", {
-    params: {
-      feeds: (() => {
-        let pinned = [];
-        for (const feed of feeds.slice(1)) {
-          if (feed.pinned) pinned.push(feed.value);
-        }
-        return pinned;
-      })(),
-    },
-  });
+  const { data: feedGens } = await (async () => {
+    try {
+      return await rpc.get("app.bsky.feed.getFeedGenerators", {
+        params: {
+          feeds: (() => {
+            let pinned = [];
+            for (const feed of feeds.slice(1)) {
+              if (feed.pinned) pinned.push(feed.value);
+            }
+            return pinned;
+          })(),
+        },
+      });
+    } catch (err) {
+      return {
+        data: {
+          feeds: [],
+        } as AppBskyFeedGetFeedGenerators.Output,
+      };
+    }
+  })();
 
   const feedsData = [];
   for (const feedGen of [
