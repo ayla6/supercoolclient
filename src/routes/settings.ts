@@ -17,7 +17,7 @@ const saveSettings = async () => {
     rpc.call("com.atproto.repo.putRecord", {
       data: {
         repo: sessionData.did,
-        rkey: "public-age-key",
+        rkey: "3publicagekey",
         collection: "app.bsky.feed.post",
         record: {
           $type: "app.bsky.feed.post",
@@ -48,23 +48,28 @@ const saveSettings = async () => {
   localStorage.setItem("allowed-dids-age", JSON.stringify(dids));
   console.log("Saved allowed DID list successfully!");
   console.log("saving public keys");
-  const publicKeys = await Promise.all(
-    dids.map(async (did) => {
-      try {
-        const record = await rpc.get("com.atproto.repo.getRecord", {
-          params: {
-            repo: did,
-            collection: "app.bsky.feed.post",
-            rkey: "public-age-key",
-          },
-        });
-        return (record.data.value as any).text;
-      } catch (e) {
-        console.error(`couldn't get public key for ${did}`, e);
-        return null;
+  const publicKeys: (string | null)[] = [];
+  for (let i = 0; i < dids.length; i += 25) {
+    const didsBatch = dids.slice(i, i + 25);
+    const posts = await rpc.get("app.bsky.feed.getPosts", {
+      params: {
+        uris: didsBatch.map(
+          (did) => `at://${did}/app.bsky.feed.post/3publicagekey`,
+        ),
+      },
+    });
+
+    for (const did of didsBatch) {
+      const post = posts.data.posts.find(
+        (post) => post.uri === `at://${did}/app.bsky.feed.post/3publicagekey`,
+      );
+      if (post) {
+        publicKeys.push((post.record as AppBskyFeedPost.Record).text as string);
+      } else {
+        console.log(`couldn't get public key for ${did}`);
       }
-    }),
-  );
+    }
+  }
   localStorage.setItem("allowed-public-keys-age", JSON.stringify(publicKeys));
   console.log("public keys saved!");
 };
