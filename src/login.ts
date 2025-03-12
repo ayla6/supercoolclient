@@ -1,6 +1,7 @@
 //stole most stuff from here because idk how to do this... https://github.com/wesbos/blue-sky-cli
 import { AtpSessionData, XRPC, CredentialManager } from "@atcute/client";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
+import { DidDocument } from "@atcute/client/utils/did";
 let savedSessionData: AtpSessionData;
 
 export let manager = new CredentialManager({
@@ -19,8 +20,32 @@ export const login = async (credentials?: {
   const session = localStorage.getItem("session");
   if (!session && !credentials) return;
 
+  let serviceEndpoint: string;
+
+  if (session) {
+    serviceEndpoint = localStorage.getItem(JSON.parse(session).pdsUri);
+  } else {
+    const did = (
+      await rpc.get("com.atproto.identity.resolveHandle", {
+        params: { handle: credentials.identifier },
+      })
+    ).data.did;
+
+    // thanks https://github.com/notjuliet/pdsls/blob/main/src/utils/api.ts#L10
+    // i thought hmm but what if there are more ways to do than two   there are not this is fine thank god
+    const didDoc = (await (
+      await fetch(
+        did.startsWith("did:web")
+          ? `https://${did.split(":")[2]}/.well-known/did.json`
+          : "https://plc.directory/" + did,
+      )
+    ).json()) as DidDocument;
+
+    serviceEndpoint = didDoc.service[0].serviceEndpoint as string;
+  }
+
   manager = new CredentialManager({
-    service: "https://api.bsky.social",
+    service: serviceEndpoint,
     onSessionUpdate(session) {
       savedSessionData = session;
       localStorage.setItem("session", JSON.stringify(session));
