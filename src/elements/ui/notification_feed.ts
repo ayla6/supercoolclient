@@ -8,19 +8,26 @@ import { formatTimeDifference } from "../utils/date";
 import { elem } from "../utils/elem";
 import { getPathFromUri } from "../utils/link_processing";
 
+import favSvg from "../../svg/fav.svg?raw";
+import repostSvg from "../../svg/repost.svg?raw";
+import userSvg from "../../svg/user.svg?raw";
+import replySvg from "../../svg/reply.svg?raw";
+import quoteSvg from "../../svg/quote.svg?raw";
+
 const notificationIcons = {
-  like: "/src/svg/fav.svg",
-  repost: "/src/svg/repost.svg",
-  follow: "/src/svg/user.svg",
-  reply: "/src/svg/reply.svg",
-  mention: "/src/svg/reply.svg",
+  like: favSvg,
+  repost: repostSvg,
+  follow: userSvg,
+  reply: replySvg,
+  mention: quoteSvg,
 };
+
 const notificationMessages = {
-  like: " liked your post.",
-  repost: " reposted your post.",
-  follow: " followed you.",
-  reply: " replied to your post.",
-  mention: " mentioned you in a post.",
+  like: " liked your post",
+  repost: " reposted your post",
+  follow: " followed you",
+  reply: " replied to your post",
+  mention: " mentioned you in a post",
 };
 
 const loadNotifications = async (params: { limit: number; cursor: string }) => {
@@ -85,13 +92,15 @@ const loadNotifications = async (params: { limit: number; cursor: string }) => {
     ]);
 
     const notifHeader = elem("div", { className: "header" }, undefined, [
-      elem("div", { className: "handle-area" }, undefined, [
-        elem("img", {
-          className: "icon",
-          src: notificationIcons[notification.reason],
-        }),
-        notifText,
-      ]),
+      elem(
+        "div",
+        {
+          className: "handle-area",
+          innerHTML: notificationIcons[notification.reason],
+        },
+        undefined,
+        [notifText],
+      ),
       elem("a", {
         className: "timestamp",
         href: href,
