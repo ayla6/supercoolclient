@@ -20,10 +20,12 @@ export const login = async (credentials?: {
   const session = localStorage.getItem("session");
   if (!session && !credentials) return;
 
-  let serviceEndpoint: string;
+  savedSessionData = JSON.parse(session);
 
-  if (session) {
-    serviceEndpoint = localStorage.getItem(JSON.parse(session).pdsUri);
+  let serviceEndpoint: string = "https://bsky.social";
+
+  if (session && savedSessionData.pdsUri) {
+    serviceEndpoint = savedSessionData.pdsUri;
   } else {
     const did = (
       await rpc.get("com.atproto.identity.resolveHandle", {
@@ -41,7 +43,9 @@ export const login = async (credentials?: {
       )
     ).json()) as DidDocument;
 
-    serviceEndpoint = didDoc.service[0].serviceEndpoint as string;
+    const didDocServiceEndpoint = didDoc.service?.[0]
+      ?.serviceEndpoint as string;
+    if (didDocServiceEndpoint) serviceEndpoint = didDocServiceEndpoint;
   }
 
   manager = new CredentialManager({
@@ -52,7 +56,6 @@ export const login = async (credentials?: {
     },
   });
   if (session) {
-    savedSessionData = JSON.parse(session);
     try {
       await manager.resume(savedSessionData);
     } catch {}
