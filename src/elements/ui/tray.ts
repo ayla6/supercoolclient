@@ -3,11 +3,18 @@ import { elem } from "../utils/elem";
 const FADE_DURATION = 150;
 
 export const createTray = (text: string, timeout: number = 3000) => {
+  let trayArea = document.getElementById("tray-area");
+
+  if (!trayArea) {
+    trayArea = elem("div", { id: "tray-area", className: "tray-area" });
+    document.body.appendChild(trayArea);
+  }
+
   const trayElement = elem("div", {
     className: "tray fade",
     textContent: text,
   });
-  document.body.appendChild(trayElement);
+  trayArea.appendChild(trayElement);
 
   setTimeout(() => {
     trayElement.classList.remove("fade");
@@ -16,7 +23,10 @@ export const createTray = (text: string, timeout: number = 3000) => {
   setTimeout(() => {
     trayElement.classList.add("fade");
     setTimeout(() => {
-      document.body.removeChild(trayElement);
+      trayArea!.removeChild(trayElement);
+      if (trayArea!.children.length === 0) {
+        document.body.removeChild(trayArea!);
+      }
     }, FADE_DURATION);
   }, timeout);
 

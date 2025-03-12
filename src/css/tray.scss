@@ -1,23 +1,29 @@
 @use "variables" as *;
 
-.tray {
-    background-color: var(--accent-color);
+.tray-area {
     position: fixed;
     left: 0;
     bottom: 0;
-    padding: 4px 8px;
     margin: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+}
+
+.tray {
+    padding: 4px 8px;
+    background-color: var(--accent-color);
     color: $white;
     border-radius: $border-radius;
     transition: opacity 0.3s ease-in-out;
-    z-index: 100;
     &.fade {
         opacity: 0;
     }
 }
 
 @media (max-width: 920px) {
-    .tray {
+    .tray-area {
         margin-bottom: $navbar-height-mobile + 8px;
     }
 }
