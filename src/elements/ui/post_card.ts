@@ -201,7 +201,7 @@ export const postCard = (
     record.text === AGE_ENCRYPTED_POST &&
     post.embed.$type === "app.bsky.embed.images#view"
   ) {
-    card.onclick = async () => {
+    setTimeout(async () => {
       const text = (post.embed as AppBskyEmbedImages.View).images[0].alt;
       try {
         const decrypted = await ageDecrypter.decrypt(
@@ -219,23 +219,7 @@ export const postCard = (
       record.embed = undefined;
       post.embed = undefined;
       postElem.replaceWith(postCard(post, fullView));
-    };
-    card.append(
-      elem(
-        "div",
-        { className: "post-content" },
-        elem("div", {
-          className: "text-content",
-          textContent: `🔒 Decrypt post by ${author.handle}`,
-        }),
-      ),
-    );
-    card.style.padding = "16px";
-    card.style.cursor = "pointer";
-    postElem.append(
-      elem("div", { className: "left-area" }, profilePicture),
-      card,
-    );
+    }, 0);
     return postElem;
   }
 
