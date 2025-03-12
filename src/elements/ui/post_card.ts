@@ -218,7 +218,7 @@ export const postCard = (
       }
       record.embed = undefined;
       post.embed = undefined;
-      postElem.replaceWith(postCard(post));
+      postElem.replaceWith(postCard(post, fullView));
     };
     card.append(
       elem(
@@ -231,6 +231,7 @@ export const postCard = (
       ),
     );
     card.style.padding = "16px";
+    card.style.cursor = "pointer";
     postElem.append(
       elem("div", { className: "left-area" }, profilePicture),
       card,
