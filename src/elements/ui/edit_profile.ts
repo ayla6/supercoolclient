@@ -32,14 +32,20 @@ export const editProfileDialog = async () => {
         className: "section-title",
         textContent: "Edit profile",
       }),
-      elem("span", {
-        textContent: "Display name",
-      }),
-      displayName,
-      elem("span", {
-        textContent: "Description",
-      }),
-      description,
+      elem("div", { className: "settings-holder" }, undefined, [
+        elem("div", { className: "setting" }, undefined, [
+          elem("label", {
+            textContent: "Display name:",
+          }),
+          displayName,
+        ]),
+        elem("div", { className: "setting" }, undefined, [
+          elem("label", {
+            textContent: "Description:",
+          }),
+          description,
+        ]),
+      ]),
       elem("div", { className: "dialog-options" }, null, [
         elem("button", {
           textContent: "Cancel",
