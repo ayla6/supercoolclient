@@ -209,15 +209,12 @@ export const postCard = (
           "text",
         );
         record.text = decrypted;
-        record.embed = undefined;
-        post.embed = undefined;
       } catch (e) {
         record.text = "Failed to decrypt post";
-        record.embed = undefined;
-        post.embed = undefined;
       }
       record.embed = undefined;
       post.embed = undefined;
+      post.labels = undefined;
       postElem.replaceWith(postCard(post, fullView));
     }, 0);
     return postElem;

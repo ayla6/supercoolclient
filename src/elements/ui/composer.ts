@@ -151,7 +151,7 @@ export const composerBox = (
     if (!textboxes.every((textbox, index) => textbox.innerText?.trim() || images[index]?.length))
       return;
 
-    let blankImage;
+    let blankImage: Blob;
     let media: PostMediaEmbed[] = [];
     if (!ageEncrypted) {
       for (let i = 0; i < images.length; i++) {
@@ -159,7 +159,7 @@ export const composerBox = (
       }
     } else {
       const blankImageData =
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+        "data:image/octet-stream;base64,UklGRhYAAABXRUJQVlA4TAkAAAAvAAAAAIiI/gcA";
       blankImage = await fetch(blankImageData).then((r) => r.blob());
     }
     //if (video) embed = await uploadVideo(video);
