@@ -18,6 +18,11 @@ for (const key of pubKeys) {
   ageEncrypter.addRecipient(key);
 }
 
+const MAX_TEXT_LENGTH = {
+  normal: 300,
+  encrypted: 2000,
+};
+
 export const composerBox = (
   reply?: AppBskyFeedDefs.PostView,
   quote?: AppBskyFeedDefs.PostView,
@@ -80,7 +85,9 @@ export const composerBox = (
   const updateCharCount = (textbox?: HTMLDivElement) => {
     const text = textbox?.textContent || "";
     const count = [...text].length;
-    const maxCount = 300;
+    const maxCount = ageEncrypted
+      ? MAX_TEXT_LENGTH.encrypted
+      : MAX_TEXT_LENGTH.normal;
     const percent = Math.min((count / maxCount) * 100, 100);
 
     circle.style.strokeDasharray = `${(percent * 75.4) / 100} 75.4`;
@@ -153,6 +160,18 @@ export const composerBox = (
       createTray("Threading on encrypted posts is not supported yet!");
       return;
     }
+    if (
+      !textboxes.every((textbox, index) => {
+        const text = textbox.innerText?.trim() || "";
+        const maxCount = ageEncrypted
+          ? MAX_TEXT_LENGTH.encrypted
+          : MAX_TEXT_LENGTH.normal;
+        return [...text].length <= maxCount;
+      })
+    ) {
+      createTray("Some posts are too long!");
+      return;
+    }
 
     let blankImage: Blob;
     let media: PostMediaEmbed[] = [];
@@ -198,12 +217,17 @@ export const composerBox = (
             $type: "app.bsky.feed.post",
             reply: reply
               ? {
-                  root: {
-                    cid: (reply.record as AppBskyFeedPost.Record).reply.root
-                      .cid,
-                    uri: (reply.record as AppBskyFeedPost.Record).reply.root
-                      .uri,
-                  },
+                  root: (reply.record as AppBskyFeedPost.Record).reply
+                    ? {
+                        cid: (reply.record as AppBskyFeedPost.Record).reply.root
+                          .cid,
+                        uri: (reply.record as AppBskyFeedPost.Record).reply.root
+                          .uri,
+                      }
+                    : {
+                        cid: reply.cid,
+                        uri: reply.uri,
+                      },
                   parent: {
                     cid: reply.cid,
                     uri: reply.uri,
@@ -460,6 +484,7 @@ export const composerBox = (
       ageEncrypted = !ageEncrypted;
       lockButton.textContent = ageEncrypted ? "🔒" : "🔓";
       lockButton.style.backgroundColor = ageEncrypted ? "#00ff00" : "#ff0000";
+      updateCharCount(selectedTextbox);
     },
   });
   lockButton.style.background = ageEncrypted ? "#00ff00" : "#ff0000";
