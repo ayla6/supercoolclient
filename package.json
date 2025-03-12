@@ -11,17 +11,17 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "sass-embedded": "^1.80.6",
-    "vite": "^5.4.10",
+    "sass-embedded": "^1.85.1",
+    "vite": "^5.4.14",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-raw": "^1.0.3"
   },
   "dependencies": {
-    "@atcute/bluesky": "^1.0.8",
-    "@atcute/bluesky-richtext-segmenter": "^1.0.4",
+    "@atcute/bluesky": "^1.0.14",
+    "@atcute/bluesky-richtext-segmenter": "^1.0.5",
     "@atcute/bluesky-threading": "^3.0.0",
-    "@atcute/client": "^2.0.4",
+    "@atcute/client": "^2.0.8",
     "age-encryption": "^0.2.1",
-    "hls.js": "^1.5.17"
+    "hls.js": "^1.5.20"
   }
 }

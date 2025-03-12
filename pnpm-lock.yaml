@@ -9,29 +9,29 @@ importers:
   .:
     dependencies:
       '@atcute/bluesky':
-        specifier: ^1.0.8
+        specifier: ^1.0.14
         version: 1.0.14(@atcute/client@2.0.8)
       '@atcute/bluesky-richtext-segmenter':
-        specifier: ^1.0.4
+        specifier: ^1.0.5
         version: 1.0.5(@atcute/bluesky@1.0.14(@atcute/client@2.0.8))(@atcute/client@2.0.8)
       '@atcute/bluesky-threading':
         specifier: ^3.0.0
         version: 3.0.0(@atcute/bluesky@1.0.14(@atcute/client@2.0.8))(@atcute/client@2.0.8)
       '@atcute/client':
-        specifier: ^2.0.4
+        specifier: ^2.0.8
         version: 2.0.8
       age-encryption:
         specifier: ^0.2.1
         version: 0.2.1
       hls.js:
-        specifier: ^1.5.17
+        specifier: ^1.5.20
         version: 1.5.20
     devDependencies:
       sass-embedded:
-        specifier: ^1.80.6
+        specifier: ^1.85.1
         version: 1.85.1
       vite:
-        specifier: ^5.4.10
+        specifier: ^5.4.14
         version: 5.4.14(sass-embedded@1.85.1)
       vite-plugin-compression:
         specifier: ^0.5.1
