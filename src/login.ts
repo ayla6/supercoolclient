@@ -1,7 +1,7 @@
 //stole most stuff from here because idk how to do this... https://github.com/wesbos/blue-sky-cli
 import { AtpSessionData, XRPC, CredentialManager } from "@atcute/client";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
-import { DidDocument } from "@atcute/client/utils/did";
+import { DidDocument, getServiceEndpoint } from "@atcute/client/utils/did";
 let savedSessionData: AtpSessionData;
 
 export let manager = new CredentialManager({
@@ -16,16 +16,19 @@ export const privateKey = localStorage.getItem("private-key");
 export const login = async (credentials?: {
   identifier: string;
   password: string;
+  serviceEndpoint?: string;
 }) => {
   const session = localStorage.getItem("session");
   if (!session && !credentials) return;
 
   savedSessionData = JSON.parse(session);
 
-  let serviceEndpoint: string = "https://bsky.social";
+  let serviceEndpoint = "https://bsky.social";
 
   if (session && savedSessionData.pdsUri) {
     serviceEndpoint = savedSessionData.pdsUri;
+  } else if (credentials?.serviceEndpoint) {
+    serviceEndpoint = credentials.serviceEndpoint;
   } else {
     const did = (
       await rpc.get("com.atproto.identity.resolveHandle", {
@@ -51,6 +54,7 @@ export const login = async (credentials?: {
   manager = new CredentialManager({
     service: serviceEndpoint,
     onSessionUpdate(session) {
+      session.pdsUri = serviceEndpoint;
       savedSessionData = session;
       localStorage.setItem("session", JSON.stringify(session));
     },

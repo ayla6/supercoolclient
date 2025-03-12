@@ -1,6 +1,7 @@
 import { login } from "../../login";
 import { elem } from "../utils/elem";
 import { popupBox } from "./dialog";
+import { createTray } from "./tray";
 
 export const loginDialog = async () => {
   const identifier = elem("input", {
@@ -15,10 +16,21 @@ export const loginDialog = async () => {
     className: "login-input",
   });
 
+  const serviceEndpoint = elem("input", {
+    type: "text",
+    placeholder: "Put your PDS here if it can't auto detect it",
+    className: "login-input",
+  });
+
   const handleLogin = () => {
+    if (serviceEndpoint.value && !serviceEndpoint.value.startsWith("http")) {
+      createTray("Invalid service endpoint");
+      return;
+    }
     login({
       identifier: identifier.value,
       password: password.value,
+      serviceEndpoint: serviceEndpoint.value,
     });
   };
 
@@ -38,6 +50,8 @@ export const loginDialog = async () => {
     elem("div", { className: "field" }, null, [identifier]),
 
     elem("div", { className: "field" }, null, [password]),
+
+    elem("div", { className: "field" }, null, [serviceEndpoint]),
 
     elem("div", { className: "dialog-options" }, null, [
       elem("button", {
