@@ -211,7 +211,7 @@ export const postCard = (
         record.embed = undefined;
         post.embed = undefined;
         post.labels = undefined;
-        postElem.replaceWith(postCard(post, fullView));
+        postElem.replaceWith(postCard(postHousing, fullView));
       } catch (e) {}
     }, 0);
     return postElem;

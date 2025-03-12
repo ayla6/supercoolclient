@@ -180,17 +180,13 @@ export const composerBox = (
     }
     if (error) return;
 
-    let blankImage: Blob;
     let media: PostMediaEmbed[] = [];
     if (!ageEncrypted) {
       for (let i = 0; i < images.length; i++) {
         if (images[i].length) media[i] = await uploadImages(images[i]);
       }
-    } else {
-      const blankImageData =
-        "data:image/octet-stream;base64,UklGRhYAAABXRUJQVlA4TAkAAAAvAAAAAIiI/gcA";
-      blankImage = await fetch(blankImageData).then((r) => r.blob());
     }
+
     //if (video) embed = await uploadVideo(video);
     if (!ageEncrypted) {
       await publishThread(rpc, {
