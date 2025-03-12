@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "jsr": "^0.13.4",
     "sass-embedded": "^1.85.1",
     "vite": "^5.4.14",
     "vite-plugin-compression": "^0.5.1",
@@ -21,6 +22,7 @@
     "@atcute/bluesky-richtext-segmenter": "^1.0.5",
     "@atcute/bluesky-threading": "^3.0.0",
     "@atcute/client": "^2.0.8",
+    "@mary/color-fns": "npm:@jsr/mary__color-fns@^0.1.1",
     "age-encryption": "^0.2.1",
     "hls.js": "^1.5.20"
   }
