@@ -113,7 +113,7 @@ const loadNotifications = async (params: { limit: number; cursor: string }) => {
     ]);
 
     let notifContent = elem("div", { className: "content" });
-    if (notification.reason === "reply") {
+    if (notification.reason === "reply" || notification.reason === "mention") {
       notifContent.append(
         new Text((notification.record as AppBskyFeedPost.Record).text),
       );
@@ -135,6 +135,8 @@ const loadNotifications = async (params: { limit: number; cursor: string }) => {
 
     card.setAttribute("works-as-link", "");
     card.setAttribute("href", href);
+
+    if (notification.reason === "follow") card.style.paddingBlock = "16px";
 
     const notifElement: HTMLElement = elem(
       "div",
