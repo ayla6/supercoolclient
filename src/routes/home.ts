@@ -72,6 +72,23 @@ export const homeRoute = async (
     true,
   );
 
+  sideBar.append(
+    elem("div", { className: "sidebar-footer" }, undefined, [
+      elem("a", {
+        textContent: "Source code",
+        href: "https://codeberg.org/aylac/supercoolclient",
+      }),
+      elem("a", {
+        textContent: "Source code (mirror)",
+        href: "https://github.com/ayla6/supercoolclient",
+      }),
+      elem("a", {
+        textContent: "Dev",
+        href: "/did:plc:avlpu4l2j5u3johint7tqrmu",
+      }),
+    ]),
+  );
+
   const params = new URLSearchParams(window.location.search);
   let uri: string = params.get("feed");
   history.replaceState(null, "", window.location.pathname);

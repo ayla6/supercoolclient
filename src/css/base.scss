@@ -313,6 +313,13 @@ select {
     margin-bottom: $font-size / 2;
 }
 
+.sidebar-footer {
+    color: $light-grey;
+    font-size: 12px;
+    display: flex;
+    gap: 4px;
+}
+
 @media (min-width: 920px) {
     .buffer-top {
         display: none;
@@ -400,6 +407,10 @@ select {
 }
 
 @media (max-width: 920px) {
+    .sidebar-footer {
+        display: none;
+    }
+
     .hide-on-mobile {
         display: none;
     }
