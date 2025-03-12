@@ -55,14 +55,13 @@ const stat = (
 
 const updateInteraction = async (
   active: boolean,
-  cid: string,
-  uri: string,
-  count: number,
-  recordUri: string,
-  type: "repost" | "like",
+  post: AppBskyFeedDefs.PostView,
+  type: string,
   countSpan: HTMLSpanElement,
   button: HTMLButtonElement,
 ) => {
+  let count = post[type + "Count"];
+  const recordUri = post.viewer[type];
   try {
     const collection = "app.bsky.feed." + type;
     count += active ? 1 : -1;
@@ -74,7 +73,7 @@ const updateInteraction = async (
           record: {
             $type: collection,
             createdAt: new Date().toISOString(),
-            subject: { cid, uri },
+            subject: { cid: post.cid, uri: post.uri },
           },
           collection,
           repo: manager.session.did,
@@ -95,57 +94,6 @@ const updateInteraction = async (
   }
 };
 
-const interactionButton = (
-  type: "reply" | "like" | "repost" | "quote",
-  post: AppBskyFeedDefs.PostView,
-) => {
-  const hasViewer = "viewer" in post;
-  let count: number = post[type + "Count"];
-
-  const countSpan = elem("span", { textContent: count.toLocaleString() });
-  const button = elem(
-    "button",
-    { className: "interaction " + type + "-button" },
-    undefined,
-    [elem("div", { className: "icon" }), countSpan],
-  );
-  button.setAttribute("role", "button");
-
-  if (manager.session)
-    if (type === "like" || type === "repost") {
-      let isActive = Boolean(hasViewer ? post.viewer[type] : false);
-      button.classList.toggle("active", isActive);
-
-      if (hasViewer)
-        button.onclick = (e) => {
-          e.stopPropagation();
-          isActive = !isActive;
-          updateInteraction(
-            isActive,
-            post.cid,
-            post.uri,
-            post[type + "Count"],
-            post.viewer[type],
-            type,
-            countSpan,
-            button,
-          );
-        };
-    } else if (type === "reply") {
-      button.onclick = (e) => {
-        e.stopPropagation();
-        composerBox(post);
-      };
-    } else if (type === "quote") {
-      button.onclick = (e) => {
-        e.stopPropagation();
-        composerBox(undefined, post);
-      };
-    }
-
-  return button;
-};
-
 export const postCard = (
   postHousing:
     | AppBskyFeedDefs.FeedViewPost
@@ -154,7 +102,50 @@ export const postCard = (
   fullView = false,
   hasReplies = false,
   isEmbed = false,
+  isDecryptedPost = false,
 ) => {
+  const interactionButton = (
+    type: "reply" | "like" | "repost" | "quote",
+    post: AppBskyFeedDefs.PostView,
+  ) => {
+    const hasViewer = "viewer" in post;
+    let count: number = post[type + "Count"];
+
+    const countSpan = elem("span", { textContent: count.toLocaleString() });
+    const button = elem(
+      "button",
+      { className: "interaction " + type + "-button" },
+      undefined,
+      [elem("div", { className: "icon" }), countSpan],
+    );
+    button.setAttribute("role", "button");
+
+    if (manager.session)
+      if (type === "like" || type === "repost") {
+        let isActive = Boolean(hasViewer ? post.viewer[type] : false);
+        button.classList.toggle("active", isActive);
+
+        if (hasViewer)
+          button.onclick = (e) => {
+            e.stopPropagation();
+            isActive = !isActive;
+            updateInteraction(isActive, post, type, countSpan, button);
+          };
+      } else if (type === "reply") {
+        button.onclick = (e) => {
+          e.stopPropagation();
+          composerBox(post, undefined, isDecryptedPost);
+        };
+      } else if (type === "quote") {
+        button.onclick = (e) => {
+          e.stopPropagation();
+          composerBox(undefined, post, isDecryptedPost);
+        };
+      }
+
+    return button;
+  };
+
   const post = "post" in postHousing ? postHousing.post : postHousing;
 
   if (post.labels && post.labels.some((l) => contentLabels[l.val] === "hide"))
@@ -218,7 +209,9 @@ export const postCard = (
         record.embed = undefined;
         post.embed = undefined;
         post.labels = undefined;
-        postElem.replaceWith(postCard(postHousing, fullView));
+        postElem.replaceWith(
+          postCard(postHousing, fullView, undefined, undefined, true),
+        );
       }
     }, 0);
   }
@@ -245,6 +238,7 @@ export const postCard = (
         elem("a", { className: "user-area", href: authorHref }, undefined, [
           profilePicture,
           elem("span", { className: "handle-area handle", textContent: atId }),
+          isDecryptedPost && elem("span", { textContent: "🔓" }),
         ]),
         elem("a", {
           className: "timestamp",
@@ -259,7 +253,10 @@ export const postCard = (
       elem("a", { className: "header", href: authorHref }, undefined, [
         profilePicture,
         elem("div", { className: "handle-area" }, undefined, [
-          elem("span", { className: "handle", textContent: atId }),
+          elem("span", {
+            className: "handle",
+            textContent: atId + (isDecryptedPost ? "🔓" : ""),
+          }),
           elem("span", { textContent: post.author.displayName }),
         ]),
       ]),
@@ -289,6 +286,7 @@ export const postCard = (
             href: authorHref,
             textContent: atId,
           }),
+          isDecryptedPost && elem("span", { textContent: "🔓" }),
         ]),
       ];
     } else {
@@ -298,6 +296,7 @@ export const postCard = (
           href: authorHref,
           textContent: atId,
         }),
+        isDecryptedPost && elem("span", { textContent: "🔓" }),
       ];
     }
 
