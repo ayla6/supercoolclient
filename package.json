@@ -23,7 +23,9 @@
     "@atcute/bluesky-threading": "^3.0.0",
     "@atcute/client": "^2.0.8",
     "@mary/color-fns": "npm:@jsr/mary__color-fns@^0.1.1",
+    "@types/sanitize-html": "^2.13.0",
     "age-encryption": "^0.2.1",
-    "hls.js": "^1.5.20"
+    "hls.js": "^1.5.20",
+    "sanitize-html": "^2.14.0"
   }
 }

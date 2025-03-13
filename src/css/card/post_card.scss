@@ -25,6 +25,12 @@
         top: $string-avatar-margin + 1px + ($large-avatar-size * 0.5) -
             ($speech-bubble-height * 0.5);
     }
+
+    .flex-row-gap {
+        display: flex;
+        flex-flow: row;
+        gap: 4px;
+    }
 }
 
 .post-content {
@@ -61,6 +67,9 @@
         .icon {
             background-image: icon.$reposted;
         }
+    }
+    .og-fedi-link {
+        font-size: 10px;
     }
 }
 

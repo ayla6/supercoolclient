@@ -25,7 +25,7 @@ const loadImage = (
     "a",
     {
       className: "image",
-      target: " ",
+      target: "_blank",
       onclick: (e) => {
         e.preventDefault();
         let notDefaultFormat = false;

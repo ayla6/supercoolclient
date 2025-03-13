@@ -5,6 +5,7 @@
     "moduleResolution": "Bundler",
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "types": ["@atcute/bluesky/lexicons"]
+    "types": ["@atcute/bluesky/lexicons"],
+    "esModuleInterop": true
   }
 }

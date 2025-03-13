@@ -29,3 +29,13 @@ export const parseBlueskyImage = (imgUrl: string) => {
   const did = imgUrl.slice(plainIndex + 7, nextSlash);
   return { did, cid };
 };
+
+export const getFediAt = (link: string) => {
+  const atSign = link.indexOf("@", 8);
+  const username = link.slice(
+    atSign + 1,
+    link.lastIndexOf("/") < atSign ? link.length : link.lastIndexOf("/"),
+  );
+  const domain = link.slice(8, atSign - 1);
+  return `${username}@${domain}`;
+};

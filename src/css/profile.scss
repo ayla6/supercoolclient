@@ -33,17 +33,20 @@
         //flex-grow: 1;
         width: 100%;
         gap: 1px;
-        .display-name {
+        .handle {
             font-size: 26px;
             font-weight: 700;
             word-break: break-word;
         }
-        .handle-container {
+        .og-fedi-link {
+            font-size: 16px;
+        }
+        .container {
             display: flex;
             align-items: center;
             gap: 4px;
         }
-        .handle {
+        .display-name {
             font-size: 18px;
             display: block;
             color: #777;

@@ -226,7 +226,7 @@ export const settingsRoute = async (
         elem("p", {}, undefined, [
           elem("a", {
             className: "link",
-            target: "blank",
+            target: "_blank",
             textContent: "Age",
             href: "https://github.com/FiloSottile/awesome-age",
           }),

@@ -6,7 +6,11 @@ import { feedNSID } from "../elements/ui/feed";
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { profileCard } from "../elements/ui/profile_card";
 import { elem } from "../elements/utils/elem";
-import { changeImageFormat, getRkey } from "../elements/utils/link_processing";
+import {
+  changeImageFormat,
+  getFediAt,
+  getRkey,
+} from "../elements/utils/link_processing";
 import { processText } from "../elements/utils/text_processing";
 import { manager, rpc, rpcPublic, sessionData } from "../login";
 import { beingLoadedSplitPath, profileRedirect, updatePage } from "../router";
@@ -63,8 +67,29 @@ export const profileRoute = async (
 
   const _rpc = viewBlockedPosts && blockingInAnyWay ? rpcPublic : rpc;
 
+  let ogFediLink: HTMLAnchorElement;
   const did = profile.did;
-  const handle = profile.handle;
+  const handle = !profile.handle.endsWith("brid.gy")
+    ? profile.handle
+    : (() => {
+        const fediDescription = profile.description.match(
+          /\n\[bridged from (.*) on the fediverse by https\:\/\/fed.brid.gy\/ \]/,
+        );
+        profile.description = profile.description.replace(
+          fediDescription[0],
+          "",
+        );
+        ogFediLink = elem("a", {
+          className: "og-fedi-link",
+          textContent: "🔗",
+          target: "_blank",
+          href: fediDescription[1],
+        });
+        const fediHandle = fediDescription
+          ? getFediAt(fediDescription[1])
+          : profile.handle;
+        return fediHandle;
+      })();
 
   if (profile.did !== atId) profileRedirect(did);
 
@@ -166,12 +191,15 @@ export const profileRoute = async (
         }),
       ),
       elem("div", { className: "header" }, undefined, [
-        elem("span", {
-          className: "display-name",
-          textContent: profile.displayName,
-        }),
-        elem("span", { className: "handle-container" }, null, [
-          elem("span", { className: "handle", innerHTML: "@" + handle }),
+        elem("span", { className: "container" }, null, [
+          elem("span", { className: "handle", innerHTML: handle }),
+          ogFediLink,
+        ]),
+        elem("span", { className: "container" }, null, [
+          elem("span", {
+            className: "display-name",
+            textContent: profile.displayName,
+          }),
           profile.viewer?.followedBy
             ? elem("span", { className: "label", textContent: "Follows you" })
             : undefined,

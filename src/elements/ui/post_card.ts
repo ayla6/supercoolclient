@@ -6,6 +6,7 @@ import {
 import {
   changeImageFormat,
   getDidFromUri,
+  getFediAt,
   getPathFromUri,
   idChoose,
 } from "../utils/link_processing.ts";
@@ -18,6 +19,7 @@ import { languagesToNotTranslate } from "../../settings.ts";
 import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import * as age from "age-encryption";
+import sanitizeHtml from "sanitize-html";
 
 const ageDecrypter = new age.Decrypter();
 privateKey && ageDecrypter.addIdentity(privateKey);
@@ -175,11 +177,21 @@ export const postCard = (
 
   const record = post.record as AppBskyFeedPost.Record;
   const author = post.author;
-  const atId = idChoose(author);
   const authorHref = `/${author.did}`;
   const href = getPathFromUri(post.uri);
   const indexedAt = new Date(post.indexedAt);
   const createdAt = new Date(record.createdAt);
+
+  const notBridgePost = !(
+    record["bridgyOriginalText"] && record["bridgyOriginalUrl"]
+  );
+  const notLongText = !record["longText"];
+
+  const atId =
+    notBridgePost ||
+    (author.handle !== "handle.invalid" && !author.handle.endsWith(".brid.gy"))
+      ? idChoose(author)
+      : getFediAt(record["bridgyOriginalUrl"]);
 
   const postElem = elem("div", {
     className: "card-holder post" + (cfg.isFullView ? " full" : ""),
@@ -230,6 +242,30 @@ export const postCard = (
     }, 0);
   }
 
+  let ogFediLink: HTMLAnchorElement;
+  if (!notBridgePost) {
+    if (
+      post.embed?.$type === "app.bsky.embed.external#view" &&
+      post.embed.external.title.startsWith("Original post on ")
+    ) {
+      post.embed = null;
+    }
+    ogFediLink = elem("a", {
+      className: "og-fedi-link",
+      textContent: "🔗",
+      target: "_blank",
+      href: record["bridgyOriginalUrl"],
+    });
+  }
+  if (!notLongText) {
+    if (
+      post.embed?.$type === "app.bsky.embed.external#view" &&
+      post.embed.external.title.startsWith("Full post at ")
+    ) {
+      post.embed = null;
+    }
+  }
+
   if (!cfg.isFullView) {
     card.onclick = (e) => {
       if (window.getSelection()?.toString()) return;
@@ -254,12 +290,18 @@ export const postCard = (
           elem("span", { className: "handle-area handle", textContent: atId }),
           cfg.isDecryptedPost && elem("span", { textContent: "🔓" }),
         ]),
-        elem("a", {
-          className: "timestamp",
-          href: href,
-          textContent: formatTimeDifference(new Date(), indexedAt || createdAt),
-          onclick: preload,
-        }),
+        elem("div", { className: "flex-row-gap" }, undefined, [
+          ogFediLink,
+          elem("a", {
+            className: "timestamp",
+            href: href,
+            textContent: formatTimeDifference(
+              new Date(),
+              indexedAt || createdAt,
+            ),
+            onclick: preload,
+          }),
+        ]),
       ]),
     );
   } else if (cfg.isFullView) {
@@ -324,12 +366,18 @@ export const postCard = (
     card.appendChild(
       elem("div", { className: "header" }, undefined, [
         elem("span", { className: "handle-area" }, undefined, handleElem),
-        elem("a", {
-          className: "timestamp",
-          href: href,
-          textContent: formatTimeDifference(new Date(), indexedAt || createdAt),
-          onclick: preload,
-        }),
+        elem("div", { className: "flex-row-gap" }, undefined, [
+          ogFediLink,
+          elem("a", {
+            className: "timestamp",
+            href: href,
+            textContent: formatTimeDifference(
+              new Date(),
+              indexedAt || createdAt,
+            ),
+            onclick: preload,
+          }),
+        ]),
       ]),
     );
   }
@@ -355,13 +403,25 @@ export const postCard = (
 
   const content = elem("div", { className: "post-content" });
   if (record.text) {
-    content.appendChild(
-      elem(
-        "div",
-        { className: "text-content" },
-        processRichText(record.text, record.facets),
-      ),
-    );
+    if (notBridgePost && notLongText) {
+      content.appendChild(
+        elem(
+          "div",
+          { className: "text-content" },
+          processRichText(record.text, record.facets),
+        ),
+      );
+    } else {
+      const saferText = sanitizeHtml(
+        notLongText ? record["bridgyOriginalText"] : record["longText"],
+      ).replace("https://bsky.brid.gy/r/https://bsky.app/profile/", "/");
+      content.appendChild(
+        elem("div", {
+          className: "text-content",
+          innerHTML: saferText,
+        }),
+      );
+    }
   }
   if (post.embed) {
     const embeds = handleEmbed(post.embed as any);
@@ -472,6 +532,7 @@ export const postCard = (
       }),
     );
     if (translateButton) postData.appendChild(translateButton);
+    if (ogFediLink) postData.appendChild(ogFediLink);
     card.appendChild(postData);
 
     const stats = [

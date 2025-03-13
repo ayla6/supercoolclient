@@ -13,7 +13,7 @@ export const loadEmbedExternal = (embed: AppBskyEmbedExternal.View) => {
     const card = elem("a", {
       href: embed.external.uri,
       className: "external",
-      target: " ",
+      target: "_blank",
     });
     if (embed.external.thumb) {
       const image = elem(

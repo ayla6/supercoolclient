@@ -44,7 +44,7 @@ export const processRichText = (text: string, facets: Facet[]) => {
         case "app.bsky.richtext.facet#link":
           result = elem("a", {
             href: feat.uri,
-            target: " ",
+            target: "_blank",
             textContent: text,
           });
           break;
