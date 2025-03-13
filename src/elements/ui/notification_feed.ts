@@ -118,7 +118,7 @@ const loadNotifications = async (params: { limit: number; cursor: string }) => {
         new Text((notification.record as AppBskyFeedPost.Record).text),
       );
     } else if (notification.reasonSubject) {
-      notifContent.classList.add("grayed");
+      notifContent.classList.add("greyed");
       notifContent.append(
         new Text(
           postsMentioned.posts.find(
