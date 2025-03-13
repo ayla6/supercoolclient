@@ -5,7 +5,7 @@ import { RouteOutput } from "../types";
 import { createTray } from "../elements/ui/tray";
 import { getUriFromSplitPath } from "../elements/utils/link_processing";
 
-const saveSettings = async () => {
+const saveAppearanceSettings = async () => {
   const accentColor = (
     document.getElementById("accent-color") as HTMLInputElement
   ).value;
@@ -18,7 +18,9 @@ const saveSettings = async () => {
       createTray("Accent color saved successfully!");
     }
   }
+};
 
+const saveAgeSettings = async () => {
   const publicKey = (document.getElementById("public-key") as HTMLInputElement)
     .value;
   const privateKey = (
@@ -115,34 +117,65 @@ export const settingsRoute = async (
   previousSplitPath: string[],
   container: HTMLDivElement,
 ): RouteOutput => {
-  const accentColorInput = elem("input", {
-    type: "color",
-    id: "accent-color",
-    className: "color-input",
-    value: localStorage.getItem("accent-color"),
-    onchange: (e) => {
-      accentColorTextInput.value = accentColorInput.value;
-    },
-  });
-  const accentColorTextInput = elem("input", {
-    type: "text",
-    id: "accent-color-text",
-    className: "text-input",
-    value: localStorage.getItem("accent-color"),
-    onchange: (e) => {
-      accentColorInput.value = accentColorTextInput.value;
-    },
-  });
+  const allowedItem = (id: string) =>
+    elem("div", { className: "list-item allowed-item" }, undefined, [
+      elem("span", { textContent: id }),
+      elem("button", {
+        className: "square",
+        textContent: "×",
+        onclick: (e) => (e.target as HTMLElement).parentElement.remove(),
+      }),
+    ]);
 
-  const content = elem(
-    "div",
-    { id: "content" },
+  const content = elem("div", { id: "content" }, undefined, [
+    elem(
+      "div",
+      { className: "card-holder" },
+      elem(
+        "div",
+        { className: "card accent-card" },
+        elem("span", { textContent: "Settings", className: "section-title" }),
+      ),
+    ),
     elem(
       "div",
       { className: "card-holder" },
       elem("div", { className: "card" }, undefined, [
-        elem("span", { textContent: "Settings", className: "section-title" }),
-
+        elem("span", {
+          textContent: "I don't really know",
+          className: "small-section-title",
+        }),
+        elem("div", { className: "setting toggle" }, undefined, [
+          elem("label", {
+            textContent: "Load blocked posts:",
+            htmlFor: "view-blocked-posts",
+          }),
+          elem("input", {
+            type: "checkbox",
+            id: "view-blocked-posts",
+            className: "checkbox",
+            checked: localStorage.getItem("view-blocked-posts") === "true",
+            onclick: (e) => e.stopPropagation(),
+            onchange: () => {
+              localStorage.setItem(
+                "view-blocked-posts",
+                (
+                  document.getElementById(
+                    "view-blocked-posts",
+                  ) as HTMLInputElement
+                ).checked
+                  ? "true"
+                  : "false",
+              );
+            },
+          }),
+        ]),
+      ]),
+    ),
+    elem(
+      "div",
+      { className: "card-holder" },
+      elem("div", { className: "card" }, undefined, [
         elem("span", {
           textContent: "Appearance",
           className: "small-section-title",
@@ -150,13 +183,45 @@ export const settingsRoute = async (
         elem("div", { className: "settings-holder" }, undefined, [
           elem("div", { className: "setting" }, undefined, [
             elem("label", { textContent: "Accent color:" }),
-            elem("div", { className: "color-picker" }, undefined, [
-              accentColorInput,
-              accentColorTextInput,
-            ]),
+            elem(
+              "div",
+              { className: "color-picker" },
+              undefined,
+              (() => {
+                const accentColorInput = elem("input", {
+                  type: "color",
+                  id: "accent-color",
+                  className: "color-input",
+                  value: localStorage.getItem("accent-color"),
+                  onchange: (e) => {
+                    accentColorTextInput.value = accentColorInput.value;
+                  },
+                });
+                const accentColorTextInput = elem("input", {
+                  type: "text",
+                  id: "accent-color-text",
+                  className: "text-input",
+                  value: localStorage.getItem("accent-color"),
+                  onchange: (e) => {
+                    accentColorInput.value = accentColorTextInput.value;
+                  },
+                });
+                return [accentColorInput, accentColorTextInput];
+              })(),
+            ),
           ]),
         ]),
-
+        elem("button", {
+          textContent: "Save",
+          id: "save-button",
+          onclick: saveAppearanceSettings,
+        }),
+      ]),
+    ),
+    elem(
+      "div",
+      { className: "card-holder" },
+      elem("div", { className: "card" }, undefined, [
         elem("span", { textContent: "Age", className: "small-section-title" }),
         elem("p", {}, undefined, [
           elem("a", {
@@ -215,68 +280,52 @@ export const settingsRoute = async (
           }),
           elem("div", { id: "allow-list" }, undefined, [
             ...JSON.parse(localStorage.getItem("allowed-dids-age") || "[]").map(
-              (did: string) =>
-                elem(
-                  "div",
-                  { className: "list-item allowed-item" },
-                  undefined,
-                  [
-                    elem("span", { textContent: did }),
-                    elem("button", {
-                      className: "square",
-                      textContent: "×",
-                      onclick: (e) =>
-                        (e.target as HTMLElement).parentElement.remove(),
-                    }),
-                  ],
-                ),
+              (id: string) => allowedItem(id),
             ),
-            elem("div", { className: "list-item" }, undefined, [
-              elem("input", {
+            (() => {
+              const addToList = () => {
+                const input = document.getElementById(
+                  "new-item",
+                ) as HTMLInputElement;
+                const list = document.getElementById("allow-list");
+                if (input.value) {
+                  const item = allowedItem(input.value);
+                  list.insertBefore(item, input.parentElement);
+                  input.value = "";
+                }
+              };
+
+              const input = elem("input", {
                 type: "text",
                 id: "new-item",
                 placeholder:
                   "A handle, a DID or a list (either a link or a proper at:// URI)",
-              }),
-              elem("button", {
+              });
+              input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") addToList();
+              });
+
+              const button = elem("button", {
                 className: "square",
                 textContent: "+",
-                onclick: () => {
-                  const input = document.getElementById(
-                    "new-item",
-                  ) as HTMLInputElement;
-                  const list = document.getElementById("allow-list");
-                  if (input.value) {
-                    const item = elem(
-                      "div",
-                      { className: "list-item" },
-                      undefined,
-                      [
-                        elem("span", { textContent: input.value }),
-                        elem("button", {
-                          className: "square",
-                          textContent: "×",
-                          onclick: (e) =>
-                            (e.target as HTMLElement).parentElement.remove(),
-                        }),
-                      ],
-                    );
-                    list.appendChild(item);
-                    input.value = "";
-                  }
-                },
-              }),
-            ]),
+                onclick: addToList,
+              });
+
+              return elem("div", { className: "list-item" }, undefined, [
+                input,
+                button,
+              ]);
+            })(),
           ]),
         ]),
         elem("button", {
           textContent: "Save",
           id: "save-button",
-          onclick: saveSettings,
+          onclick: saveAgeSettings,
         }),
       ]),
     ),
-  );
+  ]);
   container.append(content);
 
   return { title: "Settings" };

@@ -14,7 +14,7 @@ import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
 import { handleEmbed } from "./embeds/embed_handlers";
-import { languagesToNotTranslate } from "../../config.ts";
+import { languagesToNotTranslate } from "../../settings.ts";
 import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import * as age from "age-encryption";
@@ -99,10 +99,21 @@ export const postCard = (
     | AppBskyFeedDefs.FeedViewPost
     | AppBskyFeedDefs.PostView
     | AppBskyFeedDefs.ThreadViewPost,
-  fullView = false,
-  hasReplies = false,
-  isEmbed = false,
-  isDecryptedPost = false,
+  cfg: {
+    isFullView?: boolean;
+    hasReplies?: boolean;
+    isEmbed?: boolean;
+    isDecryptedPost?: boolean;
+    blockedPost?: boolean;
+    blockedByPost?: boolean;
+  } = {
+    isFullView: false,
+    hasReplies: false,
+    isEmbed: false,
+    isDecryptedPost: false,
+    blockedPost: false,
+    blockedByPost: false,
+  },
 ) => {
   const interactionButton = (
     type: "reply" | "like" | "repost" | "quote",
@@ -134,12 +145,12 @@ export const postCard = (
       } else if (type === "reply") {
         button.onclick = (e) => {
           e.stopPropagation();
-          composerBox(post, undefined, isDecryptedPost);
+          composerBox(post, undefined, cfg.isDecryptedPost);
         };
       } else if (type === "quote") {
         button.onclick = (e) => {
           e.stopPropagation();
-          composerBox(undefined, post, isDecryptedPost);
+          composerBox(undefined, post, cfg.isDecryptedPost);
         };
       }
 
@@ -149,7 +160,7 @@ export const postCard = (
   const post = "post" in postHousing ? postHousing.post : postHousing;
 
   if (post.labels && post.labels.some((l) => contentLabels[l.val] === "hide"))
-    return fullView
+    return cfg.isFullView
       ? elem(
           "div",
           { className: "card-holder" },
@@ -171,7 +182,7 @@ export const postCard = (
   const createdAt = new Date(record.createdAt);
 
   const postElem = elem("div", {
-    className: "card-holder post" + (fullView ? " full" : ""),
+    className: "card-holder post" + (cfg.isFullView ? " full" : ""),
   });
   const card = elem("div", { className: "card" });
 
@@ -210,13 +221,16 @@ export const postCard = (
         post.embed = undefined;
         post.labels = undefined;
         postElem.replaceWith(
-          postCard(postHousing, fullView, undefined, undefined, true),
+          postCard(postHousing, {
+            isFullView: cfg.isFullView,
+            isDecryptedPost: true,
+          }),
         );
       }
     }, 0);
   }
 
-  if (!fullView) {
+  if (!cfg.isFullView) {
     card.onclick = (e) => {
       if (window.getSelection()?.toString()) return;
       if ((e.target as HTMLElement).closest("a, button")) return;
@@ -232,13 +246,13 @@ export const postCard = (
     setPreloaded(post);
   };
 
-  if (isEmbed) {
+  if (cfg.isEmbed) {
     card.appendChild(
       elem("div", { className: "header" }, undefined, [
         elem("a", { className: "user-area", href: authorHref }, undefined, [
           profilePicture,
           elem("span", { className: "handle-area handle", textContent: atId }),
-          isDecryptedPost && elem("span", { textContent: "🔓" }),
+          cfg.isDecryptedPost && elem("span", { textContent: "🔓" }),
         ]),
         elem("a", {
           className: "timestamp",
@@ -248,14 +262,14 @@ export const postCard = (
         }),
       ]),
     );
-  } else if (fullView) {
+  } else if (cfg.isFullView) {
     card.appendChild(
       elem("a", { className: "header", href: authorHref }, undefined, [
         profilePicture,
         elem("div", { className: "handle-area" }, undefined, [
           elem("span", {
             className: "handle",
-            textContent: atId + (isDecryptedPost ? "🔓" : ""),
+            textContent: atId + (cfg.isDecryptedPost ? "🔓" : ""),
           }),
           elem("span", { textContent: post.author.displayName }),
         ]),
@@ -286,7 +300,7 @@ export const postCard = (
             href: authorHref,
             textContent: atId,
           }),
-          isDecryptedPost && elem("span", { textContent: "🔓" }),
+          cfg.isDecryptedPost && elem("span", { textContent: "🔓" }),
         ]),
       ];
     } else {
@@ -296,14 +310,14 @@ export const postCard = (
           href: authorHref,
           textContent: atId,
         }),
-        isDecryptedPost && elem("span", { textContent: "🔓" }),
+        cfg.isDecryptedPost && elem("span", { textContent: "🔓" }),
       ];
     }
 
     postElem.appendChild(
       elem("div", { className: "left-area" }, undefined, [
         profilePicture,
-        hasReplies ? elem("div", { className: "reply-string" }) : undefined,
+        cfg.hasReplies ? elem("div", { className: "reply-string" }) : undefined,
       ]),
     );
 
@@ -411,16 +425,22 @@ export const postCard = (
     card.appendChild(elem("div", { className: "label-area" }, undefined, tags));
   }
 
-  if (fullView) {
+  if (true) {
     const warnings = [];
-    if (post.indexedAt && indexedAt.getTime() - createdAt.getTime() > 250000) {
+    const warning = (text: string) =>
       warnings.push(
         elem("span", {
           className: "label",
-          textContent: `Archived from ${formatDate(createdAt)}`,
+          textContent: text,
         }),
       );
-    }
+
+    if (post.indexedAt && indexedAt.getTime() - createdAt.getTime() > 250000)
+      warning(`Archived from ${formatDate(createdAt)}`);
+    if (cfg.blockedPost)
+      warning(`Block relation between this user and their replier`);
+    if (cfg.blockedByPost) warning(`Blocked by or blocking this user`);
+
     if (warnings.length)
       card.appendChild(
         elem("div", { className: "label-area" }, undefined, warnings),
@@ -438,10 +458,10 @@ export const postCard = (
       textContent: "Translate",
       href: "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
     });
-    if (!fullView) card.appendChild(translateButton);
+    if (!cfg.isFullView) card.appendChild(translateButton);
   }
 
-  if (fullView) {
+  if (cfg.isFullView) {
     const postData = elem("div", { className: "post-data" });
     postData.appendChild(
       elem("a", {
@@ -464,7 +484,7 @@ export const postCard = (
       card.appendChild(elem("div", { className: "stats" }, undefined, stats));
   }
 
-  if (!isEmbed)
+  if (!cfg.isEmbed)
     card.appendChild(
       elem("div", { className: "stats-buttons" }, undefined, [
         interactionButton("reply", post),

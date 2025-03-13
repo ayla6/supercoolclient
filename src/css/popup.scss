@@ -31,7 +31,7 @@
     }
 
     .confirm-delete {
-        @include accent-button($red);
+        @include accent-button($red, $white);
     }
 
     .field {

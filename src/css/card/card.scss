@@ -36,6 +36,10 @@
         .greyed {
             color: #999;
         }
+
+        &.accent-card {
+            @include accent-card;
+        }
     }
 
     &.clickable .card {

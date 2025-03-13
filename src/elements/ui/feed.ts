@@ -1,6 +1,7 @@
 import { postCard } from "../ui/post_card";
 import { rpc } from "../../login";
 import { OnscrollFunction } from "../../types";
+import { XRPC } from "@atcute/client";
 
 export type feedNSID =
   | "app.bsky.feed.getAuthorFeed"
@@ -33,9 +34,10 @@ export const hydrateFeed = async (
   nsid: feedNSID,
   params: { [key: string]: any },
   func: (item: any) => HTMLDivElement = postCard,
+  _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
   const dataLocation = dataLocations[nsid] ?? "feed";
-  const { data } = await rpc.get(nsid, { params: params });
+  const { data } = await _rpc.get(nsid, { params: params });
 
   output.replaceChildren();
   data[dataLocation].forEach((item: Object) => output.appendChild(func(item)));
@@ -52,7 +54,7 @@ export const hydrateFeed = async (
 
     try {
       feedBeingLoaded = true;
-      const { data } = await rpc.get(nsid, { params: params });
+      const { data } = await _rpc.get(nsid, { params: params });
       data[dataLocation].forEach((item: Object) =>
         output.appendChild(func(item)),
       );

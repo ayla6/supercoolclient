@@ -140,10 +140,11 @@ export const composerBox = (
     multiple: boolean,
     handler: (files: FileList) => void,
   ) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = `${type}/*`;
-    input.multiple = multiple;
+    const input = elem("input", {
+      type: "file",
+      accept: `${type}/*`,
+      multiple,
+    });
     input.addEventListener("change", () => input.files && handler(input.files));
     return input;
   };
@@ -494,10 +495,10 @@ export const composerBox = (
 
   const composer = elem("div", { className: "composer" }, null, [
     reply &&
-      elem("div", { className: "embeds" }, postCard(reply, false, false, true)),
+      elem("div", { className: "embeds" }, postCard(reply, { isEmbed: true })),
     textAreasHolder,
     quote &&
-      elem("div", { className: "embeds" }, postCard(quote, false, false, true)),
+      elem("div", { className: "embeds" }, postCard(quote, { isEmbed: true })),
     elem("div", { className: "horizontal-buttons space-between" }, null, [
       elem("div", {}, null, [
         privateKey ? lockButton : undefined,

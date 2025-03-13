@@ -80,6 +80,12 @@ a {
     }
 }
 
+.label-area {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
 .label {
     background-color: $lighter-grey;
     border-radius: 8px;
@@ -208,6 +214,11 @@ code {
     height: 33px;
 }
 
+::selection {
+    background-color: color-mix(in srgb, var(--accent-color), #fff 25%);
+    color: var(--accent-color-text);
+}
+
 input {
     outline: none;
     border: $border;
@@ -216,7 +227,10 @@ input {
     padding: 8px 12px;
     box-sizing: border-box;
     font-size: $font-size;
-    height: 33px;
+    accent-color: var(--accent-color);
+    &[type="text"] {
+        height: 33px;
+    }
     &::placeholder {
         color: $medium-grey;
         content: attr(aria-placeholder);
@@ -320,6 +334,10 @@ select {
     gap: 4px;
 }
 
+.red-button {
+    @include accent-button($red, $white);
+}
+
 @media (min-width: 920px) {
     .buffer-top {
         display: none;
@@ -404,6 +422,11 @@ select {
             }
         }
     }
+}
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.5;
 }
 
 @media (max-width: 920px) {

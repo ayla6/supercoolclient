@@ -1,3 +1,5 @@
+import { XRPC } from "@atcute/client";
+import { rpc } from "../../login";
 import { cache } from "../../router";
 import { FeedState, OnscrollFunction } from "../../types";
 import { elem } from "../utils/elem";
@@ -18,6 +20,7 @@ export const createFeedManager = (
   sideBar: HTMLDivElement,
   feedsData: Feed[],
   home: boolean = false,
+  _rpc: XRPC = rpc,
 ) => {
   const path = window.location.pathname;
   feedsData = feedsData.filter(Boolean);
@@ -103,6 +106,7 @@ export const createFeedManager = (
         feed.nsid,
         clonedParams,
         feed.func,
+        _rpc,
       );
       feedState[feed.feed] = [content, onscrollFunc, 0];
     } else {

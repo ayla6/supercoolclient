@@ -1,5 +1,5 @@
 import { fromRgbaHex, getWCAGTextColor, toRgbaHex } from "@mary/color-fns";
-import { fillMissingSettings } from "./config";
+import { fillMissingSettings } from "./settings";
 import { loadNavbar } from "./elements/ui/navbar";
 import { login } from "./login";
 import { cleanCache, updatePage } from "./router";

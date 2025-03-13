@@ -20,9 +20,12 @@ $border: $border-width solid rgba(0, 0, 0, 0.1);
 $navbar-height: 40px;
 $navbar-height-mobile: 50px;
 
-@mixin accent-button($color: var(--accent-color)) {
+@mixin accent-button(
+    $color: var(--accent-color),
+    $text-color: var(--accent-color-text)
+) {
     background: linear-gradient($color, color-mix(in srgb, $color, #000 20%));
-    color: var(--accent-color-text);
+    color: $text-color;
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
     border-color: color-mix(in srgb, $color, #000 20%);
 
@@ -34,4 +37,14 @@ $navbar-height-mobile: 50px;
         border-color: color-mix(in srgb, $color, #000 10%);
         text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
     }
+}
+
+@mixin accent-card(
+    $color: var(--accent-color),
+    $text-color: var(--accent-color-text)
+) {
+    background: linear-gradient($color, color-mix(in srgb, $color, #000 10%));
+    color: $text-color;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    border-color: color-mix(in srgb, $color, #000 20%);
 }

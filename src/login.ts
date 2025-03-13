@@ -4,6 +4,11 @@ import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { DidDocument, getServiceEndpoint } from "@atcute/client/utils/did";
 let savedSessionData: AtpSessionData;
 
+export let managerPublic = new CredentialManager({
+  service: "https://public.api.bsky.app",
+});
+export let rpcPublic = new XRPC({ handler: managerPublic });
+
 export let manager = new CredentialManager({
   service: "https://public.api.bsky.app",
 });

@@ -11,10 +11,11 @@ import {
   getPathFromUri,
   getUriFromSplitPath,
 } from "../elements/utils/link_processing";
-import { rpc } from "../login";
+import { rpc, rpcPublic } from "../login";
 import { beingLoadedSplitPath, profileRedirect } from "../router";
 import { RouteOutput } from "../types";
 import { preloadedPost, setPreloaded } from "../elements/utils/preloaded_post";
+import { viewBlockedPosts } from "../settings";
 
 const mutedPostsButton = (
   outputElement: HTMLElement,
@@ -64,40 +65,123 @@ const loadThread = (
   if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
     const thread = postThread.thread;
 
-    const mainThreadPosts = document.createDocumentFragment();
-    const replyPosts = document.createDocumentFragment();
+    const mainThreadPosts = elem("div");
+    const replyPosts = elem("div");
     //let mutedPosts = document.createDocumentFragment();
+
+    mainPost = postCard(thread.post, { isFullView: true });
+    mainThreadPosts.appendChild(mainPost);
 
     if (thread.parent) {
       let currentThread = thread;
-      while (
-        currentThread.parent &&
-        currentThread.parent.$type === "app.bsky.feed.defs#threadViewPost"
-      ) {
-        currentThread = currentThread.parent;
-        mainThreadPosts.prepend(postCard(currentThread.post, false, true));
-      }
-      if (
-        currentThread.parent &&
-        currentThread.parent.$type !== "app.bsky.feed.defs#threadViewPost"
-      ) {
-        const post = currentThread.parent;
-        mainThreadPosts.prepend(
-          elem("a", {
-            className: "simple-card",
-            href: getPathFromUri(post.uri),
-            textContent:
-              post.$type === "app.bsky.feed.defs#blockedPost"
-                ? "Blocked post"
-                : "Post not found",
-          }),
-        );
-        if (rootPost) mainThreadPosts.prepend(postCard(rootPost, false, true));
+      if (!viewBlockedPosts) {
+        while (
+          currentThread.parent &&
+          currentThread.parent.$type === "app.bsky.feed.defs#threadViewPost"
+        ) {
+          currentThread = currentThread.parent;
+          mainThreadPosts.prepend(
+            postCard(currentThread.post, { hasReplies: true }),
+          );
+        }
+        if (
+          currentThread.parent &&
+          currentThread.parent.$type !== "app.bsky.feed.defs#threadViewPost"
+        ) {
+          if (rootPost && rootPost.uri !== currentThread.parent.uri)
+            mainThreadPosts.prepend(
+              elem("a", {
+                className: "simple-card",
+                href: getPathFromUri(currentThread.parent.uri),
+                textContent:
+                  currentThread.parent.$type ===
+                  "app.bsky.feed.defs#blockedPost"
+                    ? "Blocked post"
+                    : "Post not found",
+              }),
+            );
+          if (rootPost)
+            mainThreadPosts.prepend(
+              postCard(rootPost, {
+                hasReplies: true,
+                blockedPost:
+                  currentThread.parent.$type ===
+                    "app.bsky.feed.defs#blockedPost" &&
+                  rootPost.uri === currentThread.parent.uri,
+              }),
+            );
+        }
+      } else {
+        setTimeout(async () => {
+          const temporaryPostsArea = elem("div");
+          while (currentThread.parent) {
+            let postElem: HTMLElement;
+            if (
+              currentThread.parent.$type === "app.bsky.feed.defs#notFoundPost"
+            ) {
+              postElem = elem("a", {
+                className: "simple-card",
+                href: getPathFromUri(currentThread.parent.uri),
+                textContent: "Post not found",
+              });
+            } else {
+              let blockedPost = false;
+              let blockedByPost = false;
+              if (
+                currentThread.parent.$type ===
+                "app.bsky.feed.defs#threadViewPost"
+              ) {
+                currentThread = currentThread.parent;
+              } else if (
+                currentThread.parent.$type === "app.bsky.feed.defs#blockedPost"
+              ) {
+                blockedPost = true;
+                const hopefullyNextThread = (
+                  await rpc.get("app.bsky.feed.getPostThread", {
+                    params: {
+                      depth: 0,
+                      uri: currentThread.parent.uri,
+                    },
+                  })
+                ).data.thread;
+                if (
+                  hopefullyNextThread.$type ===
+                  "app.bsky.feed.defs#threadViewPost"
+                ) {
+                  currentThread = hopefullyNextThread;
+                } else if (
+                  hopefullyNextThread.$type === "app.bsky.feed.defs#blockedPost"
+                ) {
+                  blockedByPost = true;
+                  const hopefullyNextThread = (
+                    await rpcPublic.get("app.bsky.feed.getPostThread", {
+                      params: {
+                        depth: 0,
+                        uri: currentThread.parent.uri,
+                      },
+                    })
+                  ).data.thread;
+                  if (
+                    hopefullyNextThread.$type ===
+                    "app.bsky.feed.defs#threadViewPost"
+                  ) {
+                    currentThread = hopefullyNextThread;
+                  }
+                }
+              }
+              postElem = postCard(currentThread.post, {
+                hasReplies: true,
+                blockedPost,
+                blockedByPost,
+              });
+            }
+            temporaryPostsArea.prepend(postElem);
+          }
+          mainThreadPosts.prepend(temporaryPostsArea);
+          window.scrollBy({ top: temporaryPostsArea.offsetHeight });
+        }, 0);
       }
     }
-
-    mainPost = postCard(thread.post, true);
-    mainThreadPosts.appendChild(mainPost);
 
     function loadReplies(
       replies: Brand.Union<
@@ -167,15 +251,13 @@ const loadThread = (
             }
           } else shownPostReplies = post.replies;
 
-          const replyElem = postCard(
-            post,
-            false,
-            Boolean(
+          const replyElem = postCard(post, {
+            hasReplies: Boolean(
               post.replies !== undefined
                 ? shownPostReplies?.length
                 : post.post.replyCount,
             ),
-          );
+          });
 
           replyContainer.appendChild(replyElem);
           outputElement.appendChild(replyContainer);
@@ -254,13 +336,23 @@ export const postRoute = async (
 
   if (preloadedPost) {
     const loadingContent = elem("div", { id: "content" });
-    loadingContent.append(postCard(preloadedPost, true));
+    loadingContent.append(postCard(preloadedPost, { isFullView: true }));
     container.append(stickyHeader("Post"), loadingContent);
   }
 
-  const { data: postThread } = await rpc.get("app.bsky.feed.getPostThread", {
-    params: { uri },
+  let { data: postThread } = await rpc.get("app.bsky.feed.getPostThread", {
+    params: { uri, parentHeight: 1000 },
   });
+  if (
+    viewBlockedPosts &&
+    postThread.thread.$type === "app.bsky.feed.defs#blockedPost"
+  ) {
+    postThread = (
+      await rpcPublic.get("app.bsky.feed.getPostThread", {
+        params: { uri, parentHeight: 1000 },
+      })
+    ).data;
+  }
 
   let rootPost: AppBskyFeedDefs.PostView;
   if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {

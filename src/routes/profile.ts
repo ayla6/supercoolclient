@@ -8,12 +8,13 @@ import { profileCard } from "../elements/ui/profile_card";
 import { elem } from "../elements/utils/elem";
 import { changeImageFormat, getRkey } from "../elements/utils/link_processing";
 import { processText } from "../elements/utils/text_processing";
-import { manager, rpc, sessionData } from "../login";
+import { manager, rpc, rpcPublic, sessionData } from "../login";
 import { beingLoadedSplitPath, profileRedirect, updatePage } from "../router";
 import { RouteOutput } from "../types";
 import { confirmDialog } from "../elements/ui/dialog";
 import { editProfileDialog } from "../elements/ui/edit_profile";
 import { createSearchBar } from "../elements/ui/search_bar";
+import { viewBlockedPosts } from "../settings";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -55,18 +56,28 @@ export const profileRoute = async (
     params: { actor: atId },
   });
 
+  const blockingInAnyWay =
+    profile.viewer?.blockedBy ||
+    profile.viewer?.blocking ||
+    profile.viewer?.blockingByList?.listItemCount > 0;
+
+  const _rpc = viewBlockedPosts && blockingInAnyWay ? rpcPublic : rpc;
+
   const did = profile.did;
   const handle = profile.handle;
 
   if (profile.did !== atId) profileRedirect(did);
 
-  const { data: lastMedia } = await rpc.get("app.bsky.feed.getAuthorFeed", {
-    params: {
-      actor: did,
-      filter: "posts_with_media",
-      limit: 4,
-    },
-  });
+  const { data: lastMedia } =
+    !viewBlockedPosts && blockingInAnyWay
+      ? { data: { feed: [] } }
+      : await _rpc.get("app.bsky.feed.getAuthorFeed", {
+          params: {
+            actor: did,
+            filter: "posts_with_media",
+            limit: 4,
+          },
+        });
 
   if (currentSplitPath !== beingLoadedSplitPath) return;
 
@@ -194,6 +205,13 @@ export const profileRoute = async (
                 );
               },
             });
+          if (blockingInAnyWay) {
+            if (profile.viewer.blockedBy)
+              return elem("button", {
+                textContent: "You're blocked",
+                className: "red-button",
+              });
+          }
           return elem("button", {
             className: profile.viewer.following ? "" : " follow",
             textContent: profile.viewer.following
@@ -330,15 +348,26 @@ export const profileRoute = async (
         extra: mediaNavButton(lastMedia),
       },
     ],
+    false,
+    _rpc,
   );
 
-  const onscrollFunction = await loadProfileFeed({
-    feed: "posts",
-    nsid: "app.bsky.feed.getAuthorFeed",
-    params: {
-      actor: did,
-      filter: "posts_no_replies",
-    },
-  });
+  if (!viewBlockedPosts && blockingInAnyWay) {
+    Array.from(sideBar.querySelector(".side-nav").children).forEach((child) =>
+      child.classList.add("disabled"),
+    );
+  }
+
+  const onscrollFunction =
+    !viewBlockedPosts && blockingInAnyWay
+      ? undefined
+      : await loadProfileFeed({
+          feed: "posts",
+          nsid: "app.bsky.feed.getAuthorFeed",
+          params: {
+            actor: did,
+            filter: "posts_no_replies",
+          },
+        });
   return { onscrollFunction, title: profile.handle, bodyStyle };
 };

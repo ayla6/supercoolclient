@@ -22,7 +22,7 @@ export const loadEmbedRecord = (embed: AppBskyEmbedRecord.View) => {
         repostCount: record.repostCount,
         quoteCount: record.quoteCount,
       };
-      return postCard(post, false, false, true);
+      return postCard(post, { isEmbed: true });
     }
   } else if (
     record.$type === "app.bsky.embed.record#viewBlocked" ||
