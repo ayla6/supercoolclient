@@ -2,17 +2,19 @@ import {
   AppBskyNotificationListNotifications,
   AppBskyFeedPost,
 } from "@atcute/client/lexicons";
-import { rpc } from "../../login";
+import { rpc, sessionData } from "../../login";
 import { OnscrollFunction } from "../../types";
 import { formatTimeDifference } from "../utils/date";
 import { elem } from "../utils/elem";
-import { getPathFromUri } from "../utils/link_processing";
+import { getDidFromUri, getPathFromUri } from "../utils/link_processing";
 
 import favSvg from "../../svg/fav.svg?raw";
 import repostSvg from "../../svg/repost.svg?raw";
 import userSvg from "../../svg/user.svg?raw";
 import replySvg from "../../svg/reply.svg?raw";
 import quoteSvg from "../../svg/quote.svg?raw";
+import { postCard } from "./post_card";
+import { updateNotificationIcon } from "./navbar";
 
 const notificationIcons = {
   like: favSvg,
@@ -30,17 +32,26 @@ const notificationMessages = {
   mention: " mentioned you in a post",
 };
 
-const loadNotifications = async (params: { limit: number; cursor: string }) => {
+const loadNotifications = async (params: {
+  limit: number;
+  cursor: string;
+  useCache: boolean;
+}) => {
   const fragment = document.createDocumentFragment();
-  const { data } = await rpc.get("app.bsky.notification.listNotifications", {
-    params,
-  });
+  const data = (
+    await rpc.get("app.bsky.notification.listNotifications", {
+      params,
+    })
+  ).data;
 
   const listPosts = [];
 
   for (const notification of data.notifications) {
     if (notification.reasonSubject) {
       listPosts.push(notification.reasonSubject);
+    }
+    if (notification.reason === "reply" || notification.reason === "mention") {
+      listPosts.push(notification.uri);
     }
   }
 
@@ -70,87 +81,93 @@ const loadNotifications = async (params: { limit: number; cursor: string }) => {
           ? getPathFromUri(notification.reasonSubject)
           : `/${notification.author.did}`;
 
-    const leftArea = elem("div", { className: "left-area" }, undefined, [
-      elem(
-        "a",
-        { className: "avatar-holder", href: `/${notification.author.did}` },
-        elem("img", {
-          className: "avatar",
-          src: notification.author.avatar,
+    if (
+      !(notification.reason === "reply" || notification.reason === "mention")
+    ) {
+      const leftArea = elem("div", { className: "left-area" }, undefined, [
+        elem(
+          "a",
+          { className: "avatar-holder", href: `/${notification.author.did}` },
+          elem("img", {
+            className: "avatar",
+            src: notification.author.avatar,
+          }),
+        ),
+      ]);
+
+      const notifText = elem("span", {}, undefined, [
+        elem("a", {
+          className: "handle",
+          href: `/${notification.author.did}`,
+          textContent: notification.author.handle,
+          onclick: (e) => e.stopPropagation(),
         }),
-      ),
-    ]);
+        document.createTextNode(notificationMessages[notification.reason]),
+      ]);
 
-    const notifText = elem("span", {}, undefined, [
-      elem("a", {
-        className: "handle",
-        href: `/${notification.author.did}`,
-        textContent: notification.author.handle,
-        onclick: (e) => e.stopPropagation(),
-      }),
-      new Text(notificationMessages[notification.reason]),
-    ]);
+      const notifHeader = elem("div", { className: "header" }, undefined, [
+        elem(
+          "div",
+          {
+            className: "handle-area",
+            innerHTML: notificationIcons[notification.reason],
+          },
+          notifText,
+        ),
+        elem("a", {
+          className: "timestamp",
+          href: href,
+          textContent: formatTimeDifference(
+            new Date(),
+            new Date(notification.indexedAt),
+          ),
+          onclick: (e) => e.stopPropagation(),
+        }),
+      ]);
 
-    const notifHeader = elem("div", { className: "header" }, undefined, [
-      elem(
-        "div",
+      let notifContent = elem("div", { className: "content" });
+      if (notification.reasonSubject) {
+        notifContent.classList.add("greyed");
+        notifContent.append(
+          document.createTextNode(
+            postsMentioned.posts.find(
+              (post) => post.uri === notification.reasonSubject,
+            )?.record.text,
+          ),
+        );
+      }
+
+      const card = elem("div", { className: "card" }, undefined, [
+        notifHeader,
+        notifContent,
+      ]);
+
+      card.setAttribute("works-as-link", "");
+      card.setAttribute("href", href);
+
+      if (notification.reason === "follow") card.style.paddingBlock = "16px";
+
+      return elem("div", { className: "card-holder clickable" }, undefined, [
+        leftArea,
+        card,
+      ]);
+    } else {
+      if (
+        notification.reason === "mention" &&
+        (notification.record as AppBskyFeedPost.Record).reply?.parent.uri &&
+        getDidFromUri(
+          (notification.record as AppBskyFeedPost.Record).reply.parent.uri,
+        ) === sessionData.did
+      )
+        notification.reason = "reply";
+      return postCard(
+        postsMentioned.posts.find((post) => post.uri === notification.uri),
         {
-          className: "handle-area",
-          innerHTML: notificationIcons[notification.reason],
+          icon: notificationIcons[notification.reason],
+          text: notificationMessages[notification.reason],
         },
-        undefined,
-        [notifText],
-      ),
-      elem("a", {
-        className: "timestamp",
-        href: href,
-        textContent: formatTimeDifference(
-          new Date(),
-          new Date(notification.indexedAt),
-        ),
-        onclick: (e) => e.stopPropagation(),
-      }),
-    ]);
-
-    let notifContent = elem("div", { className: "content" });
-    if (notification.reason === "reply" || notification.reason === "mention") {
-      notifContent.append(
-        new Text((notification.record as AppBskyFeedPost.Record).text),
-      );
-    } else if (notification.reasonSubject) {
-      notifContent.classList.add("greyed");
-      notifContent.append(
-        new Text(
-          postsMentioned.posts.find(
-            (post) => post.uri === notification.reasonSubject,
-          )?.record.text,
-        ),
       );
     }
-
-    const card = elem("div", { className: "card" }, undefined, [
-      notifHeader,
-      notifContent,
-    ]);
-
-    card.setAttribute("works-as-link", "");
-    card.setAttribute("href", href);
-
-    if (notification.reason === "follow") card.style.paddingBlock = "16px";
-
-    const notifElement: HTMLElement = elem(
-      "div",
-      {
-        className:
-          notification.reason === "reply"
-            ? "card-holder post"
-            : "card-holder clickable",
-      },
-      undefined,
-      [leftArea, card],
-    );
-
-    return notifElement;
   };
 
   for (const notification of data.notifications) {
@@ -163,8 +180,13 @@ const loadNotifications = async (params: { limit: number; cursor: string }) => {
 let feedBeingLoaded = false;
 export const hydrateNotificationFeed = async (
   output: HTMLElement,
+  useCache = true,
 ): Promise<OnscrollFunction> => {
-  const params = { limit: 25, cursor: undefined };
+  rpc.call("app.bsky.notification.updateSeen", {
+    data: { seenAt: new Date().toISOString() },
+  });
+  updateNotificationIcon();
+  const params = { limit: 50, cursor: undefined, useCache };
   const data = await loadNotifications(params);
 
   output.replaceChildren();

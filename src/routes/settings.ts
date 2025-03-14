@@ -230,7 +230,7 @@ export const settingsRoute = async (
             textContent: "Age",
             href: "https://github.com/FiloSottile/awesome-age",
           }),
-          new Text(
+          document.createTextNode(
             " is a nice encryption tool that can you can use to encrypt stuff with only someone's public key!",
           ),
         ]),

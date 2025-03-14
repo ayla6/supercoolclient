@@ -2,6 +2,7 @@
 import { AtpSessionData, XRPC, CredentialManager } from "@atcute/client";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { DidDocument, getServiceEndpoint } from "@atcute/client/utils/did";
+import { updateNotificationIcon } from "./elements/ui/navbar";
 let savedSessionData: AtpSessionData;
 
 export let managerPublic = new CredentialManager({
@@ -98,4 +99,7 @@ export const login = async (credentials?: {
   feeds = preferences?.data.preferences.find((e) => {
     return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
   }).items;
+
+  updateNotificationIcon();
+  setInterval(updateNotificationIcon, 30 * 1000);
 };

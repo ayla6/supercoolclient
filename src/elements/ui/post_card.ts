@@ -108,6 +108,8 @@ export const postCard = (
     isDecryptedPost?: boolean;
     blockedPost?: boolean;
     blockedByPost?: boolean;
+    icon?: string;
+    text?: string;
   } = {
     isFullView: false,
     hasReplies: false,
@@ -115,6 +117,8 @@ export const postCard = (
     isDecryptedPost: false,
     blockedPost: false,
     blockedByPost: false,
+    icon: undefined,
+    text: undefined,
   },
 ) => {
   const interactionButton = (
@@ -352,6 +356,7 @@ export const postCard = (
           href: authorHref,
           textContent: atId,
         }),
+        cfg.text && elem("span", { textContent: cfg.text }),
         cfg.isDecryptedPost && elem("span", { textContent: "🔓" }),
       ];
     }
@@ -365,7 +370,12 @@ export const postCard = (
 
     card.appendChild(
       elem("div", { className: "header" }, undefined, [
-        elem("span", { className: "handle-area" }, undefined, handleElem),
+        elem(
+          "span",
+          { className: "handle-area", innerHTML: cfg.icon ?? "" },
+          undefined,
+          handleElem,
+        ),
         elem("div", { className: "flex-row-gap" }, undefined, [
           ogFediLink,
           elem("a", {

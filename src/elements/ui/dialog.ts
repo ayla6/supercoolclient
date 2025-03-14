@@ -23,10 +23,7 @@ export const popupBox = (
 
   // Handle escape key
   const escapeKeyHandler = (e: KeyboardEvent) => {
-    if (e.key === "Escape") {
-      console.log("hey");
-      cleanup();
-    }
+    if (e.key === "Escape") cleanup();
   };
   document.addEventListener("keydown", escapeKeyHandler);
 

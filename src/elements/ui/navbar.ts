@@ -1,4 +1,4 @@
-import { manager } from "../../login";
+import { manager, rpc } from "../../login";
 import { elem } from "../utils/elem";
 
 import homeSVG from "../../svg/home.svg?raw";
@@ -19,7 +19,18 @@ export const loadNavbar = () => {
     ...[
       navButton("Home", "/", homeSVG),
       navButton("Search", "/search", searchSVG),
-      manager.session && navButton("Notifications", "/notifications", notifSVG),
+      manager.session &&
+        (() => {
+          const notifButton = navButton(
+            "Notifications",
+            "/notifications",
+            notifSVG,
+          );
+          notifButton.append(
+            elem("span", { id: "notification-count", textContent: "0" }),
+          );
+          return notifButton;
+        })(),
       manager.session &&
         navButton("Profile", "/" + manager.session.did, profileSVG),
       manager.session &&
@@ -32,4 +43,19 @@ export const loadNavbar = () => {
         elem("button", { textContent: "Sign in", onclick: loginDialog }),
     ].filter(Boolean),
   );
+};
+
+export const updateNotificationIcon = async () => {
+  const unreadCount = (
+    await rpc.get("app.bsky.notification.getUnreadCount", {
+      params: {},
+    })
+  ).data.count;
+  const notificationCount = document.getElementById("notification-count");
+  if (unreadCount !== 0) {
+    notificationCount.textContent = unreadCount.toString();
+    notificationCount.classList.add("show");
+  } else {
+    notificationCount.classList.remove("show");
+  }
 };
