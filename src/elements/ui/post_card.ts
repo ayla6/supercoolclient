@@ -276,7 +276,11 @@ export const postCard = (
       if (window.getSelection()?.toString()) return;
       if ((e.target as HTMLElement).closest("a, button")) return;
       const embeds = (e.target as HTMLElement).closest(".embeds");
-      if (embeds && embeds.querySelector(".card") && !embeds.contains(card))
+      if (
+        embeds &&
+        !(e.target as HTMLElement).classList.contains("media-container") &&
+        !embeds.contains(card)
+      )
         return;
       preload();
     };
