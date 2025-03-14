@@ -274,7 +274,8 @@ export const postCard = (
       if (window.getSelection()?.toString()) return;
       if ((e.target as HTMLElement).closest("a, button")) return;
       const embeds = (e.target as HTMLElement).closest(".embeds");
-      if (embeds && !embeds.contains(card)) return;
+      if (embeds && embeds.querySelector(".card") && !embeds.contains(card))
+        return;
       preload();
     };
     card.setAttribute("works-as-link", "");
@@ -478,8 +479,8 @@ export const postCard = (
 
       embedsElem.style.display = "none";
       content.appendChild(warningButton);
-      content.appendChild(embedsElem);
-    } else content.appendChild(embedsElem);
+    }
+    content.appendChild(embedsElem);
   }
   card.appendChild(content);
 
