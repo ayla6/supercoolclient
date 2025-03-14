@@ -14,7 +14,7 @@
 .tray {
     padding: 4px 8px;
     background-color: var(--accent-color);
-    color: $white;
+    color: var(--accent-color-text);
     border-radius: $border-radius;
     transition: opacity 0.3s ease-in-out;
     &.fade {
