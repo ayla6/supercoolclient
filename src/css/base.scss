@@ -10,7 +10,7 @@ body {
     font-size: $font-size;
     height: 100%;
     margin: 0;
-    background: #224 center/cover fixed repeat;
+    background: var(--background-color) center/cover fixed repeat;
     color: $dark-grey;
     overflow-x: hidden;
     overflow-y: scroll;

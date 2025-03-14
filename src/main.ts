@@ -72,6 +72,13 @@ if (customAccentColor) {
       ).slice(0, -2),
   );
 }
+const customBackgroundColor = localStorage.getItem("background-color");
+if (customBackgroundColor) {
+  document.documentElement.style.setProperty(
+    "--background-color",
+    customBackgroundColor,
+  );
+}
 
 fillMissingSettings();
 await login();

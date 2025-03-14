@@ -18,6 +18,20 @@ const saveAppearanceSettings = async () => {
       createTray("Accent color saved successfully!");
     }
   }
+
+  const backgroundColor = (
+    document.getElementById("background-color") as HTMLInputElement
+  ).value;
+
+  if (backgroundColor) {
+    if (!backgroundColor.match(/^#[0-9a-f]{6}$/i)) {
+      createTray("Selected color is invalid");
+    } else {
+      localStorage.setItem("background-color", backgroundColor);
+      createTray("Background color saved successfully!");
+    }
+  }
+  location.reload();
 };
 
 const saveAgeSettings = async () => {
@@ -192,7 +206,7 @@ export const settingsRoute = async (
                   type: "color",
                   id: "accent-color",
                   className: "color-input",
-                  value: localStorage.getItem("accent-color"),
+                  value: localStorage.getItem("accent-color") ?? "#226699",
                   onchange: (e) => {
                     accentColorTextInput.value = accentColorInput.value;
                   },
@@ -201,12 +215,42 @@ export const settingsRoute = async (
                   type: "text",
                   id: "accent-color-text",
                   className: "text-input",
-                  value: localStorage.getItem("accent-color"),
+                  value: localStorage.getItem("accent-color") ?? "#226699",
                   onchange: (e) => {
                     accentColorInput.value = accentColorTextInput.value;
                   },
                 });
                 return [accentColorInput, accentColorTextInput];
+              })(),
+            ),
+          ]),
+
+          elem("div", { className: "setting" }, undefined, [
+            elem("label", { textContent: "Background color:" }),
+            elem(
+              "div",
+              { className: "color-picker" },
+              undefined,
+              (() => {
+                const backgroundColorInput = elem("input", {
+                  type: "color",
+                  id: "background-color",
+                  className: "color-input",
+                  value: localStorage.getItem("background-color") ?? "#222244",
+                  onchange: (e) => {
+                    backgroundColorTextInput.value = backgroundColorInput.value;
+                  },
+                });
+                const backgroundColorTextInput = elem("input", {
+                  type: "text",
+                  id: "background-color-text",
+                  className: "text-input",
+                  value: localStorage.getItem("background-color") ?? "#222244",
+                  onchange: (e) => {
+                    backgroundColorInput.value = backgroundColorTextInput.value;
+                  },
+                });
+                return [backgroundColorInput, backgroundColorTextInput];
               })(),
             ),
           ]),
