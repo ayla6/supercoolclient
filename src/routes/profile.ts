@@ -85,9 +85,7 @@ export const profileRoute = async (
           target: "_blank",
           href: fediDescription[1],
         });
-        const fediHandle = fediDescription
-          ? getFediAt(fediDescription[1])
-          : profile.handle;
+        const fediHandle = getFediAt(profile.handle);
         return fediHandle;
       })();
 

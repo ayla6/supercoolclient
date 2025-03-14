@@ -192,10 +192,9 @@ export const postCard = (
   const notLongText = !record["longText"];
 
   const atId =
-    notBridgePost ||
-    (author.handle !== "handle.invalid" && !author.handle.endsWith(".brid.gy"))
+    notBridgePost || !author.handle.endsWith(".brid.gy")
       ? idChoose(author)
-      : getFediAt(record["bridgyOriginalUrl"]);
+      : getFediAt(author.handle);
 
   const postElem = elem("div", {
     className: "card-holder post" + (cfg.isFullView ? " full" : ""),
@@ -424,7 +423,7 @@ export const postCard = (
     } else {
       const saferText = sanitizeHtml(
         notLongText ? record["bridgyOriginalText"] : record["longText"],
-      ).replace("https://bsky.brid.gy/r/https://bsky.app/profile/", "/");
+      ).replaceAll("https://bsky.brid.gy/r/https://bsky.app/profile/", "/");
       content.appendChild(
         elem("div", {
           className: "text-content",

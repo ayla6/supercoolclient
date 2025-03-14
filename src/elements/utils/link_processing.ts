@@ -30,12 +30,10 @@ export const parseBlueskyImage = (imgUrl: string) => {
   return { did, cid };
 };
 
-export const getFediAt = (link: string) => {
-  const atSign = link.indexOf("@", 8);
-  const username = link.slice(
-    atSign + 1,
-    link.lastIndexOf("/") < atSign ? link.length : link.lastIndexOf("/"),
-  );
-  const domain = link.slice(8, atSign - 1);
-  return `${username}@${domain}`;
+export const getFediAt = (atprotoHandle: string) => {
+  if (atprotoHandle.endsWith(".ap.brid.gy")) {
+    const handle = atprotoHandle.slice(0, -11);
+    return handle.replace(".", "@");
+  }
+  return atprotoHandle;
 };
