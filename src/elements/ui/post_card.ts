@@ -108,6 +108,7 @@ export const postCard = (
     isDecryptedPost?: boolean;
     blockedPost?: boolean;
     blockedByPost?: boolean;
+    someBlocking?: boolean;
     icon?: string;
     text?: string;
   } = {
@@ -117,6 +118,7 @@ export const postCard = (
     isDecryptedPost: false,
     blockedPost: false,
     blockedByPost: false,
+    someBlocking: false,
     icon: undefined,
     text: undefined,
   },
@@ -510,6 +512,7 @@ export const postCard = (
     if (cfg.blockedPost)
       warning(`Block relation between this user and their replier`);
     if (cfg.blockedByPost) warning(`Blocked by or blocking this user`);
+    if (cfg.someBlocking) warning(`Someone here is blocking someone`);
 
     if (warnings.length)
       card.appendChild(
