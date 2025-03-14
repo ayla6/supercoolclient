@@ -153,7 +153,7 @@ export const updatePage = async (useCache: boolean) => {
 export const profileRedirect = (did: string) => {
   const path = window.location.pathname;
   const indexOfSlash = path.indexOf("/", 1);
-  history.pushState(
+  history.replaceState(
     null,
     "",
     "/" + did + (indexOfSlash === -1 ? "" : path.slice(indexOfSlash)),
