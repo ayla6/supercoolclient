@@ -237,7 +237,7 @@
             $yellow 10px,
             $yellow 20px
         );
-    border-color: darken($yellow, 20%);
+    border-color: adjust($yellow, -20%);
     color: $white;
     text-shadow:
         0px 0px 1px rgba(0, 0, 0, 0.8),
@@ -253,7 +253,7 @@
                 $yellow 10px,
                 $yellow 20px
             );
-        border-color: darken($yellow, 10%);
+        border-color: adjust($yellow, -10%);
     }
     .warning-text {
         font-weight: 400;
