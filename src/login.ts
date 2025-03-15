@@ -1,8 +1,17 @@
-//stole most stuff from here because idk how to do this... https://github.com/wesbos/blue-sky-cli
 import { AtpSessionData, XRPC, CredentialManager } from "@atcute/client";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
-import { DidDocument, getServiceEndpoint } from "@atcute/client/utils/did";
+import {
+  DidDocument,
+  getPdsEndpoint,
+  getServiceEndpoint,
+} from "@atcute/client/utils/did";
 import { updateNotificationIcon } from "./elements/ui/navbar";
+import {
+  AtprotoWebDidDocumentResolver,
+  CompositeDidDocumentResolver,
+  PlcDidDocumentResolver,
+  XrpcHandleResolver,
+} from "@atcute/identity-resolver";
 let savedSessionData: AtpSessionData;
 
 export let managerPublic = new CredentialManager({
@@ -36,24 +45,25 @@ export const login = async (credentials?: {
   } else if (credentials?.serviceEndpoint) {
     serviceEndpoint = credentials.serviceEndpoint;
   } else {
-    const did = (
-      await rpc.get("com.atproto.identity.resolveHandle", {
-        params: { handle: credentials.identifier },
-      })
-    ).data.did;
+    // https://github.com/notjuliet/pdsls/blob/main/src/utils/api.ts
+    const didDocumentResolver = new CompositeDidDocumentResolver({
+      methods: {
+        plc: new PlcDidDocumentResolver(),
+        web: new AtprotoWebDidDocumentResolver(),
+      },
+    });
 
-    // thanks https://github.com/notjuliet/pdsls/blob/main/src/utils/api.ts#L10
-    // i thought hmm but what if there are more ways to do than two   there are not this is fine thank god
-    const didDoc = (await (
-      await fetch(
-        did.startsWith("did:web")
-          ? `https://${did.split(":")[2]}/.well-known/did.json`
-          : "https://plc.directory/" + did,
-      )
-    ).json()) as DidDocument;
+    const handleResolver = new XrpcHandleResolver({
+      serviceUrl: "https://public.api.bsky.app",
+    });
 
-    const didDocServiceEndpoint = didDoc.service?.[0]
-      ?.serviceEndpoint as string;
+    const did = credentials.identifier.startsWith("did:")
+      ? credentials.identifier
+      : await handleResolver.resolve(credentials.identifier as any);
+
+    const doc = await didDocumentResolver.resolve(did as any);
+
+    const didDocServiceEndpoint = getPdsEndpoint(doc as any);
     if (didDocServiceEndpoint) serviceEndpoint = didDocServiceEndpoint;
   }
 

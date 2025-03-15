@@ -20,6 +20,9 @@ importers:
       '@atcute/client':
         specifier: ^2.0.8
         version: 2.0.8
+      '@atcute/identity-resolver':
+        specifier: ^0.1.2
+        version: 0.1.2(@atcute/identity@0.1.1)
       '@mary/color-fns':
         specifier: npm:@jsr/mary__color-fns@^0.1.1
         version: '@jsr/mary__color-fns@0.1.1'
@@ -80,6 +83,14 @@ packages:
   '@atcute/client@2.0.8':
     resolution: {integrity: sha512-OTfiWwjB4mOTlp2InGStvoQ+PIA5lvih9cTYU8BvOhzNcCBUpt4l860MKZExHjvQ9Tt1kjq/ED9zRiUjsAgIxw==}
 
+  '@atcute/identity-resolver@0.1.2':
+    resolution: {integrity: sha512-fP2VbHD04kVcCdNi/Kszo6jFzqM7Pg3p33oGhfp2zVkwFKaVBlwCaFRWEga/Xvu/IDLwNdASGWnLqoA34SFeSg==}
+    peerDependencies:
+      '@atcute/identity': ^0.1.0
+
+  '@atcute/identity@0.1.1':
+    resolution: {integrity: sha512-TijKOgvvOfp/QoMAqaiKLn+FnQi5XrxsWLVcVnvr5JoKlgF2yppNvVo0y62XEXZbgDuEMSav1v1tEjC4Hn7MzQ==}
+
   '@atcute/multibase@1.1.2':
     resolution: {integrity: sha512-KFX+c7a/u2jSNcRw0rLaUHG/XEKf1A1c8XF5soHnsb1JMCShihf/anfZ1kJ4no/IlIp9HEHV3PQRQO2sWL6ASQ==}
 
@@ -89,8 +100,15 @@ packages:
   '@atcute/uint8array@1.0.1':
     resolution: {integrity: sha512-AAnlFKyfDRgb9GNZJbhQ6OuMhbmNPirQyapb8KnmcEhxQZ3+tt+4NcwqekEegY4MpNqSTYeeTdyxq0wGZv1JHg==}
 
+  '@atcute/util-fetch@1.0.1':
+    resolution: {integrity: sha512-Clc0E/5ufyGBVfYBUwWNlHONlZCoblSr4Ho50l1LhmRPGB1Wu/AQ9Sz+rsBg7fdaW/auve8ulmwhRhnX2cGRow==}
+
   '@atcute/varint@1.0.2':
     resolution: {integrity: sha512-0O31hePzzr4O3NGWHUKKOyta6CGSL+AtN8iir8grGxu9jXyI7DBARlw6PbgKA6uTAvsXdpmRmF8MX+p0TsLnNg==}
+
+  '@badrap/valita@0.4.3':
+    resolution: {integrity: sha512-C9iZSrVlTb610dxZ2oatK5LwefaHv0Q9eYfVDH3co846x7WinhCfc8jCDTE55yM8WxlmOfX2ckKmsSr7KzZ/gg==}
+    engines: {node: '>= 18'}
 
   '@bufbuild/protobuf@2.2.3':
     resolution: {integrity: sha512-tFQoXHJdkEOSwj5tRIZSPNUuXK3RaR7T1nUrPgbYX1pUbvqqaaZAsfo+NXBPsz5rZMSKVFrgK1WL8Q/MSLvprg==}
@@ -718,6 +736,16 @@ snapshots:
 
   '@atcute/client@2.0.8': {}
 
+  '@atcute/identity-resolver@0.1.2(@atcute/identity@0.1.1)':
+    dependencies:
+      '@atcute/identity': 0.1.1
+      '@atcute/util-fetch': 1.0.1
+      '@badrap/valita': 0.4.3
+
+  '@atcute/identity@0.1.1':
+    dependencies:
+      '@badrap/valita': 0.4.3
+
   '@atcute/multibase@1.1.2':
     dependencies:
       '@atcute/uint8array': 1.0.1
@@ -726,7 +754,13 @@ snapshots:
 
   '@atcute/uint8array@1.0.1': {}
 
+  '@atcute/util-fetch@1.0.1':
+    dependencies:
+      '@badrap/valita': 0.4.3
+
   '@atcute/varint@1.0.2': {}
+
+  '@badrap/valita@0.4.3': {}
 
   '@bufbuild/protobuf@2.2.3': {}
 
