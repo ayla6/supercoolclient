@@ -162,44 +162,68 @@ export const settingsRoute = async (
             textContent: "Default fullsize CDN image format:",
             htmlFor: "default-fullsize-format",
           }),
-          elem("input", {
-            type: "text",
-            id: "default-fullsize-format",
-            className: "checkbox",
-            value: localStorage.getItem("default-fullsize-format") || "avif",
-            onclick: (e) => e.stopPropagation(),
-            onchange: (e) => {
-              localStorage.setItem(
-                "default-fullsize-format",
-                (e.target as HTMLInputElement).value,
-              );
-              settings.defaultFullsizeFormat = (
-                e.target as HTMLInputElement
-              ).value;
+          elem(
+            "select",
+            {
+              id: "default-fullsize-format",
+              className: "checkbox",
+              value: localStorage.getItem("default-fullsize-format") || "webp",
+              onclick: (e) => e.stopPropagation(),
+              onchange: (e) => {
+                localStorage.setItem(
+                  "default-fullsize-format",
+                  (e.target as HTMLInputElement).value,
+                );
+                settings.defaultFullsizeFormat = (
+                  e.target as HTMLInputElement
+                ).value;
+              },
             },
-          }),
+            undefined,
+            [
+              elem("option", { value: "avif", textContent: "avif" }),
+              elem("option", { value: "webp", textContent: "webp" }),
+              elem("option", { value: "jpeg", textContent: "jpeg" }),
+              elem("option", { value: "png", textContent: "png" }),
+              elem("option", { value: "gif", textContent: "gif" }),
+              elem("option", { value: "bmp", textContent: "bmp" }),
+              elem("option", { value: "heic", textContent: "heic" }),
+            ],
+          ),
         ]),
         elem("div", { className: "setting" }, undefined, [
           elem("label", {
             textContent: "Default thumbnail CDN image format:",
             htmlFor: "default-thumbnail-format",
           }),
-          elem("input", {
-            type: "text",
-            id: "default-thumbnail-format",
-            className: "checkbox",
-            value: localStorage.getItem("default-thumbnail-format") || "webp",
-            onclick: (e) => e.stopPropagation(),
-            onchange: (e) => {
-              localStorage.setItem(
-                "default-thumbnail-format",
-                (e.target as HTMLInputElement).value,
-              );
-              settings.defaultThumbnailFormat = (
-                e.target as HTMLInputElement
-              ).value;
+          elem(
+            "select",
+            {
+              id: "default-thumbnail-format",
+              className: "checkbox",
+              value: localStorage.getItem("default-thumbnail-format") || "webp",
+              onclick: (e) => e.stopPropagation(),
+              onchange: (e) => {
+                localStorage.setItem(
+                  "default-thumbnail-format",
+                  (e.target as HTMLInputElement).value,
+                );
+                settings.defaultThumbnailFormat = (
+                  e.target as HTMLInputElement
+                ).value;
+              },
             },
-          }),
+            undefined,
+            [
+              elem("option", { value: "webp", textContent: "webp" }),
+              elem("option", { value: "avif", textContent: "avif" }),
+              elem("option", { value: "jpeg", textContent: "jpeg" }),
+              elem("option", { value: "png", textContent: "png" }),
+              elem("option", { value: "gif", textContent: "gif" }),
+              elem("option", { value: "bmp", textContent: "bmp" }),
+              elem("option", { value: "heic", textContent: "heic" }),
+            ],
+          ),
         ]),
       ]),
     ),
