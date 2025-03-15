@@ -169,13 +169,15 @@ export const hydratePostFeed = async (
     // this looks so stupid :/
     for (const post of data[dataLocation] as AppBskyFeedDefs.FeedViewPost[]) {
       if (postPositions[post.post.uri]) continue;
-      let position: RecursivePostArray =
+      const ancestorPosition: RecursivePostArray =
         postPositions[post.reply?.parent?.uri] ??
         postPositions[post.reply?.root?.uri];
-      if (position) {
-        position[1].push(post);
+      if (ancestorPosition) {
+        const position = [post, []] as any;
+        ancestorPosition[1].push(position);
+        postPositions[post.post.uri] = position;
       } else {
-        position = [post, []] as any;
+        let position = [post, []] as any;
         postPositions[post.post.uri] = position;
         if (post.reply) {
           if (
