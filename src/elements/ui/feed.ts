@@ -167,7 +167,9 @@ export const hydratePostFeed = async (
     const postPositions: { [key: string]: RecursivePostArray } = {};
     const hasReplies = new Set<string>();
     // this looks so stupid :/
-    for (const post of data[dataLocation] as AppBskyFeedDefs.FeedViewPost[]) {
+    for (const post of data[
+      dataLocation
+    ].reverse() as AppBskyFeedDefs.FeedViewPost[]) {
       if (postPositions[post.post.uri]) continue;
       const ancestorPosition: RecursivePostArray =
         postPositions[post.reply?.parent?.uri] ??
@@ -203,14 +205,19 @@ export const hydratePostFeed = async (
       hasReplies.add(post.reply?.root.uri);
     }
     if (!params.cursor) output.replaceChildren();
-    rearrangedFeed.flat(100000).forEach((post: any) => {
-      if (post[0]) return;
-      return output.appendChild(
-        postCard(post, {
-          hasReplies: hasReplies.has("post" in post ? post.post.uri : post.uri),
-        }),
-      );
-    });
+    rearrangedFeed
+      .reverse()
+      .flat(100000)
+      .forEach((post: any) => {
+        if (post[0]) return;
+        return output.appendChild(
+          postCard(post, {
+            hasReplies: hasReplies.has(
+              "post" in post ? post.post.uri : post.uri,
+            ),
+          }),
+        );
+      });
     return data;
   };
 
