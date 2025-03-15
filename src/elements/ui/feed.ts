@@ -167,35 +167,48 @@ export const hydratePostFeed = async (
     const postPositions: { [key: string]: RecursivePostArray } = {};
     const hasReplies = new Set<string>();
     // this looks so stupid :/
-    // prettier-ignore
-    for (const post of data[dataLocation].reverse() as AppBskyFeedDefs.FeedViewPost[]) {
-      let position: RecursivePostArray = postPositions[post.reply?.parent?.uri] ?? postPositions[post.reply?.root?.uri];
+    for (const post of data[dataLocation] as AppBskyFeedDefs.FeedViewPost[]) {
+      if (postPositions[post.post.uri]) continue;
+      let position: RecursivePostArray =
+        postPositions[post.reply?.parent?.uri] ??
+        postPositions[post.reply?.root?.uri];
       if (position) {
         position[1].push(post);
       } else {
         position = [post, []] as any;
+        postPositions[post.post.uri] = position;
+        if (post.reply) {
+          if (
+            post.reply.parent &&
+            post.reply.parent.$type === "app.bsky.feed.defs#postView"
+          ) {
+            position = [post.reply.parent, position] as any;
+            postPositions[post.reply.parent.uri] = position;
+          }
+          if (
+            post.reply.root &&
+            post.reply.root.$type === "app.bsky.feed.defs#postView" &&
+            post.reply.root.uri !== post.reply.parent.uri
+          ) {
+            position = [post.reply.root, position] as any;
+            postPositions[post.reply.root.uri] = position;
+          }
+        }
         rearrangedFeed.push(position);
       }
 
       hasReplies.add(post.reply?.parent.uri);
       hasReplies.add(post.reply?.root.uri);
-
-      postPositions[post.post.uri] = position;
     }
     if (!params.cursor) output.replaceChildren();
-    rearrangedFeed
-      .reverse()
-      .flat(100000)
-      .forEach((post: any) => {
-        if (!("post" in post)) return;
-        return output.appendChild(
-          postCard(post, {
-            hasReplies: hasReplies.has(
-              "post" in post ? post.post.uri : post.uri,
-            ),
-          }),
-        );
-      });
+    rearrangedFeed.flat(100000).forEach((post: any) => {
+      if (post[0]) return;
+      return output.appendChild(
+        postCard(post, {
+          hasReplies: hasReplies.has("post" in post ? post.post.uri : post.uri),
+        }),
+      );
+    });
     return data;
   };
 
