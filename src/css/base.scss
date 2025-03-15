@@ -435,7 +435,7 @@ select {
     }
 
     .hide-on-mobile {
-        display: none;
+        display: none !important;
     }
 
     #search-bar {

@@ -18,7 +18,7 @@ import { RouteOutput } from "../types";
 import { confirmDialog } from "../elements/ui/dialog";
 import { editProfileDialog } from "../elements/ui/edit_profile";
 import { createSearchBar } from "../elements/ui/search_bar";
-import { viewBlockedPosts } from "../settings";
+import { settings } from "../settings";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
   posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
@@ -65,7 +65,7 @@ export const profileRoute = async (
     profile.viewer?.blocking ||
     profile.viewer?.blockingByList?.listItemCount > 0;
 
-  const _rpc = viewBlockedPosts && blockingInAnyWay ? rpcPublic : rpc;
+  const _rpc = settings.viewBlockedPosts && blockingInAnyWay ? rpcPublic : rpc;
 
   let ogFediLink: HTMLAnchorElement;
   const did = profile.did;
@@ -92,7 +92,7 @@ export const profileRoute = async (
   if (profile.did !== atId) profileRedirect(did);
 
   const { data: lastMedia } =
-    !viewBlockedPosts && blockingInAnyWay
+    !settings.viewBlockedPosts && blockingInAnyWay
       ? { data: { feed: [] } }
       : await _rpc.get("app.bsky.feed.getAuthorFeed", {
           params: {
@@ -310,7 +310,7 @@ export const profileRoute = async (
   );
 
   const bodyStyle = `background-image:
-    url(${profile.banner?.replace("img/banner", "img/feed_fullsize").replace("jpeg", "webp")});`;
+    url(${changeImageFormat(profile.banner?.replace("img/banner", "img/feed_fullsize"))});`;
   document.body.setAttribute("style", bodyStyle);
 
   const loadProfileFeed = createFeedManager(
@@ -378,14 +378,14 @@ export const profileRoute = async (
     _rpc,
   );
 
-  if (!viewBlockedPosts && blockingInAnyWay) {
+  if (!settings.viewBlockedPosts && blockingInAnyWay) {
     Array.from(sideBar.querySelector(".side-nav").children).forEach((child) =>
       child.classList.add("disabled"),
     );
   }
 
   const onscrollFunction =
-    !viewBlockedPosts && blockingInAnyWay
+    !settings.viewBlockedPosts && blockingInAnyWay
       ? undefined
       : await loadProfileFeed({
           feed: "posts",

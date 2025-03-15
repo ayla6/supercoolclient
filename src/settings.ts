@@ -10,11 +10,13 @@ export const fillMissingSettings = () => {
   if (!localStorage.getItem("view-blocked-posts")) {
     localStorage.setItem("view-blocked-posts", "1");
   }
+  if (!localStorage.getItem("default-image-format")) {
+    localStorage.setItem("default-image-format", "avif");
+  }
 };
 
-export const languagesToNotTranslate = new Set(
-  langs ? JSON.parse(langs) : navigatorLangs,
-);
-
-export const viewBlockedPosts =
-  localStorage.getItem("view-blocked-posts") === "true";
+export let settings = {
+  languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
+  viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
+  defaultImageFormat: localStorage.getItem("default-image-format") || "avif",
+};

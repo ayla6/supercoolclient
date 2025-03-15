@@ -2,7 +2,7 @@ import { postCard } from "../ui/post_card";
 import { rpc, rpcPublic } from "../../login";
 import { OnscrollFunction } from "../../types";
 import { XRPC } from "@atcute/client";
-import { viewBlockedPosts } from "../../settings";
+import { settings } from "../../settings";
 import {
   AppBskyFeedGetAuthorFeed,
   AppBskyFeedGetFeed,
@@ -96,7 +96,7 @@ export const hydrateFeed = async (
   const dataLocation = dataLocations[nsid] ?? "feed";
   const { data } = await _rpc.get(nsid, { params: params });
   if (
-    viewBlockedPosts &&
+    settings.viewBlockedPosts &&
     (nsid === "app.bsky.feed.getFeed" ||
       nsid === "app.bsky.feed.getAuthorFeed" ||
       nsid === "app.bsky.feed.searchPosts" ||

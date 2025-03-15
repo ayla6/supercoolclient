@@ -15,7 +15,7 @@ import { rpc, rpcPublic } from "../login";
 import { beingLoadedSplitPath, profileRedirect } from "../router";
 import { RouteOutput } from "../types";
 import { preloadedPost, setPreloaded } from "../elements/utils/preloaded_post";
-import { viewBlockedPosts } from "../settings";
+import { settings } from "../settings";
 
 const mutedPostsButton = (
   outputElement: HTMLElement,
@@ -74,7 +74,7 @@ const loadThread = (
 
     if (thread.parent) {
       let currentThread = thread;
-      if (!viewBlockedPosts) {
+      if (!settings.viewBlockedPosts) {
         while (
           currentThread.parent &&
           currentThread.parent.$type === "app.bsky.feed.defs#threadViewPost"
@@ -344,7 +344,7 @@ export const postRoute = async (
     params: { uri, parentHeight: 1000 },
   });
   if (
-    viewBlockedPosts &&
+    settings.viewBlockedPosts &&
     postThread.thread.$type === "app.bsky.feed.defs#blockedPost"
   ) {
     postThread = (

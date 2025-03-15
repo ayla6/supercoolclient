@@ -11,6 +11,7 @@ import {
 import { popupBox } from "../dialog";
 import { createSwipeAction } from "../../utils/swipe_manager";
 import { getPdsEndpoint } from "@atcute/client/utils/did";
+import { settings } from "../../../settings";
 
 const loadImage = (
   image: AppBskyEmbedImages.ViewImage,
@@ -45,18 +46,18 @@ const loadImage = (
             );
             img.src = `${pds}/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`;
             seeRawButton.textContent = "Raw";
-            pngWebpButton.textContent = "See WebP";
+            pngDefaultButton.textContent = `See ${settings.defaultImageFormat}`;
             notDefaultFormat = true;
           },
         });
-        const pngWebpButton = elem("button", {
+        const pngDefaultButton = elem("button", {
           textContent: "See as PNG",
           onclick: async (e) => {
             img.src = changeImageFormat(
               image.fullsize,
-              notDefaultFormat ? "webp" : "png",
+              notDefaultFormat ? settings.defaultImageFormat : "png",
             );
-            pngWebpButton.textContent = `See as ${notDefaultFormat ? "PNG" : "WebP"}`;
+            pngDefaultButton.textContent = `See as ${notDefaultFormat ? "PNG" : settings.defaultImageFormat}`;
             seeRawButton.textContent = "See raw";
             notDefaultFormat = !notDefaultFormat;
           },
@@ -69,7 +70,7 @@ const loadImage = (
               className: "ztop see-raw-button",
             },
             undefined,
-            [seeRawButton, pngWebpButton],
+            [seeRawButton, pngDefaultButton],
           ),
           elem("button", {
             textContent: "×",

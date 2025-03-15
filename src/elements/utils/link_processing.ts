@@ -1,3 +1,5 @@
+import { settings } from "../../settings";
+
 export const idChoose = ({ handle, did }: { did: string; handle: string }) =>
   handle !== "handle.invalid" ? handle : did;
 
@@ -6,8 +8,10 @@ export const getPathFromUri = (uri: string) =>
 
 export const getDidFromUri = (uri: string) => uri.slice(5, uri.indexOf("/", 6));
 
-export const changeImageFormat = (uri: string, format = "webp") =>
-  uri ? uri.slice(0, -4) + format : undefined;
+export const changeImageFormat = (
+  uri: string,
+  format = settings.defaultImageFormat,
+) => (uri ? uri.slice(0, -4) + format : undefined);
 
 export const getUriFromSplitPath = (
   [did, , postId]: string[],

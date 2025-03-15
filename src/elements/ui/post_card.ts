@@ -15,7 +15,7 @@ import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
 import { handleEmbed } from "./embeds/embed_handlers";
-import { languagesToNotTranslate, viewBlockedPosts } from "../../settings.ts";
+import { settings } from "../../settings.ts";
 import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import * as age from "age-encryption";
@@ -545,7 +545,7 @@ export const postCard = (
     card.appendChild(labelArea);
   }
 
-  if (viewBlockedPosts) {
+  if (settings.viewBlockedPosts) {
     const warnings = [];
     const warning = (text: string) =>
       warnings.push(
@@ -572,7 +572,7 @@ export const postCard = (
   if (
     record.text &&
     record.langs?.[0] &&
-    !languagesToNotTranslate.has(record.langs[0])
+    !settings.languagesToNotTranslate.has(record.langs[0])
   ) {
     translateButton = elem("a", {
       className: "small-link",

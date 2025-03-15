@@ -4,6 +4,8 @@ import { rpc, sessionData } from "../login";
 import { RouteOutput } from "../types";
 import { createTray } from "../elements/ui/tray";
 import { getUriFromSplitPath } from "../elements/utils/link_processing";
+import { settings } from "../settings";
+import { stickyHeader } from "../elements/ui/sticky_header";
 
 const saveAppearanceSettings = async () => {
   const accentColor = (
@@ -147,8 +149,11 @@ export const settingsRoute = async (
       { className: "card-holder" },
       elem(
         "div",
-        { className: "card accent-card" },
-        elem("span", { textContent: "Settings", className: "section-title" }),
+        { className: "card accent-card hide-on-mobile" },
+        elem("span", {
+          textContent: "Settings",
+          className: "section-title",
+        }),
       ),
     ),
     elem(
@@ -170,17 +175,36 @@ export const settingsRoute = async (
             className: "checkbox",
             checked: localStorage.getItem("view-blocked-posts") === "true",
             onclick: (e) => e.stopPropagation(),
-            onchange: () => {
+            onchange: (e) => {
               localStorage.setItem(
                 "view-blocked-posts",
-                (
-                  document.getElementById(
-                    "view-blocked-posts",
-                  ) as HTMLInputElement
-                ).checked
-                  ? "true"
-                  : "false",
+                (e.target as HTMLInputElement).checked ? "true" : "false",
               );
+              settings.viewBlockedPosts = (
+                e.target as HTMLInputElement
+              ).checked;
+            },
+          }),
+        ]),
+        elem("div", { className: "setting" }, undefined, [
+          elem("label", {
+            textContent: "Default CDN image format:",
+            htmlFor: "default-image-format",
+          }),
+          elem("input", {
+            type: "text",
+            id: "default-image-format",
+            className: "checkbox",
+            value: localStorage.getItem("default-image-format") || "avif",
+            onclick: (e) => e.stopPropagation(),
+            onchange: (e) => {
+              localStorage.setItem(
+                "default-image-format",
+                (e.target as HTMLInputElement).value,
+              );
+              settings.defaultImageFormat = (
+                e.target as HTMLInputElement
+              ).value;
             },
           }),
         ]),
@@ -370,7 +394,7 @@ export const settingsRoute = async (
       ]),
     ),
   ]);
-  container.append(content);
+  container.append(stickyHeader("Settings"), content);
 
   return { title: "Settings" };
 };
