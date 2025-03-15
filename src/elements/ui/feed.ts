@@ -26,6 +26,16 @@ export type feedNSID =
   | "app.bsky.actor.searchActors"
   | "app.bsky.graph.getKnownFollowers";
 
+type RecursivePostArray = Array<
+  [
+    post:
+      | AppBskyFeedDefs.FeedViewPost
+      | AppBskyFeedDefs.PostView
+      | AppBskyFeedDefs.ThreadViewPost,
+    replies?: RecursivePostArray,
+  ]
+>;
+
 const dataLocations = {
   "app.bsky.feed.searchPosts": "posts",
   "app.bsky.graph.getFollows": "follows",
@@ -145,7 +155,6 @@ export const hydratePostFeed = async (
   params: { [key: string]: any },
   _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
-  console.log("hello");
   const dataLocation = dataLocations[nsid] ?? "feed";
 
   const loadFeed = async () => {
@@ -154,33 +163,39 @@ export const hydratePostFeed = async (
     });
     if (settings.viewBlockedPosts)
       await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
-    const rearrangedFeed: AppBskyFeedDefs.FeedViewPost[][] = [];
-    const postPositions: { [key: string]: number } = {};
+    const rearrangedFeed: RecursivePostArray[] = [];
+    const postPositions: { [key: string]: RecursivePostArray } = {};
     const hasReplies = new Set<string>();
     // this looks so stupid :/
-    for (const post of data[dataLocation].reverse()) {
-      let replyPosition =
-        postPositions[post.reply?.parent?.uri] ??
-        postPositions[post.reply?.root?.uri] ??
-        rearrangedFeed.length;
-      if (rearrangedFeed[replyPosition]) {
-        rearrangedFeed[replyPosition].push(post);
-      } else rearrangedFeed.push([post]);
-      postPositions[post.post.uri] = replyPosition;
-      if (post.reply) {
-        hasReplies.add(post.reply.parent.uri);
-        hasReplies.add(post.reply.root.uri);
+    // prettier-ignore
+    for (const post of data[dataLocation].reverse() as AppBskyFeedDefs.FeedViewPost[]) {
+      let position: RecursivePostArray = postPositions[post.reply?.parent?.uri] ?? postPositions[post.reply?.root?.uri];
+      if (position) {
+        position[1].push(post);
+      } else {
+        position = [post, []] as any;
+        rearrangedFeed.push(position);
       }
+
+      hasReplies.add(post.reply?.parent.uri);
+      hasReplies.add(post.reply?.root.uri);
+
+      postPositions[post.post.uri] = position;
     }
     if (!params.cursor) output.replaceChildren();
     rearrangedFeed
       .reverse()
-      .flat()
-      .forEach((item: AppBskyFeedDefs.FeedViewPost) =>
-        output.appendChild(
-          postCard(item, { hasReplies: hasReplies.has(item.post.uri) }),
-        ),
-      );
+      .flat(100000)
+      .forEach((post: any) => {
+        if (!("post" in post)) return;
+        return output.appendChild(
+          postCard(post, {
+            hasReplies: hasReplies.has(
+              "post" in post ? post.post.uri : post.uri,
+            ),
+          }),
+        );
+      });
     return data;
   };
 
