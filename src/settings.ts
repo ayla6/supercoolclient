@@ -12,15 +12,21 @@ export const fillMissingSettings = () => {
   if (!localStorage.getItem("view-blocked-posts")) {
     localStorage.setItem("view-blocked-posts", "1");
   }
-  if (!localStorage.getItem("default-image-format")) {
-    localStorage.setItem("default-image-format", "avif");
+  if (!localStorage.getItem("default-fullsize-format")) {
+    localStorage.setItem("default-fullsize-format", "avif");
+  }
+  if (!localStorage.getItem("default-thumbnail-format")) {
+    localStorage.setItem("default-thumbnail-format", "webp");
   }
 };
 
 export let settings = {
   languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
   viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
-  defaultImageFormat: localStorage.getItem("default-image-format") || "avif",
+  defaultFullsizeFormat:
+    localStorage.getItem("default-fullsize-format") || "avif",
+  defaultThumbnailFormat:
+    localStorage.getItem("default-thumbnail-format") || "webp",
 };
 
 export const updateColors = () => {

@@ -159,21 +159,43 @@ export const settingsRoute = async (
         ]),
         elem("div", { className: "setting" }, undefined, [
           elem("label", {
-            textContent: "Default CDN image format:",
-            htmlFor: "default-image-format",
+            textContent: "Default fullsize CDN image format:",
+            htmlFor: "default-fullsize-format",
           }),
           elem("input", {
             type: "text",
-            id: "default-image-format",
+            id: "default-fullsize-format",
             className: "checkbox",
-            value: localStorage.getItem("default-image-format") || "avif",
+            value: localStorage.getItem("default-fullsize-format") || "avif",
             onclick: (e) => e.stopPropagation(),
             onchange: (e) => {
               localStorage.setItem(
-                "default-image-format",
+                "default-fullsize-format",
                 (e.target as HTMLInputElement).value,
               );
-              settings.defaultImageFormat = (
+              settings.defaultFullsizeFormat = (
+                e.target as HTMLInputElement
+              ).value;
+            },
+          }),
+        ]),
+        elem("div", { className: "setting" }, undefined, [
+          elem("label", {
+            textContent: "Default thumbnail CDN image format:",
+            htmlFor: "default-thumbnail-format",
+          }),
+          elem("input", {
+            type: "text",
+            id: "default-thumbnail-format",
+            className: "checkbox",
+            value: localStorage.getItem("default-thumbnail-format") || "webp",
+            onclick: (e) => e.stopPropagation(),
+            onchange: (e) => {
+              localStorage.setItem(
+                "default-thumbnail-format",
+                (e.target as HTMLInputElement).value,
+              );
+              settings.defaultThumbnailFormat = (
                 e.target as HTMLInputElement
               ).value;
             },

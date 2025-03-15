@@ -30,7 +30,12 @@ const loadImage = (
       onclick: (e) => {
         e.preventDefault();
         let notDefaultFormat = false;
-        const img = elem("img", { src: changeImageFormat(image.fullsize) });
+        const img = elem("img", {
+          src: changeImageFormat(
+            image.fullsize,
+            settings.defaultFullsizeFormat,
+          ),
+        });
         const seeRawButton = elem("button", {
           textContent: "See raw",
           onclick: async (e) => {
@@ -46,7 +51,7 @@ const loadImage = (
             );
             img.src = `${pds}/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`;
             seeRawButton.textContent = "Raw";
-            pngDefaultButton.textContent = `See ${settings.defaultImageFormat}`;
+            pngDefaultButton.textContent = `See ${settings.defaultFullsizeFormat}`;
             notDefaultFormat = true;
           },
         });
@@ -55,9 +60,9 @@ const loadImage = (
           onclick: async (e) => {
             img.src = changeImageFormat(
               image.fullsize,
-              notDefaultFormat ? settings.defaultImageFormat : "png",
+              notDefaultFormat ? settings.defaultFullsizeFormat : "png",
             );
-            pngDefaultButton.textContent = `See as ${notDefaultFormat ? "PNG" : settings.defaultImageFormat}`;
+            pngDefaultButton.textContent = `See as ${notDefaultFormat ? "PNG" : settings.defaultFullsizeFormat}`;
             seeRawButton.textContent = "See raw";
             notDefaultFormat = !notDefaultFormat;
           },
@@ -93,8 +98,12 @@ const loadImage = (
   );
 
   imageHolder.style.cssText = getProperSize(image.aspectRatio, isSingleImage);
-  if (image.aspectRatio && image.aspectRatio.height <= 350) {
-    img.src = changeImageFormat(image.fullsize);
+  if (
+    image.aspectRatio &&
+    image.aspectRatio.height <= 350 &&
+    image.aspectRatio.height > 8
+  ) {
+    img.src = changeImageFormat(image.fullsize, settings.defaultFullsizeFormat);
   } else img.src = changeImageFormat(image.thumb);
 
   imageHolder.href = changeImageFormat(image.fullsize, "png");

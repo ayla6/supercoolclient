@@ -10,7 +10,7 @@ export const getDidFromUri = (uri: string) => uri.slice(5, uri.indexOf("/", 6));
 
 export const changeImageFormat = (
   uri: string,
-  format = settings.defaultImageFormat,
+  format = settings.defaultThumbnailFormat,
 ) => (uri ? uri.slice(0, -4) + format : undefined);
 
 export const getUriFromSplitPath = (
