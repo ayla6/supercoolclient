@@ -124,6 +124,7 @@ const loadThread = (
                 href: getPathFromUri(currentThread.parent.uri),
                 textContent: "Post not found",
               });
+              currentThread = currentThread.parent as any;
             } else {
               let blockedPost = false;
               let blockedByPost = false;

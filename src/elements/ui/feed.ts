@@ -10,6 +10,7 @@ import {
   AppBskyFeedSearchPosts,
   AppBskyFeedDefs,
   AppBskyEmbedRecord,
+  AppBskyFeedPost,
 } from "@atcute/client/lexicons";
 
 export type feedNSID =
@@ -26,15 +27,13 @@ export type feedNSID =
   | "app.bsky.actor.searchActors"
   | "app.bsky.graph.getKnownFollowers";
 
-type RecursivePostArray = Array<
-  [
-    post:
-      | AppBskyFeedDefs.FeedViewPost
-      | AppBskyFeedDefs.PostView
-      | AppBskyFeedDefs.ThreadViewPost,
-    replies?: RecursivePostArray,
-  ]
->;
+type RecursivePost = {
+  post:
+    | AppBskyFeedDefs.FeedViewPost
+    | AppBskyFeedDefs.PostView
+    | AppBskyFeedDefs.ThreadViewPost;
+  reply?: RecursivePost;
+};
 
 const dataLocations = {
   "app.bsky.feed.searchPosts": "posts",
@@ -43,7 +42,7 @@ const dataLocations = {
   "app.bsky.feed.getLikes": "likes",
   "app.bsky.feed.getRepostedBy": "repostedBy",
   "app.bsky.feed.getQuotes": "posts",
-  "dataapp.bsky.actor.searchActors": "actors",
+  "app.bsky.actor.searchActors": "actors",
   "app.bsky.graph.getKnownFollowers": "followers",
 };
 
@@ -163,61 +162,77 @@ export const hydratePostFeed = async (
     });
     if (settings.viewBlockedPosts)
       await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
-    const rearrangedFeed: RecursivePostArray[] = [];
-    const postPositions: { [key: string]: RecursivePostArray } = {};
-    const hasReplies = new Set<string>();
-    // this looks so stupid :/
-    for (const post of data[
-      dataLocation
-    ].reverse() as AppBskyFeedDefs.FeedViewPost[]) {
-      if (postPositions[post.post.uri]) continue;
-      const ancestorPosition: RecursivePostArray =
-        postPositions[post.reply?.parent?.uri] ??
-        postPositions[post.reply?.root?.uri];
-      if (ancestorPosition) {
-        const position = [post, []] as any;
-        ancestorPosition[1].push(position);
-        postPositions[post.post.uri] = position;
-      } else {
-        let position = [post, []] as any;
-        postPositions[post.post.uri] = position;
-        if (post.reply) {
-          if (
-            post.reply.parent &&
-            post.reply.parent.$type === "app.bsky.feed.defs#postView"
-          ) {
-            position = [post.reply.parent, position] as any;
-            postPositions[post.reply.parent.uri] = position;
-          }
-          if (
-            post.reply.root &&
-            post.reply.root.$type === "app.bsky.feed.defs#postView" &&
-            post.reply.root.uri !== post.reply.parent.uri
-          ) {
-            position = [post.reply.root, position] as any;
-            postPositions[post.reply.root.uri] = position;
-          }
-        }
-        rearrangedFeed.push(position);
-      }
+    const rearrangedFeed: Map<string, boolean> = new Map();
+    const posts: { [key: string]: RecursivePost } = {};
+    for (const post of data[dataLocation] as AppBskyFeedDefs.FeedViewPost[]) {
+      const postUri = post.post.uri;
+      if (posts[postUri]) posts[postUri].post = post;
+      else posts[postUri] = { post };
+      rearrangedFeed.set(postUri, true);
 
-      hasReplies.add(post.reply?.parent.uri);
-      hasReplies.add(post.reply?.root.uri);
+      if (post.reply) {
+        if (
+          post.reply.parent &&
+          post.reply.parent.$type === "app.bsky.feed.defs#postView"
+        ) {
+          const parentUri = post.reply.parent.uri;
+          if (posts[parentUri]?.reply) {
+            const toBeChangedPost = posts[parentUri].reply.post;
+            rearrangedFeed.set(
+              "post" in toBeChangedPost
+                ? toBeChangedPost.post.uri
+                : toBeChangedPost.uri,
+              true,
+            );
+            rearrangedFeed.set(parentUri, true);
+            posts[parentUri].reply = posts[postUri];
+          } else {
+            const reply = (post.reply.parent.record as AppBskyFeedPost.Record)
+              ?.reply;
+            const record = {
+              post: post.reply.parent,
+            } as AppBskyFeedDefs.FeedViewPost;
+            if (reply) {
+              record.reply = reply as any;
+              if (record.reply.parent) {
+                record.reply.parent.$type = "app.bsky.feed.defs#postView";
+                (record.reply.parent as any).author =
+                  post.reply.grandparentAuthor;
+              }
+            }
+            posts[parentUri] = {
+              post: record,
+              reply: posts[postUri],
+            };
+            rearrangedFeed.delete(parentUri);
+            rearrangedFeed.set(parentUri, true);
+          }
+          rearrangedFeed.set(postUri, false);
+        }
+      }
     }
     if (!params.cursor) output.replaceChildren();
-    rearrangedFeed
-      .reverse()
-      .flat(100000)
-      .forEach((post: any) => {
-        if (post[0]) return;
-        return output.appendChild(
-          postCard(post, {
-            hasReplies: hasReplies.has(
-              "post" in post ? post.post.uri : post.uri,
-            ),
+    for (const postUri of rearrangedFeed.keys()) {
+      if (!rearrangedFeed.get(postUri)) continue;
+      const post = posts[postUri].post;
+      output.appendChild(
+        postCard(post, {
+          hasReplies: Boolean(
+            posts["post" in post ? post.post.uri : post.uri].reply,
+          ),
+        }),
+      );
+      let currentPost = posts[postUri];
+      while (currentPost.reply) {
+        const replyPost = currentPost.reply.post;
+        output.appendChild(
+          postCard(replyPost, {
+            hasReplies: Boolean(currentPost.reply.reply),
           }),
         );
-      });
+        currentPost = currentPost.reply;
+      }
+    }
     return data;
   };
 
