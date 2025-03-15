@@ -15,7 +15,7 @@ import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
 import { handleEmbed } from "./embeds/embed_handlers";
-import { languagesToNotTranslate } from "../../settings.ts";
+import { languagesToNotTranslate, viewBlockedPosts } from "../../settings.ts";
 import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import * as age from "age-encryption";
@@ -188,13 +188,13 @@ export const postCard = (
   const indexedAt = new Date(post.indexedAt);
   const createdAt = new Date(record.createdAt);
 
-  const notBridgePost = !(
+  const notBridgyPost = !(
     record["bridgyOriginalText"] && record["bridgyOriginalUrl"]
   );
   const notLongText = !record["longText"];
 
   const atId =
-    notBridgePost || !author.handle.endsWith(".brid.gy")
+    notBridgyPost || !author.handle.endsWith(".brid.gy")
       ? idChoose(author)
       : getFediAt(author.handle);
 
@@ -247,15 +247,15 @@ export const postCard = (
     }, 0);
   }
 
-  let ogFediLink: HTMLAnchorElement;
-  if (!notBridgePost) {
+  let apOgLink: HTMLAnchorElement;
+  if (!notBridgyPost) {
     if (
       post.embed?.$type === "app.bsky.embed.external#view" &&
       post.embed.external.title.startsWith("Original post on ")
     ) {
       post.embed = null;
     }
-    ogFediLink = elem("a", {
+    apOgLink = elem("a", {
       className: "og-fedi-link",
       textContent: "🔗",
       target: "_blank",
@@ -301,7 +301,7 @@ export const postCard = (
           cfg.isDecryptedPost && elem("span", { textContent: "🔓" }),
         ]),
         elem("div", { className: "flex-row-gap" }, undefined, [
-          ogFediLink,
+          apOgLink,
           elem("a", {
             className: "timestamp",
             href: href,
@@ -383,7 +383,7 @@ export const postCard = (
           handleElem,
         ),
         elem("div", { className: "flex-row-gap" }, undefined, [
-          ogFediLink,
+          apOgLink,
           elem("a", {
             className: "timestamp",
             href: href,
@@ -417,9 +417,51 @@ export const postCard = (
     );
   }
 
+  const labelArea = elem("div", { className: "label-area" });
   const content = elem("div", { className: "post-content" });
+  let apWarningButton: HTMLButtonElement;
+  if (!notBridgyPost) {
+    const warningLabel = record.text.match(/^\[(.*)\]/);
+    const originalTextHasWarning =
+      warningLabel &&
+      record["bridgyOriginalText"].match(
+        new RegExp(`^<p>\\\[${warningLabel[1]}\\\]</p>`),
+      );
+    if (warningLabel?.[0] && !originalTextHasWarning) {
+      let postShow = false;
+      const buttonStatus = elem("span", {
+        textContent: postShow ? "Hide content" : "Show content",
+      });
+      apWarningButton = elem(
+        "button",
+        {
+          className: "warning-button",
+          onclick: (e) => {
+            e.stopPropagation();
+            postShow = !postShow;
+            buttonStatus.textContent = postShow
+              ? "Hide content"
+              : "Show content";
+            const display = postShow ? "block" : "none";
+            content.style.display = display;
+            labelArea.style.display = display;
+          },
+        },
+        undefined,
+        [
+          elem("span", {
+            className: "warning-text",
+            textContent: warningLabel?.[1],
+          }),
+          buttonStatus,
+        ],
+      );
+      content.style.display = "none";
+      labelArea.style.display = "none";
+    }
+  }
   if (record.text) {
-    if (notBridgePost && notLongText) {
+    if (notBridgyPost && notLongText) {
       content.appendChild(
         elem(
           "div",
@@ -453,12 +495,12 @@ export const postCard = (
       post.labels &&
       post.labels.some((l) => contentLabels[l.val] === "warn")
     ) {
-      let embeddedShown = false;
+      let embeddedShow = false;
       const warningLabel = post.labels.find(
         (l) => contentLabels[l.val] === "warn",
       );
       const buttonStatus = elem("span", {
-        textContent: embeddedShown ? "Hide content" : "Show content",
+        textContent: embeddedShow ? "Hide content" : "Show content",
       });
       const warningButton = elem(
         "button",
@@ -466,11 +508,11 @@ export const postCard = (
           className: "warning-button",
           onclick: (e) => {
             e.stopPropagation();
-            embeddedShown = !embeddedShown;
-            buttonStatus.textContent = embeddedShown
+            embeddedShow = !embeddedShow;
+            buttonStatus.textContent = embeddedShow
               ? "Hide content"
               : "Show content";
-            embedsElem.style.display = embeddedShown ? "block" : "none";
+            embedsElem.style.display = embeddedShow ? "block" : "none";
           },
         },
         undefined,
@@ -488,6 +530,7 @@ export const postCard = (
     }
     content.appendChild(embedsElem);
   }
+  if (apWarningButton) card.appendChild(apWarningButton);
   card.appendChild(content);
 
   if (record.tags) {
@@ -498,10 +541,11 @@ export const postCard = (
         href: `/search?tag=${encodeQuery(tag)}`,
       }),
     );
-    card.appendChild(elem("div", { className: "label-area" }, undefined, tags));
+    labelArea.append(...tags);
+    card.appendChild(labelArea);
   }
 
-  if (true) {
+  if (viewBlockedPosts) {
     const warnings = [];
     const warning = (text: string) =>
       warnings.push(
@@ -549,7 +593,7 @@ export const postCard = (
       }),
     );
     if (translateButton) postData.appendChild(translateButton);
-    if (ogFediLink) postData.appendChild(ogFediLink);
+    if (apOgLink) postData.appendChild(apOgLink);
     card.appendChild(postData);
 
     const stats = [
