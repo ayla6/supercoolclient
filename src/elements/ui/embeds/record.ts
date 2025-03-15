@@ -67,7 +67,6 @@ export const loadEmbedRecord = (
       return simpleCard;
     }
   } else if ("isLoadedBlockedPost" in embed) {
-    console.log(record);
     return postCard(record as AppBskyFeedDefs.PostView, {
       isEmbed: true,
       someBlocking: true,

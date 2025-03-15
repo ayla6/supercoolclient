@@ -37,12 +37,15 @@ const dataLocations = {
   "app.bsky.graph.getKnownFollowers": "followers",
 };
 
-type loadBlockdPostsTypes =
+type loadBlockedPostsTypes =
   | AppBskyFeedGetTimeline.Output
   | AppBskyFeedGetFeed.Output
   | AppBskyFeedGetAuthorFeed.Output
   | AppBskyFeedSearchPosts.Output;
-const loadBlockedPosts = async (data: loadBlockdPostsTypes, nsid: feedNSID) => {
+const loadBlockedPosts = async (
+  data: loadBlockedPostsTypes,
+  nsid: feedNSID,
+) => {
   const posts = data[dataLocations[nsid] ?? "feed"] as (
     | AppBskyFeedDefs.FeedViewPost
     | AppBskyFeedDefs.PostView
@@ -93,20 +96,27 @@ export const hydrateFeed = async (
   func: (item: any) => HTMLDivElement = postCard,
   _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
+  if (nsid === "app.bsky.feed.getTimeline")
+    return hydrateTimeline(output, params);
   const dataLocation = dataLocations[nsid] ?? "feed";
-  const { data } = await _rpc.get(nsid, { params: params });
-  if (
-    settings.viewBlockedPosts &&
-    (nsid === "app.bsky.feed.getFeed" ||
-      nsid === "app.bsky.feed.getAuthorFeed" ||
-      nsid === "app.bsky.feed.searchPosts" ||
-      nsid === "app.bsky.feed.getTimeline")
-  ) {
-    await loadBlockedPosts(data as loadBlockdPostsTypes, nsid);
-  }
 
-  output.replaceChildren();
-  data[dataLocation].forEach((item: Object) => output.appendChild(func(item)));
+  const loadFeed = async () => {
+    const { data } = await _rpc.get(nsid, { params: params });
+    if (
+      settings.viewBlockedPosts &&
+      (nsid === "app.bsky.feed.getFeed" ||
+        nsid === "app.bsky.feed.getAuthorFeed" ||
+        nsid === "app.bsky.feed.searchPosts")
+    )
+      await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
+    if (!params.cursor) output.replaceChildren();
+    data[dataLocation].forEach((item: Object) =>
+      output.appendChild(func(item)),
+    );
+    return data;
+  };
+
+  const data = await loadFeed();
 
   if (data.cursor === undefined) return;
   params.cursor = data.cursor;
@@ -120,10 +130,73 @@ export const hydrateFeed = async (
 
     try {
       feedBeingLoaded = true;
-      const { data } = await _rpc.get(nsid, { params: params });
-      data[dataLocation].forEach((item: Object) =>
-        output.appendChild(func(item)),
+      const data = await loadFeed();
+      params.cursor = data.cursor;
+      if (params.cursor === undefined) window.onscroll = null;
+    } finally {
+      feedBeingLoaded = false;
+    }
+  };
+};
+
+export const hydrateTimeline = async (
+  output: HTMLElement,
+  params: { [key: string]: any },
+): Promise<OnscrollFunction> => {
+  const loadFeed = async () => {
+    const { data } = await rpc.get("app.bsky.feed.getTimeline", {
+      params: params,
+    });
+    if (settings.viewBlockedPosts)
+      await loadBlockedPosts(
+        data as loadBlockedPostsTypes,
+        "app.bsky.feed.getTimeline",
       );
+    const rearrangedFeed: AppBskyFeedDefs.FeedViewPost[][] = [];
+    const postPositions: { [key: string]: number } = {};
+    const hasReplies = new Set<string>();
+    // this looks so stupid :/
+    for (const post of data.feed.reverse()) {
+      let replyPosition =
+        postPositions[post.reply?.parent?.uri] ??
+        postPositions[post.reply?.root?.uri] ??
+        rearrangedFeed.length;
+      if (rearrangedFeed[replyPosition]) {
+        rearrangedFeed[replyPosition].push(post);
+      } else rearrangedFeed.push([post]);
+      postPositions[post.post.uri] = replyPosition;
+      if (post.reply) {
+        hasReplies.add(post.reply.parent.uri);
+        hasReplies.add(post.reply.root.uri);
+      }
+    }
+    if (!params.cursor) output.replaceChildren();
+    rearrangedFeed
+      .reverse()
+      .flat()
+      .forEach((item: AppBskyFeedDefs.FeedViewPost) =>
+        output.appendChild(
+          postCard(item, { hasReplies: hasReplies.has(item.post.uri) }),
+        ),
+      );
+    return data;
+  };
+
+  const data = await loadFeed();
+
+  if (data.cursor === undefined) return;
+  params.cursor = data.cursor;
+  return async () => {
+    if (feedBeingLoaded) return;
+
+    const bottomPosition = window.innerHeight + Math.round(window.scrollY);
+    const shouldLoad = bottomPosition + 2000 >= document.body.offsetHeight;
+
+    if (!shouldLoad) return;
+
+    try {
+      feedBeingLoaded = true;
+      const data = await loadFeed();
       params.cursor = data.cursor;
       if (params.cursor === undefined) window.onscroll = null;
     } finally {
