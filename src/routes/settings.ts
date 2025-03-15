@@ -4,37 +4,8 @@ import { rpc, sessionData } from "../login";
 import { RouteOutput } from "../types";
 import { createTray } from "../elements/ui/tray";
 import { getUriFromSplitPath } from "../elements/utils/link_processing";
-import { settings } from "../settings";
+import { settings, updateColors } from "../settings";
 import { stickyHeader } from "../elements/ui/sticky_header";
-
-const saveAppearanceSettings = async () => {
-  const accentColor = (
-    document.getElementById("accent-color") as HTMLInputElement
-  ).value;
-
-  if (accentColor) {
-    if (!accentColor.match(/^#[0-9a-f]{6}$/i)) {
-      createTray("Selected color is invalid");
-    } else {
-      localStorage.setItem("accent-color", accentColor);
-      createTray("Accent color saved successfully!");
-    }
-  }
-
-  const backgroundColor = (
-    document.getElementById("background-color") as HTMLInputElement
-  ).value;
-
-  if (backgroundColor) {
-    if (!backgroundColor.match(/^#[0-9a-f]{6}$/i)) {
-      createTray("Selected color is invalid");
-    } else {
-      localStorage.setItem("background-color", backgroundColor);
-      createTray("Background color saved successfully!");
-    }
-  }
-  location.reload();
-};
 
 const saveAgeSettings = async () => {
   const publicKey = (document.getElementById("public-key") as HTMLInputElement)
@@ -226,13 +197,23 @@ export const settingsRoute = async (
               { className: "color-picker" },
               undefined,
               (() => {
+                const saveAccentColor = () => {
+                  if (accentColorInput.value.match(/^#[0-9a-f]{6}$/i)) {
+                    localStorage.setItem(
+                      "accent-color",
+                      accentColorInput.value,
+                    );
+                    updateColors();
+                  }
+                };
                 const accentColorInput = elem("input", {
                   type: "color",
                   id: "accent-color",
                   className: "color-input",
                   value: localStorage.getItem("accent-color") ?? "#226699",
-                  onchange: (e) => {
+                  onchange: () => {
                     accentColorTextInput.value = accentColorInput.value;
+                    saveAccentColor();
                   },
                 });
                 const accentColorTextInput = elem("input", {
@@ -240,8 +221,9 @@ export const settingsRoute = async (
                   id: "accent-color-text",
                   className: "text-input",
                   value: localStorage.getItem("accent-color") ?? "#226699",
-                  onchange: (e) => {
+                  onchange: () => {
                     accentColorInput.value = accentColorTextInput.value;
+                    saveAccentColor();
                   },
                 });
                 return [accentColorInput, accentColorTextInput];
@@ -256,6 +238,15 @@ export const settingsRoute = async (
               { className: "color-picker" },
               undefined,
               (() => {
+                const saveBackgroundColor = () => {
+                  if (backgroundColorInput.value.match(/^#[0-9a-f]{6}$/i)) {
+                    localStorage.setItem(
+                      "background-color",
+                      backgroundColorInput.value,
+                    );
+                    updateColors();
+                  }
+                };
                 const backgroundColorInput = elem("input", {
                   type: "color",
                   id: "background-color",
@@ -263,6 +254,7 @@ export const settingsRoute = async (
                   value: localStorage.getItem("background-color") ?? "#222244",
                   onchange: (e) => {
                     backgroundColorTextInput.value = backgroundColorInput.value;
+                    saveBackgroundColor();
                   },
                 });
                 const backgroundColorTextInput = elem("input", {
@@ -272,6 +264,7 @@ export const settingsRoute = async (
                   value: localStorage.getItem("background-color") ?? "#222244",
                   onchange: (e) => {
                     backgroundColorInput.value = backgroundColorTextInput.value;
+                    saveBackgroundColor();
                   },
                 });
                 return [backgroundColorInput, backgroundColorTextInput];
@@ -279,11 +272,6 @@ export const settingsRoute = async (
             ),
           ]),
         ]),
-        elem("button", {
-          textContent: "Save",
-          id: "save-button",
-          onclick: saveAppearanceSettings,
-        }),
       ]),
     ),
     elem(

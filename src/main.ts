@@ -1,5 +1,4 @@
-import { fromRgbaHex, getWCAGTextColor, toRgbaHex } from "@mary/color-fns";
-import { fillMissingSettings } from "./settings";
+import { fillMissingSettings, updateColors } from "./settings";
 import { loadNavbar } from "./elements/ui/navbar";
 import { login } from "./login";
 import { cleanCache, updatePage } from "./router";
@@ -58,27 +57,7 @@ if (path.length !== 1 && path.endsWith("/")) {
   history.replaceState(null, "", newPath);
 }
 
-const customAccentColor = localStorage.getItem("accent-color");
-if (customAccentColor) {
-  document.documentElement.style.setProperty(
-    "--accent-color",
-    customAccentColor,
-  );
-  document.documentElement.style.setProperty(
-    "--accent-color-text",
-    "#" +
-      toRgbaHex(
-        getWCAGTextColor(fromRgbaHex(customAccentColor.slice(1))),
-      ).slice(0, -2),
-  );
-}
-const customBackgroundColor = localStorage.getItem("background-color");
-if (customBackgroundColor) {
-  document.documentElement.style.setProperty(
-    "--background-color",
-    customBackgroundColor,
-  );
-}
+updateColors();
 
 fillMissingSettings();
 await login();
