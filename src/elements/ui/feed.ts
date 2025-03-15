@@ -15,14 +15,14 @@ import {
 export type feedNSID =
   | "app.bsky.feed.getAuthorFeed"
   | "app.bsky.feed.getFeed"
-  | "app.bsky.feed.getActorLikes"
   | "app.bsky.feed.searchPosts"
   | "app.bsky.feed.getTimeline"
+  | "app.bsky.feed.getActorLikes"
+  | "app.bsky.feed.getQuotes"
   | "app.bsky.graph.getFollows"
   | "app.bsky.graph.getFollowers"
   | "app.bsky.feed.getLikes"
   | "app.bsky.feed.getRepostedBy"
-  | "app.bsky.feed.getQuotes"
   | "app.bsky.actor.searchActors"
   | "app.bsky.graph.getKnownFollowers";
 
@@ -96,19 +96,19 @@ export const hydrateFeed = async (
   func: (item: any) => HTMLDivElement = postCard,
   _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
-  if (nsid === "app.bsky.feed.getTimeline")
-    return hydrateTimeline(output, params);
+  if (
+    nsid === "app.bsky.feed.getFeed" ||
+    nsid === "app.bsky.feed.getAuthorFeed" ||
+    nsid === "app.bsky.feed.searchPosts" ||
+    nsid === "app.bsky.feed.getTimeline"
+  )
+    return hydratePostFeed(output, nsid, params, _rpc);
   const dataLocation = dataLocations[nsid] ?? "feed";
 
   const loadFeed = async () => {
     const { data } = await _rpc.get(nsid, { params: params });
-    if (
-      settings.viewBlockedPosts &&
-      (nsid === "app.bsky.feed.getFeed" ||
-        nsid === "app.bsky.feed.getAuthorFeed" ||
-        nsid === "app.bsky.feed.searchPosts")
-    )
-      await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
+    //if (settings.viewBlockedPosts && func === postCard)
+    //  await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
     if (!params.cursor) output.replaceChildren();
     data[dataLocation].forEach((item: Object) =>
       output.appendChild(func(item)),
@@ -139,24 +139,26 @@ export const hydrateFeed = async (
   };
 };
 
-export const hydrateTimeline = async (
+export const hydratePostFeed = async (
   output: HTMLElement,
+  nsid: feedNSID,
   params: { [key: string]: any },
+  _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
+  console.log("hello");
+  const dataLocation = dataLocations[nsid] ?? "feed";
+
   const loadFeed = async () => {
-    const { data } = await rpc.get("app.bsky.feed.getTimeline", {
+    const { data } = await _rpc.get(nsid, {
       params: params,
     });
     if (settings.viewBlockedPosts)
-      await loadBlockedPosts(
-        data as loadBlockedPostsTypes,
-        "app.bsky.feed.getTimeline",
-      );
+      await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
     const rearrangedFeed: AppBskyFeedDefs.FeedViewPost[][] = [];
     const postPositions: { [key: string]: number } = {};
     const hasReplies = new Set<string>();
     // this looks so stupid :/
-    for (const post of data.feed.reverse()) {
+    for (const post of data[dataLocation].reverse()) {
       let replyPosition =
         postPositions[post.reply?.parent?.uri] ??
         postPositions[post.reply?.root?.uri] ??

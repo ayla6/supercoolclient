@@ -21,7 +21,7 @@ import { createSearchBar } from "../elements/ui/search_bar";
 import { settings } from "../settings";
 
 const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
-  posts: ["app.bsky.feed.getAuthorFeed", "posts_no_replies"],
+  posts: ["app.bsky.feed.getAuthorFeed", "posts_and_author_threads"],
   media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
   replies: ["app.bsky.feed.getAuthorFeed", "posts_with_replies"],
   likes: ["app.bsky.feed.getActorLikes"],
@@ -323,7 +323,7 @@ export const profileRoute = async (
         nsid: "app.bsky.feed.getAuthorFeed",
         params: {
           actor: did,
-          filter: "posts_no_replies",
+          filter: "posts_and_author_threads",
         },
       },
       {
@@ -392,7 +392,7 @@ export const profileRoute = async (
           nsid: "app.bsky.feed.getAuthorFeed",
           params: {
             actor: did,
-            filter: "posts_no_replies",
+            filter: "posts_and_author_threads",
           },
         });
   return { onscrollFunction, title: profile.handle, bodyStyle };
