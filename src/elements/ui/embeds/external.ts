@@ -1,7 +1,7 @@
 import { AppBskyEmbedExternal } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { loadEmbedGif } from "./gif";
-import { cutOutThePath } from "../../utils/link_processing";
+import { changeImageFormat, cutOutThePath } from "../../utils/link_processing";
 
 const widescreenThumbs = ["www.youtube.com", "music.youtube.com"];
 export const loadEmbedExternal = (embed: AppBskyEmbedExternal.View) => {
@@ -19,7 +19,10 @@ export const loadEmbedExternal = (embed: AppBskyEmbedExternal.View) => {
       const image = elem(
         "div",
         { className: "image" },
-        elem("img", { src: embed.external.thumb, loading: "lazy" }),
+        elem("img", {
+          src: changeImageFormat(embed.external.thumb),
+          loading: "lazy",
+        }),
       );
       if (widescreenThumbs.includes(host)) {
         card.classList.add("widescreen");
