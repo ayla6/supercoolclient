@@ -18,15 +18,18 @@ export const fillMissingSettings = () => {
   if (!localStorage.getItem("default-thumbnail-format")) {
     localStorage.setItem("default-thumbnail-format", "webp");
   }
+  if (!localStorage.getItem("show-non-following-replies-on-timeline")) {
+    localStorage.setItem("show-non-following-replies-on-timeline", "false");
+  }
 };
 
 export let settings = {
   languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
   viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
-  defaultFullsizeFormat:
-    localStorage.getItem("default-fullsize-format") || "avif",
-  defaultThumbnailFormat:
-    localStorage.getItem("default-thumbnail-format") || "webp",
+  defaultFullsizeFormat: localStorage.getItem("default-fullsize-format"),
+  defaultThumbnailFormat: localStorage.getItem("default-thumbnail-format"),
+  showNonFollowingRepliesOnTimeline:
+    localStorage.getItem("show-non-following-replies-on-timeline") === "true",
 };
 
 export const updateColors = () => {

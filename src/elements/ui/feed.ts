@@ -155,6 +155,9 @@ export const hydratePostFeed = async (
   _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
   const dataLocation = dataLocations[nsid] ?? "feed";
+  const hideNonFollowingRepliesOnTimeline =
+    settings.showNonFollowingRepliesOnTimeline ||
+    nsid !== "app.bsky.feed.getTimeline";
 
   const loadFeed = async () => {
     const { data } = await _rpc.get(nsid, {
@@ -169,24 +172,28 @@ export const hydratePostFeed = async (
       if (posts[postUri]) posts[postUri].post = post;
       else posts[postUri] = { post };
       rearrangedFeed.set(postUri, true);
-
-      if (post.reply) {
-        if (
-          post.reply.parent &&
-          post.reply.parent.$type === "app.bsky.feed.defs#postView"
-        ) {
-          const parentUri = post.reply.parent.uri;
-          if (posts[parentUri]?.reply) {
-            const toBeChangedPost = posts[parentUri].reply.post;
-            rearrangedFeed.set(
-              "post" in toBeChangedPost
-                ? toBeChangedPost.post.uri
-                : toBeChangedPost.uri,
-              true,
-            );
-            rearrangedFeed.set(parentUri, true);
-            posts[parentUri].reply = posts[postUri];
-          } else {
+      if (
+        !post.reason &&
+        post.reply &&
+        post.reply.parent &&
+        post.reply.parent.$type === "app.bsky.feed.defs#postView"
+      ) {
+        const parentUri = post.reply.parent.uri;
+        if (posts[parentUri]?.reply) {
+          const toBeChangedPost = posts[parentUri].reply.post;
+          rearrangedFeed.set(
+            "post" in toBeChangedPost
+              ? toBeChangedPost.post.uri
+              : toBeChangedPost.uri,
+            true,
+          );
+          rearrangedFeed.set(parentUri, true);
+          posts[parentUri].reply = posts[postUri];
+        } else {
+          if (
+            hideNonFollowingRepliesOnTimeline ||
+            post.reply.parent.author?.viewer.following
+          ) {
             const reply = (post.reply.parent.record as AppBskyFeedPost.Record)
               ?.reply;
             const record = {
@@ -207,8 +214,8 @@ export const hydratePostFeed = async (
             rearrangedFeed.delete(parentUri);
             rearrangedFeed.set(parentUri, true);
           }
-          rearrangedFeed.set(postUri, false);
         }
+        rearrangedFeed.set(postUri, false);
       }
     }
     if (!params.cursor) output.replaceChildren();

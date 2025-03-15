@@ -157,6 +157,31 @@ export const settingsRoute = async (
             },
           }),
         ]),
+        elem("div", { className: "setting toggle" }, undefined, [
+          elem("label", {
+            textContent:
+              "Show replies to people you're not following on the timeline:",
+            htmlFor: "show-non-following-replies-on-timeline",
+          }),
+          elem("input", {
+            type: "checkbox",
+            id: "show-non-following-replies-on-timeline",
+            className: "checkbox",
+            checked:
+              localStorage.getItem("show-non-following-replies-on-timeline") ===
+              "true",
+            onclick: (e) => e.stopPropagation(),
+            onchange: (e) => {
+              localStorage.setItem(
+                "show-non-following-replies-on-timeline",
+                (e.target as HTMLInputElement).checked ? "true" : "false",
+              );
+              settings.showNonFollowingRepliesOnTimeline = (
+                e.target as HTMLInputElement
+              ).checked;
+            },
+          }),
+        ]),
         elem("div", { className: "setting" }, undefined, [
           elem("label", {
             textContent: "Default fullsize CDN image format:",
