@@ -34,7 +34,7 @@ export const parseBlueskyImage = (imgUrl: string) => {
   return { did, cid };
 };
 
-export const getFediAt = (atprotoHandle: string) => {
+export const getFediHandle = (atprotoHandle: string) => {
   if (atprotoHandle.endsWith(".ap.brid.gy")) {
     const handle = atprotoHandle.slice(0, -11);
     return handle.replace(".", "@");

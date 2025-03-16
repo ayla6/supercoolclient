@@ -6,7 +6,7 @@ import {
 import {
   changeImageFormat,
   getDidFromUri,
-  getFediAt,
+  getFediHandle,
   getPathFromUri,
   idChoose,
 } from "../utils/link_processing.ts";
@@ -194,7 +194,7 @@ export const postCard = (
   const atId =
     notBridgyPost || !author.handle.endsWith(".brid.gy")
       ? idChoose(author)
-      : getFediAt(author.handle);
+      : getFediHandle(author.handle);
 
   const postElem = elem("div", {
     className: "card-holder post" + (cfg.isFullView ? " full" : ""),

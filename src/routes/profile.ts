@@ -8,7 +8,7 @@ import { profileCard } from "../elements/ui/profile_card";
 import { elem } from "../elements/utils/elem";
 import {
   changeImageFormat,
-  getFediAt,
+  getFediHandle,
   getRkey,
 } from "../elements/utils/link_processing";
 import { processText } from "../elements/utils/text_processing";
@@ -85,7 +85,7 @@ export const profileRoute = async (
           target: "_blank",
           href: fediDescription[1],
         });
-        const fediHandle = getFediAt(profile.handle);
+        const fediHandle = getFediHandle(profile.handle);
         return fediHandle;
       })();
 
