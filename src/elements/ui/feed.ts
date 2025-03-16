@@ -167,18 +167,21 @@ export const hydratePostFeed = async (
       await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
     const rearrangedFeed: Map<string, boolean> = new Map();
     const posts: { [key: string]: RecursivePost } = {};
-    for (const post of data[dataLocation] as AppBskyFeedDefs.FeedViewPost[]) {
-      const postUri = post.post.uri;
+    for (const postHousing of data[
+      dataLocation
+    ] as AppBskyFeedDefs.FeedViewPost[]) {
+      const post = "post" in postHousing ? postHousing.post : postHousing;
+      const postUri = post.uri;
       if (posts[postUri]) posts[postUri].post = post;
       else posts[postUri] = { post };
       rearrangedFeed.set(postUri, true);
       if (
-        !post.reason &&
-        post.reply &&
-        post.reply.parent &&
-        post.reply.parent.$type === "app.bsky.feed.defs#postView"
+        !postHousing.reason &&
+        postHousing.reply &&
+        postHousing.reply.parent &&
+        postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
       ) {
-        const parentUri = post.reply.parent.uri;
+        const parentUri = postHousing.reply.parent.uri;
         if (posts[parentUri]?.reply) {
           const toBeChangedPost = posts[parentUri].reply.post;
           rearrangedFeed.set(
@@ -192,20 +195,21 @@ export const hydratePostFeed = async (
         } else {
           if (
             hideNonFollowingRepliesOnTimeline ||
-            post.reply.parent.author?.viewer.following ||
-            post.reply.parent.author.did === sessionData.did
+            postHousing.reply.parent.author?.viewer.following ||
+            postHousing.reply.parent.author.did === sessionData.did
           ) {
-            const reply = (post.reply.parent.record as AppBskyFeedPost.Record)
-              ?.reply;
+            const reply = (
+              postHousing.reply.parent.record as AppBskyFeedPost.Record
+            )?.reply;
             const record = {
-              post: post.reply.parent,
+              post: postHousing.reply.parent,
             } as AppBskyFeedDefs.FeedViewPost;
             if (reply) {
               record.reply = reply as any;
               if (record.reply.parent) {
                 record.reply.parent.$type = "app.bsky.feed.defs#postView";
                 (record.reply.parent as any).author =
-                  post.reply.grandparentAuthor;
+                  postHousing.reply.grandparentAuthor;
               }
             }
             posts[parentUri] = {

@@ -43,11 +43,12 @@
     display: block;
     word-break: break-word;
     white-space: pre-wrap;
-    .bluemoji {
-        width: 1em;
-        height: 1em;
-        vertical-align: middle;
-    }
+}
+
+.bluemoji {
+    width: 1em;
+    height: 1em;
+    vertical-align: text-bottom;
 }
 
 .post-data {

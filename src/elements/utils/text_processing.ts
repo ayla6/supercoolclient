@@ -57,11 +57,22 @@ export const processRichText = (text: string, facets: Facet[]) => {
           });
           break;
         case "blue.moji.richtext.facet":
-          result = elem("img", {
-            className: "bluemoji",
-            src: getBluemojiCdnUrl(feat.did, feat.formats.webp_128),
-            alt: feat.alt ?? feat.name,
-          });
+          const img =
+            feat.formats.webp_128 ??
+            feat.formats.png_128 ??
+            feat.formats.gif_128;
+          if (img)
+            result = elem("img", {
+              className: "bluemoji",
+              src: getBluemojiCdnUrl(feat.did, img),
+              alt: feat.alt ?? feat.name,
+              title: feat.name,
+            });
+          else
+            result = elem("span", {
+              className: "bluemoji",
+              textContent: feat.name,
+            });
           break;
         default:
           result = createTextNode(text);
