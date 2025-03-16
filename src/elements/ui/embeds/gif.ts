@@ -5,13 +5,11 @@ const gifClick = (e: MouseEvent) => {
   //i saw this on aglais but like this is  basically the only option right
   const video = e.currentTarget as HTMLVideoElement;
 
+  e.stopPropagation();
   e.preventDefault();
 
-  if (video.paused) {
-    video.play();
-  } else {
-    video.pause();
-  }
+  if (video.paused) video.play();
+  else video.pause();
 };
 
 function loadVideo(videoUrl: string, style: string) {

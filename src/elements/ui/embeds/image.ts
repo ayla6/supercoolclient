@@ -1,7 +1,4 @@
-import {
-  AppBskyEmbedImages,
-  ComAtprotoSyncGetBlob,
-} from "@atcute/client/lexicons";
+import { AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { elem } from "../../utils/elem";
 import { getProperSize } from "../../utils/get_proper_size";
 import {
