@@ -1,7 +1,6 @@
 import { feedNSID } from "../elements/ui/feed";
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { elem } from "../elements/utils/elem";
-import { rpc } from "../login";
 import { RouteOutput } from "../types";
 
 export const unsignedHomeRoute = async (

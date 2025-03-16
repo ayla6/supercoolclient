@@ -1,5 +1,4 @@
 import { AppBskyFeedGetFeedGenerators } from "@atcute/client/lexicons";
-import { feedNSID } from "../elements/ui/feed";
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";

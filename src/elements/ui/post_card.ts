@@ -18,7 +18,6 @@ import { handleEmbed } from "./embeds/embed_handlers";
 import { settings } from "../../settings.ts";
 import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
-import * as age from "age-encryption";
 import sanitizeHtml from "sanitize-html";
 import { ageDecrypt } from "../utils/encryption.ts";
 

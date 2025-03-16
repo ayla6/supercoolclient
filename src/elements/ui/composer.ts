@@ -7,11 +7,7 @@ import { uploadImages } from "./composer-embeds/image";
 import { uploadVideo } from "./composer-embeds/video";
 import { changeImageFormat, isUrl, toShortUrl } from "../utils/link_processing";
 import { language_codes } from "../utils/language_codes";
-import {
-  createThread,
-  PostMediaEmbed,
-  publishThread,
-} from "@atcute/bluesky-threading";
+import { PostMediaEmbed, publishThread } from "@atcute/bluesky-threading";
 import { createTray } from "./tray";
 import { ageEncrypt } from "../utils/encryption";
 import { Facet } from "@atcute/bluesky-richtext-segmenter";

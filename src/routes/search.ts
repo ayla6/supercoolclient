@@ -2,7 +2,6 @@ import { createFeedManager } from "../elements/ui/local_state_manager";
 import { profileCard } from "../elements/ui/profile_card";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";
-import { updatePage } from "../router";
 import { RouteOutput, RouteOutputNotPromise } from "../types";
 
 export const searchRoute = async (

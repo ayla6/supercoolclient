@@ -5,7 +5,7 @@ interface ImageWithURL {
 }
 import { AppBskyEmbedDefs, AppBskyEmbedImages } from "@atcute/client/lexicons";
 import { rpc } from "../../../login";
-import { ComposedImage, PostImageEmbed } from "@atcute/bluesky-threading";
+import { PostImageEmbed } from "@atcute/bluesky-threading";
 
 // Media upload functions
 export const uploadImages = async (input: ImageWithURL[]) => {

@@ -20,13 +20,6 @@ import { editProfileDialog } from "../elements/ui/edit_profile";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { settings } from "../settings";
 
-const urlEquivalents: { [key: string]: [feedNSID, string?] } = {
-  posts: ["app.bsky.feed.getAuthorFeed", "posts_and_author_threads"],
-  media: ["app.bsky.feed.getAuthorFeed", "posts_with_media"],
-  replies: ["app.bsky.feed.getAuthorFeed", "posts_with_replies"],
-  likes: ["app.bsky.feed.getActorLikes"],
-};
-
 const mediaNavButton = (lastMedia: AppBskyFeedGetAuthorFeed.Output) => {
   const images = elem("div", { className: "images" });
   for (const post of lastMedia.feed) {

@@ -1,10 +1,6 @@
 import { AtpSessionData, XRPC, CredentialManager } from "@atcute/client";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
-import {
-  DidDocument,
-  getPdsEndpoint,
-  getServiceEndpoint,
-} from "@atcute/client/utils/did";
+import { getPdsEndpoint } from "@atcute/client/utils/did";
 import { updateNotificationIcon } from "./elements/ui/navbar";
 import {
   AtprotoWebDidDocumentResolver,

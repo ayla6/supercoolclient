@@ -3,7 +3,7 @@ import { postCard } from "../post_card";
 import { elem } from "../../utils/elem";
 import { getPathFromUri } from "../../utils/link_processing";
 import { settings } from "../../../settings";
-import { rpc, rpcPublic } from "../../../login";
+import { rpcPublic } from "../../../login";
 
 export const loadEmbedRecord = (
   embed:
