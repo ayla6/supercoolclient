@@ -16,9 +16,9 @@ export type RouteOutputNotPromise = {
 };
 
 export type FeedState = {
-  [key: string]: [
-    content: HTMLDivElement,
-    onscroll: OnscrollFunction,
-    scroll: number,
-  ];
+  [key: string]: {
+    content: HTMLDivElement;
+    onscrollFunc: OnscrollFunction;
+    scroll: number;
+  };
 };

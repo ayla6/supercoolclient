@@ -108,15 +108,15 @@ export const createFeedManager = (
         feed.func,
         _rpc,
       );
-      feedState[feed.feed] = [content, onscrollFunc, 0];
+      feedState[feed.feed] = { content, onscrollFunc, scroll: 0 };
     } else {
-      window.scrollTo({ top: currentFeedState[2] });
+      window.scrollTo({ top: currentFeedState.scroll });
     }
-    const content = feedState[feed.feed][0];
+    const content = feedState[feed.feed].content;
     contentHolder.replaceChild(content, oldContent);
     oldContent.remove();
     oldContent = null;
-    const onscrollFunction = feedState[feed.feed][1];
+    const onscrollFunction = feedState[feed.feed].onscrollFunc;
     if (cache.has(path)) {
       const cacheEntry = cache.get(path);
       window.onscroll = onscrollFunction;
@@ -127,7 +127,7 @@ export const createFeedManager = (
     return onscrollFunction;
   };
 
-  createSwipeAction(contentHolder, (pos) => {
+  createSwipeAction(document.body, (pos) => {
     const swipeDiff = pos.endX - pos.startX;
     const activeItem = sideBar.querySelector(".active");
     if (Math.abs(swipeDiff) > 100 && activeItem) {
