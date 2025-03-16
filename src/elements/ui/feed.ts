@@ -58,7 +58,6 @@ const loadBlockedPosts = async (
   const posts = data[dataLocations[nsid] ?? "feed"] as (
     | AppBskyFeedDefs.FeedViewPost
     | AppBskyFeedDefs.PostView
-    | AppBskyFeedDefs.ThreadViewPost
   )[];
   const postsToLoad: Set<string> = new Set();
   const postsWithBlockedEmbeds: AppBskyFeedDefs.PostView[] = [];
@@ -172,8 +171,8 @@ export const hydratePostFeed = async (
     ] as AppBskyFeedDefs.FeedViewPost[]) {
       const post = "post" in postHousing ? postHousing.post : postHousing;
       const postUri = post.uri;
-      if (posts[postUri]) posts[postUri].post = post;
-      else posts[postUri] = { post };
+      if (posts[postUri]) posts[postUri].post = postHousing;
+      else posts[postUri] = { post: postHousing };
       rearrangedFeed.set(postUri, true);
       if (
         !postHousing.reason &&
@@ -213,7 +212,7 @@ export const hydratePostFeed = async (
               }
             }
             posts[parentUri] = {
-              post: record,
+              post: postHousing,
               reply: posts[postUri],
             };
             rearrangedFeed.delete(parentUri);
