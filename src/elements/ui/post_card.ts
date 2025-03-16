@@ -236,12 +236,8 @@ export const postCard = (
         record.embed = undefined;
         post.embed = undefined;
         post.labels = undefined;
-        postElem.replaceWith(
-          postCard(postHousing, {
-            isFullView: cfg.isFullView,
-            isDecryptedPost: true,
-          }),
-        );
+        cfg.isDecryptedPost = true;
+        postElem.replaceWith(postCard(postHousing, cfg));
       }
     }, 0);
   }
