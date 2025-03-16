@@ -20,7 +20,6 @@ import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import sanitizeHtml from "sanitize-html";
 import { ageDecrypt } from "../utils/encryption.ts";
-import { Facet } from "@atcute/bluesky-richtext-builder";
 
 const plural = {
   reply: "replies",
@@ -519,7 +518,7 @@ export const postCard = (
         [
           elem("span", {
             className: "warning-text",
-            textContent: `Content Warning: ${warningLabel?.val}`,
+            textContent: `Content warning: ${warningLabel?.val}`,
           }),
           buttonStatus,
         ],

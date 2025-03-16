@@ -6,7 +6,7 @@ import { createTray } from "./tray";
 export const loginDialog = async () => {
   const identifier = elem("input", {
     type: "text",
-    placeholder: "Username",
+    placeholder: "Handle or DID",
     className: "login-input",
   });
 

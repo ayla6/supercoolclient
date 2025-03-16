@@ -11,8 +11,7 @@ import { PostMediaEmbed, publishThread } from "@atcute/bluesky-threading";
 import { createTray } from "./tray";
 import { ageEncrypt } from "../utils/encryption";
 import { Facet } from "@atcute/bluesky-richtext-segmenter";
-import { tokenize } from "@atcute/bluesky-richtext-parser";
-import RichtextBuilder from "@atcute/bluesky-richtext-builder";
+import { buildRichText, getTextLength } from "../utils/composer";
 
 const MAX_TEXT_LENGTH = {
   normal: 300,
@@ -74,7 +73,7 @@ export const composerBox = (
 
   const updateCharCount = (textbox?: HTMLDivElement) => {
     const text = textbox?.textContent || "";
-    const count = [...text].length;
+    const count = getTextLength(text);
     const maxCount = ageEncrypted
       ? MAX_TEXT_LENGTH.encrypted
       : MAX_TEXT_LENGTH.normal;
@@ -180,35 +179,7 @@ export const composerBox = (
 
     const texts: { text: string; facets: Facet[] }[] = [];
     for (const textbox of textboxes) {
-      const tokens = tokenize(textbox.innerText || "");
-      const builder = new RichtextBuilder();
-      for (const token of tokens) {
-        switch (token.type) {
-          case "text":
-            builder.addText(token.text);
-            break;
-          case "link":
-            builder.addLink(token.text, token.url);
-            break;
-          case "autolink":
-            builder.addLink(toShortUrl(token.url), token.url);
-            break;
-          case "topic":
-            builder.addTag(token.name);
-            break;
-          case "mention":
-            builder.addMention(
-              "@" + token.handle,
-              (
-                await rpc.get("com.atproto.identity.resolveHandle", {
-                  params: { handle: token.handle },
-                })
-              ).data.did,
-            );
-            break;
-        }
-      }
-      texts.push(builder.build());
+      texts.push(await buildRichText(textbox.innerText || ""));
     }
 
     //if (video) embed = await uploadVideo(video);
@@ -315,16 +286,10 @@ export const composerBox = (
         e.preventDefault();
         let text = e.clipboardData.getData("text/plain");
         const url = isUrl(text);
-        if (url) text = `[${url.host}](${url.href})`;
-        // this was the gippity
-        const selection = window.getSelection();
-        const range = selection?.getRangeAt(0);
-        if (range) {
-          range.insertNode(document.createTextNode(text));
-          range.collapse(false);
-        } else {
-          textbox.textContent += text;
-        }
+        if (url) text = `[${toShortUrl(url.href)}](${url.href})`;
+        // yeah it sucks that i have to use a deprecated thing
+        document.execCommand("insertText", false, text);
+        updateCharCount(textbox);
       }
     });
     textbox.addEventListener("focus", () => {

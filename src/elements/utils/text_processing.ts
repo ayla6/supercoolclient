@@ -1,5 +1,7 @@
 import { Facet, segmentize } from "@atcute/bluesky-richtext-segmenter";
 import { elem } from "./elem";
+import { FacetFeature } from "@atcute/bluesky-richtext-builder";
+import { getBluemojiCdnUrl } from "./link_processing";
 
 const map: { [key: string]: string } = {
   "<": "&lt;",
@@ -31,7 +33,7 @@ export const processRichText = (text: string, facets: Facet[]) => {
     if (!segment.features) {
       result = createTextNode(text);
     } else {
-      const feat = segment.features[0]; // Only use first feature
+      const feat = segment.features[0];
       const type = feat.$type;
 
       switch (type) {
@@ -52,6 +54,13 @@ export const processRichText = (text: string, facets: Facet[]) => {
           result = elem("a", {
             href: `/${feat.did}`,
             textContent: text,
+          });
+          break;
+        case "blue.moji.richtext.facet":
+          result = elem("img", {
+            className: "bluemoji",
+            src: getBluemojiCdnUrl(feat.did, feat.formats.webp_128),
+            alt: feat.alt ?? feat.name,
           });
           break;
         default:

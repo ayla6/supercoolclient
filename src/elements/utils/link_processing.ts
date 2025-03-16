@@ -42,7 +42,18 @@ export const getFediHandle = (atprotoHandle: string) => {
   return atprotoHandle;
 };
 
+// https://github.com/mary-ext/aglais/blob/2f9770a31e7fb60d1b030bc952417c74ea01aa0c/src/lib/bluemoji/render.ts#L2
+export const getBluemojiCdnUrl = (
+  did: string,
+  cid: string,
+  format = settings.defaultThumbnailFormat,
+) => {
+  return `https://cdn.bsky.app/img/avatar_thumbnail/plain/${did}/${cid}@${format}`;
+};
+
 export const isUrl = (text: string) => {
+  const colonIndex = text.indexOf(":");
+  if (text.slice(colonIndex, colonIndex + 3) !== "://") return false;
   try {
     const url = new URL(text);
     return url;

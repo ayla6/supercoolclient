@@ -23,11 +23,17 @@ export const fillMissingSettings = () => {
   }
 };
 
+type imageFormat = "avif" | "webp" | "png" | "jpeg" | "gif" | "bmp" | "heic";
+
 export let settings = {
   languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
   viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
-  defaultFullsizeFormat: localStorage.getItem("default-fullsize-format"),
-  defaultThumbnailFormat: localStorage.getItem("default-thumbnail-format"),
+  defaultFullsizeFormat: localStorage.getItem(
+    "default-fullsize-format",
+  ) as imageFormat,
+  defaultThumbnailFormat: localStorage.getItem(
+    "default-thumbnail-format",
+  ) as imageFormat,
   showNonFollowingRepliesOnTimeline:
     localStorage.getItem("show-non-following-replies-on-timeline") === "true",
 };

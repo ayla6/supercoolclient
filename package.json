@@ -18,6 +18,7 @@
     "vite-plugin-raw": "^1.0.3"
   },
   "dependencies": {
+    "@atcute/bluemoji": "^1.0.4",
     "@atcute/bluesky": "^1.0.14",
     "@atcute/bluesky-richtext-builder": "^1.0.2",
     "@atcute/bluesky-richtext-parser": "^1.0.7",
