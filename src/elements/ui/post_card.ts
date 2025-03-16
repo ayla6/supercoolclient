@@ -227,7 +227,6 @@ export const postCard = (
         success = false;
       }
       if (success) {
-        console.log(decryptedSecret);
         if (decryptedSecret.startsWith("{")) {
           try {
             const decryptedSecretObj = JSON.parse(decryptedSecret);
