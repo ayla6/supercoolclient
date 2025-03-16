@@ -185,7 +185,7 @@ export const hydrateNotificationFeed = async (
   rpc.call("app.bsky.notification.updateSeen", {
     data: { seenAt: new Date().toISOString() },
   });
-  updateNotificationIcon();
+  updateNotificationIcon(true);
   const params = { limit: 50, cursor: undefined, useCache };
   const data = await loadNotifications(params);
 

@@ -45,12 +45,14 @@ export const loadNavbar = () => {
   );
 };
 
-export const updateNotificationIcon = async () => {
-  const unreadCount = (
-    await rpc.get("app.bsky.notification.getUnreadCount", {
-      params: {},
-    })
-  ).data.count;
+export const updateNotificationIcon = async (toZero: boolean = false) => {
+  const unreadCount = toZero
+    ? 0
+    : (
+        await rpc.get("app.bsky.notification.getUnreadCount", {
+          params: {},
+        })
+      ).data.count;
   const notificationCount = document.getElementById("notification-count");
   if (unreadCount !== 0) {
     notificationCount.textContent = unreadCount.toString();
