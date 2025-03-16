@@ -20,9 +20,7 @@ import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import * as age from "age-encryption";
 import sanitizeHtml from "sanitize-html";
-
-const ageDecrypter = new age.Decrypter();
-privateKey && ageDecrypter.addIdentity(privateKey);
+import { ageDecrypt } from "../utils/encryption.ts";
 
 const plural = {
   reply: "replies",
@@ -218,17 +216,13 @@ export const postCard = (
       post.record["dev.pages.supercoolclient.secret"]) ||
     (record.text === "=== AGE ENCRYPTED POST ===\n=== JUST IGNORE IT :) ===" &&
       (post.embed as AppBskyEmbedImages.View)?.images[0].alt);
-  if (isAgeEncrypted) {
+  if (privateKey && isAgeEncrypted) {
     setTimeout(async () => {
-      let success = false;
+      let success = true;
       const text = isAgeEncrypted;
       let decryptedText: string;
       try {
-        decryptedText = await ageDecrypter.decrypt(
-          age.armor.decode(text),
-          "text",
-        );
-        success = true;
+        decryptedText = await ageDecrypt(text);
       } catch (e) {
         success = false;
       }

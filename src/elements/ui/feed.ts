@@ -1,5 +1,5 @@
 import { postCard } from "../ui/post_card";
-import { rpc, rpcPublic } from "../../login";
+import { rpc, rpcPublic, sessionData } from "../../login";
 import { OnscrollFunction } from "../../types";
 import { XRPC } from "@atcute/client";
 import { settings } from "../../settings";
@@ -192,7 +192,8 @@ export const hydratePostFeed = async (
         } else {
           if (
             hideNonFollowingRepliesOnTimeline ||
-            post.reply.parent.author?.viewer.following
+            post.reply.parent.author?.viewer.following ||
+            post.reply.parent.author.did === sessionData.did
           ) {
             const reply = (post.reply.parent.record as AppBskyFeedPost.Record)
               ?.reply;

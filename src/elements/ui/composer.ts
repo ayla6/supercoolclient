@@ -9,18 +9,11 @@ import { changeImageFormat } from "../utils/link_processing";
 import { language_codes } from "../utils/language_codes";
 import { PostMediaEmbed, publishThread } from "@atcute/bluesky-threading";
 import { createTray } from "./tray";
-import * as age from "age-encryption";
-const ageEncrypter = new age.Encrypter();
-const pubKeys = JSON.parse(
-  localStorage.getItem("allowed-public-keys-age") || "[]",
-);
-for (const key of pubKeys) {
-  ageEncrypter.addRecipient(key);
-}
+import { ageEncrypt } from "../utils/encryption";
 
 const MAX_TEXT_LENGTH = {
   normal: 300,
-  encrypted: 2000,
+  encrypted: 4096,
 };
 
 export const composerBox = (
@@ -28,10 +21,8 @@ export const composerBox = (
   quote?: AppBskyFeedDefs.PostView,
   ageEncrypted: boolean = false,
 ) => {
-  // Main container elements
   const background = elem("div", { className: "background" });
 
-  // State
   interface ImageWithURL {
     file: File;
     objectURL: string;
@@ -63,7 +54,6 @@ export const composerBox = (
   circle.setAttribute("stroke-width", "3");
   circle.setAttribute("transform", "rotate(-90 15 15)");
 
-  // Add grey outline circle
   const outlineCircle = document.createElementNS(
     "http://www.w3.org/2000/svg",
     "circle",
@@ -80,7 +70,6 @@ export const composerBox = (
   wheel.appendChild(circle);
   charCounter.append(countText, wheel);
 
-  // Add character counter update
   const updateCharCount = (textbox?: HTMLDivElement) => {
     const text = textbox?.textContent || "";
     const count = [...text].length;
@@ -134,7 +123,6 @@ export const composerBox = (
     updateImagePreviews();
   };
 
-  // File input helpers
   const createFileInput = (
     type: string,
     multiple: boolean,
@@ -198,9 +186,6 @@ export const composerBox = (
           textboxes.map(async (textbox, i) => ({
             content: {
               text: textbox.innerText?.trim() || "",
-              "dev.pages.supercoolclient.secret": age.armor.encode(
-                await ageEncrypter.encrypt(textbox.innerText?.trim() || ""),
-              ),
             },
             embed: {
               record:
@@ -240,8 +225,8 @@ export const composerBox = (
               : undefined,
             createdAt: new Date().toISOString(),
             text: "AGE ENCRYPTED POST",
-            "dev.pages.supercoolclient.secret": age.armor.encode(
-              await ageEncrypter.encrypt(textboxes[0].innerText?.trim() || ""),
+            "dev.pages.supercoolclient.secret": await ageEncrypt(
+              textboxes[0].innerText?.trim() || "",
             ),
           } as AppBskyFeedPost.Record,
         },
