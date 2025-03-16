@@ -2,14 +2,21 @@ import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { manager, privateKey, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
-import { confirmDialog, popupBox, inputDialog, selectDialog } from "./dialog";
+import { confirmDialog, doubleTextDialog, selectDialog } from "./dialog";
 import { uploadImages } from "./composer-embeds/image";
 import { uploadVideo } from "./composer-embeds/video";
-import { changeImageFormat } from "../utils/link_processing";
+import { changeImageFormat, isUrl, toShortUrl } from "../utils/link_processing";
 import { language_codes } from "../utils/language_codes";
-import { PostMediaEmbed, publishThread } from "@atcute/bluesky-threading";
+import {
+  createThread,
+  PostMediaEmbed,
+  publishThread,
+} from "@atcute/bluesky-threading";
 import { createTray } from "./tray";
 import { ageEncrypt } from "../utils/encryption";
+import { Facet } from "@atcute/bluesky-richtext-segmenter";
+import { tokenize } from "@atcute/bluesky-richtext-parser";
+import RichtextBuilder from "@atcute/bluesky-richtext-builder";
 
 const MAX_TEXT_LENGTH = {
   normal: 300,
@@ -36,7 +43,6 @@ export const composerBox = (
   let selectedTextbox: HTMLDivElement;
   let cleaning = false;
 
-  // Create character counter wheel
   const charCounter = elem("div", { className: "char-counter" });
   const wheel = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   wheel.setAttribute("width", "30");
@@ -176,26 +182,55 @@ export const composerBox = (
       }
     }
 
+    const texts: { text: string; facets: Facet[] }[] = [];
+    for (const textbox of textboxes) {
+      const tokens = tokenize(textbox.innerText || "");
+      const builder = new RichtextBuilder();
+      for (const token of tokens) {
+        switch (token.type) {
+          case "text":
+            builder.addText(token.text);
+            break;
+          case "link":
+            builder.addLink(token.text, token.url);
+            break;
+          case "autolink":
+            builder.addLink(toShortUrl(token.url), token.url);
+            break;
+          case "topic":
+            builder.addTag(token.name);
+            break;
+          case "mention":
+            builder.addMention(
+              "@" + token.handle,
+              (
+                await rpc.get("com.atproto.identity.resolveHandle", {
+                  params: { handle: token.handle },
+                })
+              ).data.did,
+            );
+            break;
+        }
+      }
+      texts.push(builder.build());
+    }
+
     //if (video) embed = await uploadVideo(video);
     if (!ageEncrypted) {
       await publishThread(rpc, {
+        reply,
         author: manager.session.did,
         languages: [language],
-        reply: reply,
-        posts: await Promise.all(
-          textboxes.map(async (textbox, i) => ({
-            content: {
-              text: textbox.innerText?.trim() || "",
-            },
-            embed: {
-              record:
-                i === 0 && quote
-                  ? { type: "quote", uri: quote.uri, cid: quote.cid }
-                  : undefined,
-              media: media?.[i],
-            },
-          })),
-        ),
+        posts: textboxes.map((textbox, i) => ({
+          content: texts[i],
+          embed: {
+            record:
+              i === 0 && quote
+                ? { type: "quote", uri: quote.uri, cid: quote.cid }
+                : undefined,
+            media: media?.[i],
+          },
+        })),
       });
     } else {
       await rpc.call("com.atproto.repo.createRecord", {
@@ -225,9 +260,10 @@ export const composerBox = (
               : undefined,
             createdAt: new Date().toISOString(),
             text: "AGE ENCRYPTED POST",
-            "dev.pages.supercoolclient.secret": await ageEncrypt(
-              textboxes[0].innerText?.trim() || "",
-            ),
+            "dev.pages.supercoolclient.secret": await ageEncrypt(texts[0].text),
+            "dev.pages.supercoolclient.facets": texts[0].facets
+              ? await ageEncrypt(JSON.stringify(texts[0].facets))
+              : undefined,
           } as AppBskyFeedPost.Record,
         },
       });
@@ -280,6 +316,20 @@ export const composerBox = (
         e.preventDefault();
         if (images?.length >= 4) return;
         handleImageInput(files as unknown as FileList);
+      } else {
+        e.preventDefault();
+        let text = e.clipboardData.getData("text/plain");
+        const url = isUrl(text);
+        if (url) text = `[${url.host}](${url.href})`;
+        // this was the gippity
+        const selection = window.getSelection();
+        const range = selection?.getRangeAt(0);
+        if (range) {
+          range.insertNode(document.createTextNode(text));
+          range.collapse(false);
+        } else {
+          textbox.textContent += text;
+        }
       }
     });
     textbox.addEventListener("focus", () => {

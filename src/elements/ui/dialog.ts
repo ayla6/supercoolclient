@@ -12,22 +12,17 @@ export const popupBox = (
     if (onCleanup) onCleanup(result);
   };
 
-  // Prevent clicks inside dialog from closing it
   dialog.addEventListener("click", (e) => e.stopPropagation());
 
-  // Add dialog to background
   background.append(dialog);
 
-  // Handle background click
   background.onclick = () => cleanup();
 
-  // Handle escape key
   const escapeKeyHandler = (e: KeyboardEvent) => {
     if (e.key === "Escape") cleanup();
   };
   document.addEventListener("keydown", escapeKeyHandler);
 
-  // Add to document
   document.body.append(background);
 
   return {
@@ -62,14 +57,16 @@ export const confirmDialog = async (prompt: string, confirm: string) => {
   });
 };
 
-export const inputDialog = async (prompt: string, confirm: string) => {
+export const textDialog = async (prompt: string, confirmText: string) => {
   return await new Promise<string>((resolve) => {
     const content = elem("div", { className: "popup" }, null, [
-      elem("span", {
+      elem("label", {
         textContent: prompt,
+        htmlFor: "text-input",
       }),
       elem("input", {
         type: "text",
+        id: "text-input",
       }),
       elem("div", { className: "dialog-options" }, null, [
         elem("button", {
@@ -79,7 +76,7 @@ export const inputDialog = async (prompt: string, confirm: string) => {
           },
         }),
         elem("button", {
-          textContent: confirm,
+          textContent: confirmText,
           onclick: () => {
             const input = content.querySelector("input");
             dialog.cleanup(input.value);
@@ -88,6 +85,64 @@ export const inputDialog = async (prompt: string, confirm: string) => {
       ]),
     ]);
     const dialog = popupBox(content, (close = "") => resolve(close));
+    (content.querySelector("#text-input") as HTMLInputElement).focus();
+  });
+};
+
+export const doubleTextDialog = async (
+  prompt: string,
+  prompt2: string,
+  confirmText: string,
+) => {
+  return await new Promise<string[]>((resolve) => {
+    const confirm = () => {
+      const input1 = content.querySelector("#text-input-1") as HTMLInputElement;
+      const input2 = content.querySelector("#text-input-2") as HTMLInputElement;
+      dialog.cleanup([input1.value, input2.value]);
+    };
+    const content = elem("div", { className: "popup" }, null, [
+      elem("label", {
+        textContent: prompt,
+        htmlFor: "text-input-1",
+      }),
+      elem("input", {
+        type: "text",
+        id: "text-input-1",
+      }),
+      elem("label", {
+        textContent: prompt2,
+        htmlFor: "text-input-2",
+      }),
+      elem("input", {
+        type: "text",
+        id: "text-input-2",
+      }),
+      elem("div", { className: "dialog-options" }, null, [
+        elem("button", {
+          textContent: "Cancel",
+          onclick: () => {
+            dialog.cleanup("");
+          },
+        }),
+        elem("button", {
+          textContent: confirmText,
+          onclick: confirm,
+        }),
+      ]),
+    ]);
+    const dialog = popupBox(content, (close = "") => resolve(close));
+    const textInput1 = content.querySelector(
+      "#text-input-1",
+    ) as HTMLInputElement;
+    const textInput2 = content.querySelector(
+      "#text-input-2",
+    ) as HTMLInputElement;
+    textInput1.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        confirm();
+      }
+    });
+    textInput1.focus();
   });
 };
 

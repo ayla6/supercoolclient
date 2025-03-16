@@ -213,7 +213,7 @@ export const postCard = (
 
   const isAgeEncrypted =
     (record.text === "AGE ENCRYPTED POST" &&
-      post.record["dev.pages.supercoolclient.secret"]) ||
+      record["dev.pages.supercoolclient.secret"]) ||
     (record.text === "=== AGE ENCRYPTED POST ===\n=== JUST IGNORE IT :) ===" &&
       (post.embed as AppBskyEmbedImages.View)?.images[0].alt);
   if (privateKey && isAgeEncrypted) {
@@ -228,6 +228,11 @@ export const postCard = (
       }
       if (success) {
         record.text = decryptedText;
+        if (record["dev.pages.supercoolclient.facets"]) {
+          record.facets = JSON.parse(
+            await ageDecrypt(record["dev.pages.supercoolclient.facets"]),
+          );
+        }
         record.embed = undefined;
         post.embed = undefined;
         post.labels = undefined;
