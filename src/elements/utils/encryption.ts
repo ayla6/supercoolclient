@@ -40,10 +40,6 @@ export const compressedAgeEncrypt = async (text: string) => {
 };
 
 export const ageDecrypt = async (text: string) => {
-  /*const decryptedText = text.startsWith("-----") // -----BEGIN AGE ENCRYPTED FILE-----
-    ? await ageDecrypter.decrypt(age.armor.decode(text), "text")
-    : await ageDecrypter.decrypt(textEncoder.encode(text), "text");*/
-
   const decryptedText = await ageDecrypter.decrypt(
     age.armor.decode(text),
     "text",

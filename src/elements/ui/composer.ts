@@ -256,10 +256,9 @@ export const composerBox = (
               : undefined,
             createdAt: new Date().toISOString(),
             text: "AGE ENCRYPTED POST",
-            "dev.pages.supercoolclient.secret": await ageEncrypt(texts[0].text),
-            "dev.pages.supercoolclient.facets": texts[0].facets
-              ? await ageEncrypt(JSON.stringify(texts[0].facets))
-              : undefined,
+            "dev.pages.supercoolclient.secret": await ageEncrypt(
+              JSON.stringify(texts[0]),
+            ),
           } as AppBskyFeedPost.Record,
         },
       });

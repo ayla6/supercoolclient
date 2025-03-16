@@ -20,6 +20,7 @@ import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import sanitizeHtml from "sanitize-html";
 import { ageDecrypt } from "../utils/encryption.ts";
+import { Facet } from "@atcute/bluesky-richtext-builder";
 
 const plural = {
   reply: "replies",
@@ -218,19 +219,25 @@ export const postCard = (
   if (privateKey && isAgeEncrypted) {
     setTimeout(async () => {
       let success = true;
-      const text = isAgeEncrypted;
-      let decryptedText: string;
+      const secret = isAgeEncrypted;
+      let decryptedSecret: string;
       try {
-        decryptedText = await ageDecrypt(text);
+        decryptedSecret = await ageDecrypt(secret);
       } catch (e) {
         success = false;
       }
       if (success) {
-        record.text = decryptedText;
-        if (record["dev.pages.supercoolclient.facets"]) {
-          record.facets = JSON.parse(
-            await ageDecrypt(record["dev.pages.supercoolclient.facets"]),
-          );
+        console.log(decryptedSecret);
+        if (decryptedSecret.startsWith("{")) {
+          try {
+            const decryptedSecretObj = JSON.parse(decryptedSecret);
+            record.text = decryptedSecretObj.text;
+            record.facets = decryptedSecretObj.facets;
+          } catch {
+            record.text = decryptedSecret;
+          }
+        } else {
+          record.text = decryptedSecret;
         }
         record.embed = undefined;
         post.embed = undefined;
