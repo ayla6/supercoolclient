@@ -1,6 +1,5 @@
 import { XRPC } from "@atcute/client";
 import { rpc, sessionData } from "../../login";
-import { cache } from "../../router";
 import {
   Feed,
   feedNSID,
@@ -99,9 +98,9 @@ export const createFeedManager = (
     }
 
     const topScroll = profile
-      ? currentFeedState?.scroll >= headerEnd
+      ? currentFeedState?.scroll > headerEnd
         ? currentFeedState?.scroll
-        : scrollY >= headerEnd
+        : scrollY > headerEnd
           ? headerEnd
           : scrollY
       : (currentFeedState?.scroll ?? 0);
