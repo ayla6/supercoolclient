@@ -1,19 +1,22 @@
 import { XRPC } from "@atcute/client";
 import { rpc } from "../../login";
 import { cache } from "../../router";
-import { FeedState, OnscrollFunction } from "../../types";
+import {
+  Feed,
+  feedNSID,
+  FeedState,
+  OnscrollFunction,
+  StateManager,
+} from "../../types";
 import { elem } from "../utils/elem";
-import { createSwipeAction, pullToRefresh } from "../utils/swipe_manager";
-import { feedNSID, hydrateFeed } from "./feed";
+import { hydrateFeed } from "./feed";
+import { pullToRefresh } from "../utils/swipe_manager";
 
-interface Feed {
-  displayName: string;
-  feed: string;
-  nsid: feedNSID;
-  params: { [key: string]: any };
-  func?: (item: any) => HTMLDivElement;
-  extra?: HTMLElement;
-}
+export let currentStateManager: StateManager = {
+  feedsData: undefined,
+  loadFeed: undefined,
+  sideBar: undefined,
+};
 
 export const createFeedManager = (
   contentHolder: HTMLElement,
@@ -127,27 +130,6 @@ export const createFeedManager = (
     return onscrollFunction;
   };
 
-  createSwipeAction(document.body, (pos) => {
-    const swipeDiff = pos.endX - pos.startX;
-    const activeItem = sideBar.querySelector(".active");
-    if (Math.abs(swipeDiff) > 100 && activeItem) {
-      const sibling =
-        swipeDiff < 0
-          ? activeItem.nextElementSibling
-          : activeItem.previousElementSibling;
-      if (sibling) {
-        const position = Array.prototype.indexOf.call(
-          activeItem.parentNode.children,
-          sibling,
-        );
-        loadFeed(feedsData[position]);
-        sideBar
-          .querySelector(`a[href="?v=${feedsData[position].feed}"]`)
-          .scrollIntoView({ block: "center" });
-      }
-    }
-  });
-
   pullToRefresh(
     contentHolder,
     80,
@@ -157,5 +139,9 @@ export const createFeedManager = (
     },
   );
 
-  return loadFeed;
+  return {
+    feedsData,
+    loadFeed,
+    sideBar,
+  };
 };

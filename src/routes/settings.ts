@@ -1,7 +1,7 @@
 import { AppBskyFeedPost } from "@atcute/client/lexicons";
 import { elem } from "../elements/utils/elem";
 import { rpc, sessionData } from "../login";
-import { RouteOutput } from "../types";
+import { ImageFormat, RouteOutput } from "../types";
 import { createTray } from "../elements/ui/tray";
 import { getUriFromSplitPath } from "../elements/utils/link_processing";
 import { settings, updateColors } from "../settings";
@@ -199,9 +199,8 @@ export const settingsRoute = async (
                   "default-fullsize-format",
                   (e.target as HTMLInputElement).value,
                 );
-                settings.defaultFullsizeFormat = (
-                  e.target as HTMLInputElement
-                ).value;
+                settings.defaultFullsizeFormat = (e.target as HTMLInputElement)
+                  .value as ImageFormat;
               },
             },
             undefined,
@@ -233,9 +232,8 @@ export const settingsRoute = async (
                   "default-thumbnail-format",
                   (e.target as HTMLInputElement).value,
                 );
-                settings.defaultThumbnailFormat = (
-                  e.target as HTMLInputElement
-                ).value;
+                settings.defaultThumbnailFormat = (e.target as HTMLInputElement)
+                  .value as ImageFormat;
               },
             },
             undefined,

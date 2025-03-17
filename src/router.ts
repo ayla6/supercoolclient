@@ -1,7 +1,7 @@
 import { elem } from "./elements/utils/elem";
 import { postCard } from "./elements/ui/post_card";
 import { profileCard, statProfile } from "./elements/ui/profile_card";
-import { OnscrollFunction, RouteOutput } from "./types";
+import { OnscrollFunction, RouteOutput, StateManager } from "./types";
 
 import { homeRoute } from "./routes/home";
 import { notificationsRoute } from "./routes/notifications";
@@ -10,6 +10,7 @@ import { profileRoute } from "./routes/profile";
 import { createStatsRoute } from "./routes/stats";
 import { searchRoute } from "./routes/search";
 import { settingsRoute } from "./routes/settings";
+import { currentStateManager } from "./elements/ui/local_state_manager";
 
 type CacheEntry = {
   expirationDate: number;
@@ -19,6 +20,7 @@ type CacheEntry = {
   onscroll?: OnscrollFunction;
   bodyStyle?: string;
   scrollToElement?: HTMLElement;
+  stateManager?: StateManager;
 };
 type PageCache = Map<string, CacheEntry>;
 export const cache: PageCache = new Map();
@@ -120,16 +122,25 @@ export const updatePage = async (useCache: boolean) => {
     document.body.appendChild(container);
 
     const route = matchRoute(currentSplitPath);
-    const { onscrollFunction, title, scrollToElement, bodyStyle } = await route(
-      currentSplitPath,
-      loadedSplitPath,
-      container,
-    );
+    const {
+      onscrollFunction,
+      title,
+      scrollToElement,
+      bodyStyle,
+      stateManager,
+    } = await route(currentSplitPath, loadedSplitPath, container);
     if (document.body.contains(container)) {
       if (title) document.title = title + " — SuperCoolClient";
       if (bodyStyle) document.body.setAttribute("style", bodyStyle);
       if (scrollToElement) scrollToElement.scrollIntoView();
       if (onscrollFunction) window.onscroll = onscrollFunction;
+      if (stateManager) Object.assign(currentStateManager, stateManager);
+      else
+        Object.assign(currentStateManager, {
+          feedsData: undefined,
+          loadFeed: undefined,
+          sideBar: undefined,
+        });
 
       const expiration =
         currentPath !== "/" ? Date.now() + CACHE_DURATION : Infinity;

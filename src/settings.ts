@@ -1,4 +1,5 @@
 import { fromRgbaHex, getWCAGTextColor, toRgbaHex } from "@mary/color-fns";
+import { ImageFormat } from "./types";
 
 const langs = localStorage.getItem("langs");
 const navigatorLangs = window.navigator.languages.map((lang) =>
@@ -23,17 +24,15 @@ export const fillMissingSettings = () => {
   }
 };
 
-type imageFormat = "avif" | "webp" | "png" | "jpeg" | "gif" | "bmp" | "heic";
-
 export let settings = {
   languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
   viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
   defaultFullsizeFormat: localStorage.getItem(
     "default-fullsize-format",
-  ) as imageFormat,
+  ) as ImageFormat,
   defaultThumbnailFormat: localStorage.getItem(
     "default-thumbnail-format",
-  ) as imageFormat,
+  ) as ImageFormat,
   showNonFollowingRepliesOnTimeline:
     localStorage.getItem("show-non-following-replies-on-timeline") === "true",
 };

@@ -64,7 +64,7 @@ export const homeRoute = async (
     elem("div", { id: "content-holder" }, elem("div", { id: "content" })),
   );
 
-  const loadHomeFeed = createFeedManager(
+  const stateManager = createFeedManager(
     document.getElementById("content-holder"),
     sideBar,
     feedsData,
@@ -96,7 +96,7 @@ export const homeRoute = async (
   }
 
   const feedToLoad = feedsData.find((f) => f.feed === uri);
-  const onscrollFunction = await loadHomeFeed(feedToLoad);
+  const onscrollFunction = await stateManager.loadFeed(feedToLoad);
 
-  return { onscrollFunction };
+  return { onscrollFunction, stateManager };
 };

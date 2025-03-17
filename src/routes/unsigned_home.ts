@@ -1,7 +1,6 @@
-import { feedNSID } from "../elements/ui/feed";
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { elem } from "../elements/utils/elem";
-import { RouteOutput } from "../types";
+import { feedNSID, RouteOutput } from "../types";
 
 export const unsignedHomeRoute = async (
   currentSplitPath: string[],
@@ -26,14 +25,14 @@ export const unsignedHomeRoute = async (
     elem("div", { id: "content-holder" }, elem("div", { id: "content" })),
   );
 
-  const loadHomeFeed = createFeedManager(
+  const stateManager = createFeedManager(
     document.getElementById("content-holder"),
     sideBar,
     feedsData,
     true,
   );
 
-  const onscrollFunction = await loadHomeFeed(feedsData[0]);
+  const onscrollFunction = await stateManager.loadFeed(feedsData[0]);
 
-  return { onscrollFunction };
+  return { onscrollFunction, stateManager };
 };

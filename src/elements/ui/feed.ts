@@ -1,6 +1,6 @@
 import { postCard } from "../ui/post_card";
 import { rpc, rpcPublic, sessionData } from "../../login";
-import { OnscrollFunction } from "../../types";
+import { feedNSID, OnscrollFunction } from "../../types";
 import { XRPC } from "@atcute/client";
 import { settings } from "../../settings";
 import {
@@ -12,20 +12,6 @@ import {
   AppBskyEmbedRecord,
   AppBskyFeedPost,
 } from "@atcute/client/lexicons";
-
-export type feedNSID =
-  | "app.bsky.feed.getAuthorFeed"
-  | "app.bsky.feed.getFeed"
-  | "app.bsky.feed.searchPosts"
-  | "app.bsky.feed.getTimeline"
-  | "app.bsky.feed.getActorLikes"
-  | "app.bsky.feed.getQuotes"
-  | "app.bsky.graph.getFollows"
-  | "app.bsky.graph.getFollowers"
-  | "app.bsky.feed.getLikes"
-  | "app.bsky.feed.getRepostedBy"
-  | "app.bsky.actor.searchActors"
-  | "app.bsky.graph.getKnownFollowers";
 
 type RecursivePost = {
   post:

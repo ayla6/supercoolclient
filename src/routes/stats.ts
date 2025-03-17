@@ -1,8 +1,8 @@
-import { feedNSID, hydrateFeed } from "../elements/ui/feed";
+import { hydrateFeed } from "../elements/ui/feed";
 import { stickyHeader } from "../elements/ui/sticky_header";
 import { elem } from "../elements/utils/elem";
 import { getUriFromSplitPath } from "../elements/utils/link_processing";
-import { RouteOutput } from "../types";
+import { feedNSID, RouteOutput } from "../types";
 
 export const createStatsRoute = (
   title: string,

@@ -26,7 +26,7 @@ export const searchRoute = async (
 
   if (searchQuery) {
     searchBar.value = searchQuery;
-    const loadSearchOption = createFeedManager(
+    const stateManager = createFeedManager(
       document.getElementById("content-holder"),
       sideBar,
       [
@@ -60,7 +60,7 @@ export const searchRoute = async (
       ],
     );
 
-    returnObjects.onscrollFunction = await loadSearchOption({
+    returnObjects.onscrollFunction = await stateManager.loadFeed({
       feed: "top",
       nsid: "app.bsky.feed.searchPosts",
       params: {
@@ -68,6 +68,8 @@ export const searchRoute = async (
         sort: "top",
       },
     });
+
+    returnObjects.stateManager = stateManager;
   }
 
   (

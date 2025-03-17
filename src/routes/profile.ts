@@ -2,7 +2,7 @@ import {
   AppBskyFeedGetAuthorFeed,
   AppBskyGraphFollow,
 } from "@atcute/client/lexicons";
-import { feedNSID } from "../elements/ui/feed";
+
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { profileCard } from "../elements/ui/profile_card";
 import { elem } from "../elements/utils/elem";
@@ -153,7 +153,7 @@ export const profileRoute = async (
         href: "",
         onclick: (e) => {
           e.preventDefault();
-          loadProfileFeed({
+          stateManager.loadFeed({
             feed: "known-followers",
             nsid: "app.bsky.graph.getKnownFollowers",
             params: { actor: did },
@@ -306,7 +306,7 @@ export const profileRoute = async (
     url(${changeImageFormat(profile.banner?.replace("img/banner", "img/feed_fullsize"))});`;
   document.body.setAttribute("style", bodyStyle);
 
-  const loadProfileFeed = createFeedManager(
+  const stateManager = createFeedManager(
     document.getElementById("content-holder"),
     sideBar,
     [
@@ -380,7 +380,7 @@ export const profileRoute = async (
   const onscrollFunction =
     !settings.viewBlockedPosts && blockingInAnyWay
       ? undefined
-      : await loadProfileFeed({
+      : await stateManager.loadFeed({
           feed: "posts",
           nsid: "app.bsky.feed.getAuthorFeed",
           params: {
@@ -388,5 +388,5 @@ export const profileRoute = async (
             filter: "posts_and_author_threads",
           },
         });
-  return { onscrollFunction, title: profile.handle, bodyStyle };
+  return { onscrollFunction, title: profile.handle, bodyStyle, stateManager };
 };

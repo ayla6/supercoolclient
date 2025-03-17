@@ -6,6 +6,7 @@ export type RouteOutput = Promise<{
   title?: string;
   scrollToElement?: HTMLElement;
   bodyStyle?: string;
+  stateManager?: StateManager;
 }>;
 
 export type RouteOutputNotPromise = {
@@ -13,6 +14,7 @@ export type RouteOutputNotPromise = {
   title?: string;
   scrollToElement?: HTMLElement;
   bodyStyle?: string;
+  stateManager?: StateManager;
 };
 
 export type FeedState = {
@@ -22,3 +24,41 @@ export type FeedState = {
     scroll: number;
   };
 };
+
+export type feedNSID =
+  | "app.bsky.feed.getAuthorFeed"
+  | "app.bsky.feed.getFeed"
+  | "app.bsky.feed.searchPosts"
+  | "app.bsky.feed.getTimeline"
+  | "app.bsky.feed.getActorLikes"
+  | "app.bsky.feed.getQuotes"
+  | "app.bsky.graph.getFollows"
+  | "app.bsky.graph.getFollowers"
+  | "app.bsky.feed.getLikes"
+  | "app.bsky.feed.getRepostedBy"
+  | "app.bsky.actor.searchActors"
+  | "app.bsky.graph.getKnownFollowers";
+
+export type ImageFormat =
+  | "avif"
+  | "webp"
+  | "png"
+  | "jpeg"
+  | "gif"
+  | "bmp"
+  | "heic";
+
+export interface Feed {
+  displayName: string;
+  feed: string;
+  nsid: feedNSID;
+  params: { [key: string]: any };
+  func?: (item: any) => HTMLDivElement;
+  extra?: HTMLElement;
+}
+
+export interface StateManager {
+  feedsData: Feed[];
+  loadFeed: Function;
+  sideBar: HTMLDivElement;
+}
