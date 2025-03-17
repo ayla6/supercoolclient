@@ -10,6 +10,13 @@ export const notificationsRoute = async (
   const content = elem("div", { id: "content" });
   container.append(content);
 
+  const navbar = document.getElementById("navbar");
+  (
+    navbar.querySelector(`a[href="/notifications"]`) as HTMLLinkElement
+  ).onclick = (e) => {
+    hydrateNotificationFeed(content);
+  };
+
   const onscrollFunction = await hydrateNotificationFeed(content);
 
   return { onscrollFunction, title: "Notifications" };

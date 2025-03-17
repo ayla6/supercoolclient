@@ -101,7 +101,8 @@ export const updatePage = async (useCache: boolean) => {
     cachePage &&
     ((useCache && Date.now() < cachePage.expirationDate) ||
       currentPath === "/" ||
-      currentPath === `/${sessionData.did}`)
+      currentPath === `/${sessionData.did}` ||
+      currentPath === "/notifications")
   ) {
     document.body.appendChild(cachePage.container);
     document.title = cachePage.title;
