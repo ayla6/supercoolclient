@@ -11,12 +11,6 @@ import { elem } from "../utils/elem";
 import { hydrateFeed } from "./feed";
 import { pullToRefresh } from "../utils/swipe_manager";
 
-export let currentStateManager: StateManager = {
-  feedsData: undefined,
-  loadFeed: undefined,
-  sideBar: undefined,
-};
-
 export const createFeedManager = (
   contentHolder: HTMLElement,
   sideBar: HTMLDivElement,
@@ -26,6 +20,7 @@ export const createFeedManager = (
 ): StateManager => {
   const atHome = window.location.pathname === "/";
   const path = window.location.pathname;
+  _feedsData = _feedsData.filter(Boolean);
   const feedsData = new Map<string, Feed>();
 
   const navbar = document.getElementById("navbar");

@@ -1,8 +1,7 @@
 import { elem } from "./elements/utils/elem";
 import { postCard } from "./elements/ui/post_card";
 import { profileCard, statProfile } from "./elements/ui/profile_card";
-import { OnscrollFunction, RouteOutput, StateManager } from "./types";
-
+import { PageCache, RouteOutput, StateManager } from "./types";
 import { homeRoute } from "./routes/home";
 import { notificationsRoute } from "./routes/notifications";
 import { postRoute } from "./routes/post";
@@ -10,19 +9,8 @@ import { profileRoute } from "./routes/profile";
 import { createStatsRoute } from "./routes/stats";
 import { searchRoute } from "./routes/search";
 import { settingsRoute } from "./routes/settings";
-import { currentStateManager } from "./elements/ui/local_state_manager";
+import { settings } from "./settings";
 
-type CacheEntry = {
-  expirationDate: number;
-  container: HTMLDivElement;
-  title?: string;
-  feed?: string;
-  onscroll?: OnscrollFunction;
-  bodyStyle?: string;
-  scrollToElement?: HTMLElement;
-  stateManager?: StateManager;
-};
-type PageCache = Map<string, CacheEntry>;
 export const cache: PageCache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000;
 
@@ -115,6 +103,7 @@ export const updatePage = async (useCache: boolean) => {
     document.body.appendChild(cachePage.container);
     document.title = cachePage.title;
     window.onscroll = cachePage.onscroll;
+    settings.currentStateManager = cachePage.stateManager;
     document.body.setAttribute("style", cachePage.bodyStyle);
   } else {
     let container: HTMLDivElement;
@@ -134,13 +123,13 @@ export const updatePage = async (useCache: boolean) => {
       if (bodyStyle) document.body.setAttribute("style", bodyStyle);
       if (scrollToElement) scrollToElement.scrollIntoView();
       if (onscrollFunction) window.onscroll = onscrollFunction;
-      if (stateManager) Object.assign(currentStateManager, stateManager);
+      if (stateManager) settings.currentStateManager = stateManager;
       else
-        Object.assign(currentStateManager, {
+        settings.currentStateManager = {
           feedsData: undefined,
           loadFeed: undefined,
           sideBar: undefined,
-        });
+        };
 
       const expiration =
         currentPath !== "/" ? Date.now() + CACHE_DURATION : Infinity;
@@ -152,6 +141,7 @@ export const updatePage = async (useCache: boolean) => {
         onscroll: onscrollFunction,
         bodyStyle: document.body.getAttribute("style"),
         scrollToElement: scrollToElement,
+        stateManager,
       });
     }
   }

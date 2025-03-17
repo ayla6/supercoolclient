@@ -1,5 +1,5 @@
 import { fromRgbaHex, getWCAGTextColor, toRgbaHex } from "@mary/color-fns";
-import { ImageFormat } from "./types";
+import { ImageFormat, StateManager } from "./types";
 
 const langs = localStorage.getItem("langs");
 const navigatorLangs = window.navigator.languages.map((lang) =>
@@ -35,6 +35,11 @@ export const settings: { [key: string]: any } = {
   ) as ImageFormat,
   showNonFollowingRepliesOnTimeline:
     localStorage.getItem("show-non-following-replies-on-timeline") === "true",
+  currentStateManager: {
+    sideBar: undefined,
+    loadFeed: undefined,
+    feedsData: undefined,
+  } as StateManager,
 };
 
 export const updateColors = () => {

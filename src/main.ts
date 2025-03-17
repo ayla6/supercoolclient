@@ -1,4 +1,4 @@
-import { fillMissingSettings, updateColors } from "./settings";
+import { fillMissingSettings, settings, updateColors } from "./settings";
 import { loadNavbar } from "./elements/ui/navbar";
 import { login, rpc, sessionData } from "./login";
 import { cleanCache, updatePage } from "./router";
@@ -6,7 +6,6 @@ import {
   createSwipeAction,
   pullToRefresh,
 } from "./elements/utils/swipe_manager";
-import { currentStateManager } from "./elements/ui/local_state_manager";
 
 document.addEventListener("click", (e) => {
   const anchor =
@@ -70,9 +69,10 @@ loadNavbar();
 updatePage(false);
 
 createSwipeAction(document.body, (pos) => {
-  if (!currentStateManager.feedsData) return;
+  const csm = settings.currentStateManager;
+  if (!csm.feedsData) return;
   const swipeDiff = pos.endX - pos.startX;
-  const activeItem = currentStateManager.sideBar.querySelector(".active");
+  const activeItem = csm.sideBar.querySelector(".active");
   if (Math.abs(swipeDiff) > 100 && activeItem) {
     const sibling =
       swipeDiff < 0
@@ -83,11 +83,9 @@ createSwipeAction(document.body, (pos) => {
         activeItem.parentNode.children,
         sibling,
       );
-      currentStateManager.loadFeed(currentStateManager.feedsData[position]);
-      currentStateManager.sideBar
-        .querySelector(
-          `a[href="?v=${currentStateManager.feedsData[position].feed}"]`,
-        )
+      csm.loadFeed(csm.feedsData[position]);
+      csm.sideBar
+        .querySelector(`a[href="?v=${csm.feedsData[position].feed}"]`)
         .scrollIntoView({ block: "center" });
     }
   }

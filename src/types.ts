@@ -62,3 +62,16 @@ export interface StateManager {
   loadFeed: Function;
   sideBar: HTMLDivElement;
 }
+
+export type CacheEntry = {
+  expirationDate: number;
+  container: HTMLDivElement;
+  title?: string;
+  feed?: string;
+  onscroll?: OnscrollFunction;
+  bodyStyle?: string;
+  scrollToElement?: HTMLElement;
+  stateManager?: StateManager;
+};
+
+export type PageCache = Map<string, CacheEntry>;
