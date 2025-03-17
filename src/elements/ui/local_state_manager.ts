@@ -139,7 +139,7 @@ export const createFeedManager = (
   );
 
   return {
-    feedsData,
+    feedsData: _feedsData,
     loadFeed,
     sideBar,
   };

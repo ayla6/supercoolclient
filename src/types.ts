@@ -58,7 +58,7 @@ export interface Feed {
 }
 
 export interface StateManager {
-  feedsData: Map<string, Feed>;
+  feedsData: Feed[];
   loadFeed: Function;
   sideBar: HTMLDivElement;
 }
