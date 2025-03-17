@@ -91,7 +91,7 @@ export const createFeedManager = (
       sideBar
         .querySelector(`a[href="?v=${feed.feed}"]`)
         ?.scrollIntoView({ block: "center" });
-      if (loadedFeed) feedState[loadedFeed][2] = window.scrollY;
+      if (loadedFeed) feedState[loadedFeed].scroll = window.scrollY;
     }
 
     let oldContent = contentHolder.querySelector("#content");

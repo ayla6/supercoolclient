@@ -8,6 +8,7 @@ import {
   PlcDidDocumentResolver,
   XrpcHandleResolver,
 } from "@atcute/identity-resolver";
+import { settings } from "./settings";
 let savedSessionData: AtpSessionData;
 
 export let managerPublic = new CredentialManager({
@@ -20,8 +21,6 @@ export let manager = new CredentialManager({
 });
 export let rpc = new XRPC({ handler: manager });
 export let sessionData: AppBskyActorDefs.ProfileViewDetailed;
-export let contentLabels = {};
-export let feeds = [];
 export const privateKey = localStorage.getItem("private-key");
 
 export const login = async (credentials?: {
@@ -89,9 +88,10 @@ export const login = async (credentials?: {
     ).data;
 
   const preferences =
-    sessionData && (await rpc.get("app.bsky.actor.getPreferences", {}));
+    sessionData &&
+    (await rpc.get("app.bsky.actor.getPreferences", {})).data.preferences;
 
-  contentLabels = preferences?.data.preferences
+  settings.contentLabels = preferences
     .filter((e) => {
       return e.$type === "app.bsky.actor.defs#contentLabelPref";
     })
@@ -101,8 +101,9 @@ export const login = async (credentials?: {
       }
       return acc;
     }, {});
+  console.log(preferences);
 
-  feeds = preferences?.data.preferences.find((e) => {
+  settings.feeds = preferences?.find((e) => {
     return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
   }).items;
 

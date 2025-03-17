@@ -10,7 +10,7 @@ import {
   getPathFromUri,
   idChoose,
 } from "../utils/link_processing.ts";
-import { manager, rpc, contentLabels, privateKey } from "../../login";
+import { manager, rpc, privateKey } from "../../login";
 import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
@@ -164,7 +164,10 @@ export const postCard = (
 
   const post = "post" in postHousing ? postHousing.post : postHousing;
 
-  if (post.labels && post.labels.some((l) => contentLabels[l.val] === "hide"))
+  if (
+    post.labels &&
+    post.labels.some((l) => settings.contentLabels[l.val] === "hide")
+  )
     return cfg.isFullView
       ? elem(
           "div",
@@ -172,7 +175,7 @@ export const postCard = (
           elem("div", {
             className: "simple-card",
             textContent: `This post is hidden because it contains the label
-            ${post.labels.find((l) => contentLabels[l.val] === "hide")?.val}, which is set to hide.`,
+            ${post.labels.find((l) => settings.contentLabels[l.val] === "hide")?.val}, which is set to hide.`,
           }),
         )
       : elem("div");
@@ -492,11 +495,11 @@ export const postCard = (
     );
     if (
       post.labels &&
-      post.labels.some((l) => contentLabels[l.val] === "warn")
+      post.labels.some((l) => settings.contentLabels[l.val] === "warn")
     ) {
       let embeddedShow = false;
       const warningLabel = post.labels.find(
-        (l) => contentLabels[l.val] === "warn",
+        (l) => settings.contentLabels[l.val] === "warn",
       );
       const buttonStatus = elem("span", {
         textContent: embeddedShow ? "Hide content" : "Show content",

@@ -18,7 +18,7 @@ export const profileCard = (profile: AppBskyActorDefs.ProfileView) => {
     ]),
     elem("div", {
       className: "bio",
-      textContent: profile.description,
+      textContent: profile.description ?? "",
     }),
   ]);
 

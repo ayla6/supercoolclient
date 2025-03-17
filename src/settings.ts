@@ -24,7 +24,7 @@ export const fillMissingSettings = () => {
   }
 };
 
-export let settings = {
+export const settings: { [key: string]: any } = {
   languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
   viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
   defaultFullsizeFormat: localStorage.getItem(

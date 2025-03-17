@@ -197,7 +197,9 @@ export const profileRoute = async (
         ]),
         elem("div", {
           className: "bio",
-          innerHTML: profile.description && processText(profile.description),
+          innerHTML: profile.description
+            ? processText(profile.description)
+            : "",
         }),
         manager.session && createKnownFollowers(),
       ]),

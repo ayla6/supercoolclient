@@ -1,6 +1,6 @@
 import { fillMissingSettings, updateColors } from "./settings";
 import { loadNavbar } from "./elements/ui/navbar";
-import { login } from "./login";
+import { login, rpc, sessionData } from "./login";
 import { cleanCache, updatePage } from "./router";
 import {
   createSwipeAction,

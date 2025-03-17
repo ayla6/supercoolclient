@@ -11,6 +11,7 @@
     display: flex;
     justify-content: space-around;
     z-index: 1;
+    user-select: none;
     $font-size: 14px;
     $padding-vertical: (($navbar-height - $font-size) * 0.5);
     a,

@@ -2,9 +2,10 @@ import { AppBskyFeedGetFeedGenerators } from "@atcute/client/lexicons";
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";
-import { manager, rpc, feeds } from "../login";
+import { manager, rpc } from "../login";
 import { RouteOutput } from "../types";
 import { unsignedHomeRoute } from "./unsigned_home";
+import { settings } from "../settings";
 
 export const homeRoute = async (
   currentSplitPath: string[],
@@ -27,7 +28,7 @@ export const homeRoute = async (
         params: {
           feeds: (() => {
             let pinned = [];
-            for (const feed of feeds.slice(1)) {
+            for (const feed of settings.feeds.slice(1)) {
               if (feed.pinned) pinned.push(feed.value);
             }
             return pinned;
