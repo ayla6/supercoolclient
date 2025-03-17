@@ -22,15 +22,16 @@ export const createFeedManager = (
   contentHolder: HTMLElement,
   sideBar: HTMLDivElement,
   _feedsData: Feed[],
-  home: boolean = false,
+  profile: boolean = false,
   _rpc: XRPC = rpc,
 ): StateManager => {
+  const atHome = window.location.pathname === "/";
   const path = window.location.pathname;
   const feedsData = new Map<string, Feed>();
 
   const navbar = document.getElementById("navbar");
   (navbar.querySelector(`a[href="/"]`) as HTMLLinkElement).onclick = (e) => {
-    if (window.location.pathname === "/") {
+    if (atHome) {
       e.preventDefault();
       e.stopPropagation();
       loadFeed(feedsData.get(loadedFeed));
@@ -53,7 +54,7 @@ export const createFeedManager = (
       href: `?v=${feed.feed}`,
       onclick: async (e) => {
         e.preventDefault();
-        if (home) localStorage.setItem("last-feed", feed.feed);
+        if (atHome) localStorage.setItem("last-feed", feed.feed);
         loadFeed(feed);
       },
     });
@@ -63,7 +64,7 @@ export const createFeedManager = (
     feedsData.set(feed.feed, feed);
   }
   sideBar.append(feedNav);
-  if (home) {
+  if (atHome) {
     const feed = feedsData.get(
       localStorage.getItem("last-feed") ?? "following",
     );
@@ -82,27 +83,30 @@ export const createFeedManager = (
     window.onscroll = null;
 
     const currentFeedState = feedState[feed.feed];
+    const headerEnd =
+      document.querySelector(".profile-header").clientHeight + 10;
 
     if (feed.feed !== loadedFeed) {
       sideBar.querySelector(".active")?.classList.remove("active");
       sideBar
         .querySelector(`a[href="?v=${feed.feed}"]`)
         ?.classList.add("active");
-      sideBar
-        .querySelector(`a[href="?v=${feed.feed}"]`)
-        ?.scrollIntoView({ block: "center" });
+      if (window.innerWidth <= 920)
+        sideBar
+          .querySelector(`a[href="?v=${feed.feed}"]`)
+          ?.scrollIntoView({ block: "center" });
       if (loadedFeed) feedState[loadedFeed].scroll = window.scrollY;
     }
 
-    let oldContent = contentHolder.querySelector("#content");
+    const topScroll =
+      currentFeedState?.scroll >= headerEnd
+        ? currentFeedState?.scroll
+        : scrollY >= headerEnd
+          ? headerEnd
+          : scrollY;
+    let oldContent = contentHolder.querySelector("#content") as HTMLDivElement;
     if (feed.feed === loadedFeed || !currentFeedState) {
-      if (!currentFeedState) {
-        const tempChild = elem("div", { id: "content" });
-        contentHolder.replaceChild(tempChild, oldContent);
-        oldContent.remove();
-        oldContent = tempChild;
-      }
-      window.scrollTo({ top: 0 });
+      if (!currentFeedState) oldContent.style.opacity = "0";
       const content = elem("div", { id: "content" });
       const onscrollFunc: OnscrollFunction = await hydrateFeed(
         content,
@@ -111,21 +115,15 @@ export const createFeedManager = (
         feed.func,
         _rpc,
       );
-      feedState[feed.feed] = { content, onscrollFunc, scroll: 0 };
-    } else {
-      window.scrollTo({ top: currentFeedState.scroll });
+      feedState[feed.feed] = { content, onscrollFunc, scroll: topScroll };
+      if (!currentFeedState) oldContent.removeAttribute("style");
     }
     const content = feedState[feed.feed].content;
     contentHolder.replaceChild(content, oldContent);
+    window.scrollTo({ top: topScroll });
     oldContent.remove();
     oldContent = null;
     const onscrollFunction = feedState[feed.feed].onscrollFunc;
-    if (cache.has(path)) {
-      const cacheEntry = cache.get(path);
-      window.onscroll = onscrollFunction;
-      cacheEntry.onscroll = onscrollFunction;
-      cacheEntry.feed = feed.feed;
-    }
     loadedFeed = feed.feed;
     return onscrollFunction;
   };

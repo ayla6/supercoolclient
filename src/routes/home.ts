@@ -69,7 +69,6 @@ export const homeRoute = async (
     document.getElementById("content-holder"),
     sideBar,
     feedsData,
-    true,
   );
 
   sideBar.append(

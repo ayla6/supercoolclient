@@ -373,7 +373,7 @@ export const profileRoute = async (
         extra: mediaNavButton(lastMedia),
       },
     ],
-    false,
+    true,
     _rpc,
   );
 
