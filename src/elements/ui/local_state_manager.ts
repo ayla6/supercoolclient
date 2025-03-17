@@ -1,5 +1,5 @@
 import { XRPC } from "@atcute/client";
-import { rpc } from "../../login";
+import { rpc, sessionData } from "../../login";
 import { cache } from "../../router";
 import {
   Feed,
@@ -21,53 +21,53 @@ export let currentStateManager: StateManager = {
 export const createFeedManager = (
   contentHolder: HTMLElement,
   sideBar: HTMLDivElement,
-  feedsData: Feed[],
+  _feedsData: Feed[],
   home: boolean = false,
   _rpc: XRPC = rpc,
-) => {
+): StateManager => {
   const path = window.location.pathname;
-  feedsData = feedsData.filter(Boolean);
+  const feedsData = new Map<string, Feed>();
 
-  const setHomeNavButton = (feed: Feed) => {
-    (
-      document
-        .getElementById("navbar")
-        .querySelector(`a[href="/"]`) as HTMLLinkElement
-    ).onclick = (e) => {
-      if (window.location.pathname === "/") {
-        e.preventDefault();
-        e.stopPropagation();
-        loadFeed(feed);
-      }
-    };
+  const navbar = document.getElementById("navbar");
+  (navbar.querySelector(`a[href="/"]`) as HTMLLinkElement).onclick = (e) => {
+    if (window.location.pathname === "/") {
+      e.preventDefault();
+      e.stopPropagation();
+      loadFeed(feedsData.get(loadedFeed));
+    }
+  };
+  (
+    navbar.querySelector(`a[href="/${sessionData.did}"]`) as HTMLLinkElement
+  ).onclick = (e) => {
+    if (window.location.pathname === `/${sessionData.did}`) {
+      e.preventDefault();
+      e.stopPropagation();
+      loadFeed(feedsData.get(loadedFeed));
+    }
   };
 
-  if (home) {
-    const feed = feedsData.find(
-      (f) => f.feed === (localStorage.getItem("last-feed") ?? "following"),
-    );
-    setHomeNavButton(feed);
-  }
-
   const feedNav = elem("div", { className: "side-nav" });
-  for (const feed of feedsData) {
+  for (const feed of _feedsData) {
     const button = elem("a", {
       textContent: feed.displayName,
       href: `?v=${feed.feed}`,
       onclick: async (e) => {
         e.preventDefault();
-        if (home) {
-          localStorage.setItem("last-feed", feed.feed);
-          setHomeNavButton(feed);
-        }
+        if (home) localStorage.setItem("last-feed", feed.feed);
         loadFeed(feed);
       },
     });
     button.setAttribute("ignore", "");
     if (feed.extra) button.append(feed.extra);
     feedNav.append(button);
+    feedsData.set(feed.feed, feed);
   }
   sideBar.append(feedNav);
+  if (home) {
+    const feed = feedsData.get(
+      localStorage.getItem("last-feed") ?? "following",
+    );
+  }
 
   let loadedFeed: string;
   const feedState: FeedState = Object.create(null);
@@ -135,7 +135,7 @@ export const createFeedManager = (
     80,
     document.getElementById("search-bar") ? 40 : 0,
     async () => {
-      await loadFeed(feedsData.find((f) => f.feed === loadedFeed));
+      await loadFeed(feedsData.get(loadedFeed));
     },
   );
 

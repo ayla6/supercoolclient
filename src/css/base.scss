@@ -351,10 +351,12 @@ select {
         $width: 300px;
         display: block;
         &.sticky {
-            position: fixed;
+            top: $navbar-height + 8px;
+            position: sticky;
             max-height: calc(100% - $navbar-height - 8px);
             overflow-x: hidden;
             overflow-y: auto;
+            height: min-content;
         }
         #search-bar {
             margin-bottom: 8px;

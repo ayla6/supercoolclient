@@ -101,7 +101,6 @@ export const login = async (credentials?: {
       }
       return acc;
     }, {});
-  console.log(preferences);
 
   settings.feeds = preferences?.find((e) => {
     return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";

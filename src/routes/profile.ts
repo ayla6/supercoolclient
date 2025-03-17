@@ -99,7 +99,11 @@ export const profileRoute = async (
 
   const searchBar = createSearchBar("from:" + (profile.handle ?? profile.did));
 
-  const sideBar = elem("div", { id: "side-bar" }, searchBar);
+  const sideBar = elem(
+    "div",
+    { id: "side-bar", className: "sticky" },
+    searchBar,
+  );
 
   const createKnownFollowers = () => {
     if (!profile.viewer.knownFollowers || profile.did === manager.session.did) {
