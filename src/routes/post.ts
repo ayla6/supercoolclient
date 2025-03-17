@@ -17,6 +17,8 @@ import { RouteOutput } from "../types";
 import { preloadedPost, setPreloaded } from "../elements/utils/preloaded_post";
 import { env } from "../settings";
 
+const MAX_PARENT_HEIGHT = 81;
+
 const mutedPostsButton = (
   outputElement: HTMLElement,
   posts: DocumentFragment,
@@ -73,16 +75,41 @@ const loadThread = (
     mainThreadPosts.appendChild(mainPost);
 
     if (thread.parent) {
+      const continueThreadCard = (
+        currentThread: AppBskyFeedDefs.ThreadViewPost,
+      ) => {
+        const post = currentThread.parent;
+        return elem("a", {
+          className: "simple-card",
+          href: getPathFromUri(
+            post.$type === "app.bsky.feed.defs#threadViewPost"
+              ? post.post.uri
+              : post.uri,
+          ),
+          textContent: "Continue thread…",
+          onclick: () =>
+            post.$type === "app.bsky.feed.defs#threadViewPost" &&
+            setPreloaded(post.post),
+        });
+      };
+
+      let postCount = 1;
       let currentThread = thread;
       if (!env.viewBlockedPosts) {
         while (
           currentThread.parent &&
           currentThread.parent.$type === "app.bsky.feed.defs#threadViewPost"
         ) {
-          currentThread = currentThread.parent;
-          mainThreadPosts.prepend(
-            postCard(currentThread.post, { hasReplies: true }),
-          );
+          if (postCount === MAX_PARENT_HEIGHT) {
+            mainThreadPosts.prepend(continueThreadCard(currentThread));
+            currentThread = currentThread.parent as any;
+          } else {
+            currentThread = currentThread.parent;
+            mainThreadPosts.prepend(
+              postCard(currentThread.post, { hasReplies: true }),
+            );
+          }
+          postCount++;
         }
         if (
           currentThread.parent &&
@@ -119,11 +146,21 @@ const loadThread = (
             if (
               currentThread.parent.$type === "app.bsky.feed.defs#notFoundPost"
             ) {
-              postElem = elem("a", {
-                className: "simple-card",
-                href: getPathFromUri(currentThread.parent.uri),
-                textContent: "Post not found",
-              });
+              temporaryPostsArea.prepend(
+                elem("a", {
+                  className: "simple-card",
+                  href: getPathFromUri(currentThread.parent.uri),
+                  textContent: "Post not found",
+                }),
+              );
+              console.log(rootPost);
+              if (rootPost && rootPost.uri !== currentThread.parent.uri)
+                temporaryPostsArea.prepend(
+                  postCard(rootPost, { hasReplies: true }),
+                );
+              currentThread = currentThread.parent as any;
+            } else if (postCount === MAX_PARENT_HEIGHT) {
+              temporaryPostsArea.prepend(continueThreadCard(currentThread));
               currentThread = currentThread.parent as any;
             } else {
               let blockedPost = false;
@@ -175,8 +212,9 @@ const loadThread = (
                 blockedPost,
                 blockedByPost,
               });
+              temporaryPostsArea.prepend(postElem);
+              postCount++;
             }
-            temporaryPostsArea.prepend(postElem);
           }
           mainThreadPosts.prepend(temporaryPostsArea);
           window.scrollBy({ top: temporaryPostsArea.offsetHeight });
@@ -283,7 +321,7 @@ const loadThread = (
             continueThreadContainer.appendChild(
               elem("a", {
                 className: "simple-card",
-                textContent: "Continue thread...",
+                textContent: "Continue thread…",
                 href: getPathFromUri(post.post.uri),
                 onclick: () => setPreloaded(post.post),
               }),
@@ -342,7 +380,7 @@ export const postRoute = async (
   }
 
   let { data: postThread } = await rpc.get("app.bsky.feed.getPostThread", {
-    params: { uri, parentHeight: 1000 },
+    params: { uri, parentHeight: MAX_PARENT_HEIGHT },
   });
   if (
     env.viewBlockedPosts &&
@@ -362,10 +400,7 @@ export const postRoute = async (
 
     if (preloadedPost) Object.assign(preloadedPost, post);
     setPreloaded(null);
-    if (
-      postThread.thread.parent &&
-      postThread.thread.parent.$type !== "app.bsky.feed.defs#threadViewPost"
-    ) {
+    if (postThread.thread.parent) {
       rootPost = (
         await rpc.get("app.bsky.feed.getPosts", {
           params: {
