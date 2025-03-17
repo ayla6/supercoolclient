@@ -1,5 +1,6 @@
 import { fromRgbaHex, getWCAGTextColor, toRgbaHex } from "@mary/color-fns";
 import { ImageFormat, StateManager } from "./types";
+import { AppBskyNotificationListNotifications } from "@atcute/client/lexicons";
 
 const langs = localStorage.getItem("langs");
 const navigatorLangs = window.navigator.languages.map((lang) =>
@@ -24,7 +25,18 @@ export const fillMissingSettings = () => {
   }
 };
 
-export const settings: { [key: string]: any } = {
+export const env: {
+  languagesToNotTranslate: Set<string>;
+  viewBlockedPosts: boolean;
+  defaultFullsizeFormat: ImageFormat;
+  defaultThumbnailFormat: ImageFormat;
+  showNonFollowingRepliesOnTimeline: boolean;
+  currentStateManager: StateManager;
+  latestNotifications: {
+    notifications: AppBskyNotificationListNotifications.Notification[];
+    cursor: string;
+  };
+} = {
   languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
   viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
   defaultFullsizeFormat: localStorage.getItem(
@@ -40,6 +52,7 @@ export const settings: { [key: string]: any } = {
     loadFeed: undefined,
     feedsData: undefined,
   } as StateManager,
+  latestNotifications: undefined,
 };
 
 export const updateColors = () => {

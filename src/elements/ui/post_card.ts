@@ -15,7 +15,7 @@ import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
 import { handleEmbed } from "./embeds/embed_handlers";
-import { settings } from "../../settings.ts";
+import { env } from "../../settings.ts";
 import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import sanitizeHtml from "sanitize-html";
@@ -166,7 +166,7 @@ export const postCard = (
 
   if (
     post.labels &&
-    post.labels.some((l) => settings.contentLabels[l.val] === "hide")
+    post.labels.some((l) => env.contentLabels[l.val] === "hide")
   )
     return cfg.isFullView
       ? elem(
@@ -175,7 +175,7 @@ export const postCard = (
           elem("div", {
             className: "simple-card",
             textContent: `This post is hidden because it contains the label
-            ${post.labels.find((l) => settings.contentLabels[l.val] === "hide")?.val}, which is set to hide.`,
+            ${post.labels.find((l) => env.contentLabels[l.val] === "hide")?.val}, which is set to hide.`,
           }),
         )
       : elem("div");
@@ -495,11 +495,11 @@ export const postCard = (
     );
     if (
       post.labels &&
-      post.labels.some((l) => settings.contentLabels[l.val] === "warn")
+      post.labels.some((l) => env.contentLabels[l.val] === "warn")
     ) {
       let embeddedShow = false;
       const warningLabel = post.labels.find(
-        (l) => settings.contentLabels[l.val] === "warn",
+        (l) => env.contentLabels[l.val] === "warn",
       );
       const buttonStatus = elem("span", {
         textContent: embeddedShow ? "Hide content" : "Show content",
@@ -547,7 +547,7 @@ export const postCard = (
     card.appendChild(labelArea);
   }
 
-  if (settings.viewBlockedPosts) {
+  if (env.viewBlockedPosts) {
     const warnings = [];
     const warning = (text: string) =>
       warnings.push(
@@ -574,7 +574,7 @@ export const postCard = (
   if (
     record.text &&
     record.langs?.[0] &&
-    !settings.languagesToNotTranslate.has(record.langs[0])
+    !env.languagesToNotTranslate.has(record.langs[0])
   ) {
     translateButton = elem("a", {
       className: "small-link",

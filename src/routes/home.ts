@@ -5,7 +5,7 @@ import { elem } from "../elements/utils/elem";
 import { manager, rpc } from "../login";
 import { RouteOutput } from "../types";
 import { unsignedHomeRoute } from "./unsigned_home";
-import { settings } from "../settings";
+import { env } from "../settings";
 
 export const homeRoute = async (
   currentSplitPath: string[],
@@ -28,7 +28,7 @@ export const homeRoute = async (
         params: {
           feeds: (() => {
             let pinned = [];
-            for (const feed of settings.feeds.slice(1)) {
+            for (const feed of env.feeds.slice(1)) {
               if (feed.pinned) pinned.push(feed.value);
             }
             return pinned;

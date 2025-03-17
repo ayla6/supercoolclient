@@ -1,8 +1,13 @@
 import { elem } from "../utils/elem";
 
-export const stickyHeader = (title: string) => {
+export const stickyHeader = (title: string, returnButton: boolean = true) => {
   return elem("div", { className: "sticky-header" }, undefined, [
-    elem("div", { className: "return-button", onclick: () => history.back() }),
+    returnButton
+      ? elem("div", {
+          className: "return-button",
+          onclick: () => history.back(),
+        })
+      : undefined,
     elem("span", { textContent: title }),
   ]);
 };

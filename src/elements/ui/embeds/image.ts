@@ -8,7 +8,7 @@ import {
 import { popupBox } from "../dialog";
 import { createSwipeAction } from "../../utils/swipe_manager";
 import { getPdsEndpoint } from "@atcute/client/utils/did";
-import { settings } from "../../../settings";
+import { env } from "../../../settings";
 
 const loadImage = (
   image: AppBskyEmbedImages.ViewImage,
@@ -28,10 +28,7 @@ const loadImage = (
         e.preventDefault();
         let notDefaultFormat = false;
         const img = elem("img", {
-          src: changeImageFormat(
-            image.fullsize,
-            settings.defaultFullsizeFormat,
-          ),
+          src: changeImageFormat(image.fullsize, env.defaultFullsizeFormat),
         });
         const seeRawButton = elem("button", {
           textContent: "See raw",
@@ -48,7 +45,7 @@ const loadImage = (
             );
             img.src = `${pds}/xrpc/com.atproto.sync.getBlob?did=${did}&cid=${cid}`;
             seeRawButton.textContent = "Raw";
-            pngDefaultButton.textContent = `See ${settings.defaultFullsizeFormat}`;
+            pngDefaultButton.textContent = `See ${env.defaultFullsizeFormat}`;
             notDefaultFormat = true;
           },
         });
@@ -57,9 +54,9 @@ const loadImage = (
           onclick: async (e) => {
             img.src = changeImageFormat(
               image.fullsize,
-              notDefaultFormat ? settings.defaultFullsizeFormat : "png",
+              notDefaultFormat ? env.defaultFullsizeFormat : "png",
             );
-            pngDefaultButton.textContent = `See as ${notDefaultFormat ? "PNG" : settings.defaultFullsizeFormat}`;
+            pngDefaultButton.textContent = `See as ${notDefaultFormat ? "PNG" : env.defaultFullsizeFormat}`;
             seeRawButton.textContent = "See raw";
             notDefaultFormat = !notDefaultFormat;
           },
@@ -100,7 +97,7 @@ const loadImage = (
     image.aspectRatio.height <= 350 &&
     image.aspectRatio.height > 8
   ) {
-    img.src = changeImageFormat(image.fullsize, settings.defaultFullsizeFormat);
+    img.src = changeImageFormat(image.fullsize, env.defaultFullsizeFormat);
   } else img.src = changeImageFormat(image.thumb);
 
   imageHolder.href = changeImageFormat(image.fullsize, "png");

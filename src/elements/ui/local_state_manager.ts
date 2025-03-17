@@ -19,27 +19,30 @@ export const createFeedManager = (
   _rpc: XRPC = rpc,
 ): StateManager => {
   const atHome = window.location.pathname === "/";
-  const path = window.location.pathname;
   _feedsData = _feedsData.filter(Boolean);
   const feedsData = new Map<string, Feed>();
 
   const navbar = document.getElementById("navbar");
-  (navbar.querySelector(`a[href="/"]`) as HTMLLinkElement).onclick = (e) => {
-    if (atHome) {
-      e.preventDefault();
-      e.stopPropagation();
-      loadFeed(feedsData.get(loadedFeed));
-    }
-  };
-  (
-    navbar.querySelector(`a[href="/${sessionData.did}"]`) as HTMLLinkElement
-  ).onclick = (e) => {
-    if (window.location.pathname === `/${sessionData.did}`) {
-      e.preventDefault();
-      e.stopPropagation();
-      loadFeed(feedsData.get(loadedFeed));
-    }
-  };
+  if (atHome) {
+    (navbar.querySelector(`a[href="/"]`) as HTMLLinkElement).onclick = (e) => {
+      if (window.location.pathname === "/") {
+        e.preventDefault();
+        e.stopPropagation();
+        loadFeed(feedsData.get(loadedFeed));
+      }
+    };
+  }
+  if (window.location.pathname === `/${sessionData.did}`) {
+    (
+      navbar.querySelector(`a[href="/${sessionData.did}"]`) as HTMLLinkElement
+    ).onclick = (e) => {
+      if (window.location.pathname === `/${sessionData.did}`) {
+        e.preventDefault();
+        e.stopPropagation();
+        loadFeed(feedsData.get(loadedFeed));
+      }
+    };
+  }
 
   const feedNav = elem("div", { className: "side-nav" });
   for (const feed of _feedsData) {
@@ -74,6 +77,7 @@ export const createFeedManager = (
     func?: (item: any) => HTMLDivElement;
   }): Promise<OnscrollFunction> => {
     const clonedParams = Object.assign({}, feed.params);
+    let onscrollFunc: OnscrollFunction;
     window.onscroll = null;
 
     const currentFeedState = feedState[feed.feed];
@@ -92,35 +96,38 @@ export const createFeedManager = (
       if (loadedFeed) feedState[loadedFeed].scroll = window.scrollY;
     }
 
-    const topScroll = profile
+    const oldContent = contentHolder.querySelector(
+      "#content",
+    ) as HTMLDivElement;
+    const scrollTop = profile
       ? currentFeedState?.scroll > headerEnd
         ? currentFeedState?.scroll
         : scrollY > headerEnd
           ? headerEnd
           : scrollY
       : (currentFeedState?.scroll ?? 0);
-    let oldContent = contentHolder.querySelector("#content") as HTMLDivElement;
+    window.scrollTo({ top: scrollTop });
     if (feed.feed === loadedFeed || !currentFeedState) {
       if (!currentFeedState) oldContent.style.opacity = "0";
       const content = elem("div", { id: "content" });
-      const onscrollFunc: OnscrollFunction = await hydrateFeed(
+      onscrollFunc = await hydrateFeed(
         content,
         feed.nsid,
         clonedParams,
         feed.func,
         _rpc,
       );
-      feedState[feed.feed] = { content, onscrollFunc, scroll: topScroll };
+      feedState[feed.feed] = { content, onscrollFunc, scroll: scrollTop };
       if (!currentFeedState) oldContent.removeAttribute("style");
+      window.onscroll = onscrollFunc;
     }
+    window.scrollTo({ top: scrollTop });
+
     const content = feedState[feed.feed].content;
     contentHolder.replaceChild(content, oldContent);
-    window.scrollTo({ top: topScroll });
     oldContent.remove();
-    oldContent = null;
-    const onscrollFunction = feedState[feed.feed].onscrollFunc;
     loadedFeed = feed.feed;
-    return onscrollFunction;
+    return onscrollFunc;
   };
 
   pullToRefresh(

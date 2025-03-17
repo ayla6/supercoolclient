@@ -8,6 +8,7 @@ import postSVG from "../../svg/pencil.svg?raw";
 import searchSVG from "../../svg/search.svg?raw";
 import { composerBox } from "./composer";
 import { loginDialog } from "./login_dialog";
+import { env } from "../../settings";
 
 function navButton(text: string, link: string, icon: string) {
   return elem("a", { innerHTML: `${icon}<span>${text}</span>`, href: link });
@@ -53,6 +54,13 @@ export const updateNotificationIcon = async (toZero: boolean = false) => {
           params: {},
         })
       ).data.count;
+  if (unreadCount) {
+    env.latestNotifications = (
+      await rpc.get("app.bsky.notification.listNotifications", {
+        params: { limit: 50 },
+      })
+    ).data as any;
+  }
   const notificationCount = document.getElementById("notification-count");
   if (unreadCount !== 0) {
     notificationCount.textContent = unreadCount.toString();

@@ -8,7 +8,7 @@ import {
   PlcDidDocumentResolver,
   XrpcHandleResolver,
 } from "@atcute/identity-resolver";
-import { settings } from "./settings";
+import { env } from "./settings";
 let savedSessionData: AtpSessionData;
 
 export let managerPublic = new CredentialManager({
@@ -91,7 +91,7 @@ export const login = async (credentials?: {
     sessionData &&
     (await rpc.get("app.bsky.actor.getPreferences", {})).data.preferences;
 
-  settings.contentLabels = preferences
+  env.contentLabels = preferences
     .filter((e) => {
       return e.$type === "app.bsky.actor.defs#contentLabelPref";
     })
@@ -102,7 +102,7 @@ export const login = async (credentials?: {
       return acc;
     }, {});
 
-  settings.feeds = preferences?.find((e) => {
+  env.feeds = preferences?.find((e) => {
     return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";
   }).items;
 

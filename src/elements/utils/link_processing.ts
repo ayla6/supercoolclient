@@ -1,4 +1,4 @@
-import { settings } from "../../settings";
+import { env } from "../../settings";
 
 export const idChoose = ({ handle, did }: { did: string; handle: string }) =>
   handle !== "handle.invalid" ? handle : did;
@@ -10,7 +10,7 @@ export const getDidFromUri = (uri: string) => uri.slice(5, uri.indexOf("/", 6));
 
 export const changeImageFormat = (
   uri: string,
-  format = settings.defaultThumbnailFormat,
+  format = env.defaultThumbnailFormat,
 ) => (uri ? uri.slice(0, -4) + format : undefined);
 
 export const getUriFromSplitPath = (
@@ -46,7 +46,7 @@ export const getFediHandle = (atprotoHandle: string) => {
 export const getBluemojiCdnUrl = (
   did: string,
   cid: string,
-  format = settings.defaultThumbnailFormat,
+  format = env.defaultThumbnailFormat,
 ) => {
   return `https://cdn.bsky.app/img/avatar_thumbnail/plain/${did}/${cid}@${format}`;
 };

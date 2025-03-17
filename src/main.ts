@@ -1,4 +1,4 @@
-import { fillMissingSettings, settings, updateColors } from "./settings";
+import { fillMissingSettings, env, updateColors } from "./settings";
 import { loadNavbar } from "./elements/ui/navbar";
 import { login, rpc, sessionData } from "./login";
 import { cleanCache, updatePage } from "./router";
@@ -69,7 +69,7 @@ loadNavbar();
 updatePage(false);
 
 createSwipeAction(document.body, (pos) => {
-  const csm = settings.currentStateManager;
+  const csm = env.currentStateManager;
   if (!csm.feedsData) return;
   const swipeDiff = pos.endX - pos.startX;
   const activeItem = csm.sideBar.querySelector(".active");

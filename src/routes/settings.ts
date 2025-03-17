@@ -4,7 +4,7 @@ import { rpc, sessionData } from "../login";
 import { ImageFormat, RouteOutput } from "../types";
 import { createTray } from "../elements/ui/tray";
 import { getUriFromSplitPath } from "../elements/utils/link_processing";
-import { settings, updateColors } from "../settings";
+import { env, updateColors } from "../settings";
 import { stickyHeader } from "../elements/ui/sticky_header";
 
 const saveAgeSettings = async () => {
@@ -151,9 +151,7 @@ export const settingsRoute = async (
                 "view-blocked-posts",
                 (e.target as HTMLInputElement).checked ? "true" : "false",
               );
-              settings.viewBlockedPosts = (
-                e.target as HTMLInputElement
-              ).checked;
+              env.viewBlockedPosts = (e.target as HTMLInputElement).checked;
             },
           }),
         ]),
@@ -176,7 +174,7 @@ export const settingsRoute = async (
                 "show-non-following-replies-on-timeline",
                 (e.target as HTMLInputElement).checked ? "true" : "false",
               );
-              settings.showNonFollowingRepliesOnTimeline = (
+              env.showNonFollowingRepliesOnTimeline = (
                 e.target as HTMLInputElement
               ).checked;
             },
@@ -199,7 +197,7 @@ export const settingsRoute = async (
                   "default-fullsize-format",
                   (e.target as HTMLInputElement).value,
                 );
-                settings.defaultFullsizeFormat = (e.target as HTMLInputElement)
+                env.defaultFullsizeFormat = (e.target as HTMLInputElement)
                   .value as ImageFormat;
               },
             },
@@ -232,7 +230,7 @@ export const settingsRoute = async (
                   "default-thumbnail-format",
                   (e.target as HTMLInputElement).value,
                 );
-                settings.defaultThumbnailFormat = (e.target as HTMLInputElement)
+                env.defaultThumbnailFormat = (e.target as HTMLInputElement)
                   .value as ImageFormat;
               },
             },

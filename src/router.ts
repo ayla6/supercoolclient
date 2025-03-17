@@ -2,6 +2,7 @@ import { elem } from "./elements/utils/elem";
 import { postCard } from "./elements/ui/post_card";
 import { profileCard, statProfile } from "./elements/ui/profile_card";
 import { PageCache, RouteOutput } from "./types";
+env;
 import { homeRoute } from "./routes/home";
 import { notificationsRoute } from "./routes/notifications";
 import { postRoute } from "./routes/post";
@@ -9,7 +10,7 @@ import { profileRoute } from "./routes/profile";
 import { createStatsRoute } from "./routes/stats";
 import { searchRoute } from "./routes/search";
 import { settingsRoute } from "./routes/settings";
-import { settings } from "./settings";
+import { env } from "./settings";
 import { sessionData } from "./login";
 
 export const cache: PageCache = new Map();
@@ -89,10 +90,10 @@ export const updatePage = async (useCache: boolean) => {
 
   document.title = "SuperCoolClient";
   document.body.removeAttribute("style");
-  if (currentSplitPath[0] !== loadedSplitPath[0]) {
-    navbar.querySelector(".active")?.classList.remove("active");
-    navbar.querySelector(`a[href="${currentPath}"]`)?.classList.add("active");
-  }
+
+  navbar.querySelector(".active")?.classList.remove("active");
+  navbar.querySelector(`a[href="${currentPath}"]`)?.classList.add("active");
+
   window.scrollTo({ top: 0 });
 
   const cachePage = cache.get(currentPath);
@@ -107,7 +108,7 @@ export const updatePage = async (useCache: boolean) => {
     document.body.appendChild(cachePage.container);
     document.title = cachePage.title;
     window.onscroll = cachePage.onscroll;
-    settings.currentStateManager = cachePage.stateManager;
+    env.currentStateManager = cachePage.stateManager;
     document.body.setAttribute("style", cachePage.bodyStyle);
   } else {
     let container: HTMLDivElement;
@@ -127,9 +128,9 @@ export const updatePage = async (useCache: boolean) => {
       if (bodyStyle) document.body.setAttribute("style", bodyStyle);
       if (scrollToElement) scrollToElement.scrollIntoView();
       if (onscrollFunction) window.onscroll = onscrollFunction;
-      if (stateManager) settings.currentStateManager = stateManager;
+      if (stateManager) env.currentStateManager = stateManager;
       else
-        settings.currentStateManager = {
+        env.currentStateManager = {
           feedsData: undefined,
           loadFeed: undefined,
           sideBar: undefined,

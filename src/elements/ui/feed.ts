@@ -2,7 +2,7 @@ import { postCard } from "../ui/post_card";
 import { rpc, rpcPublic, sessionData } from "../../login";
 import { feedNSID, OnscrollFunction } from "../../types";
 import { XRPC } from "@atcute/client";
-import { settings } from "../../settings";
+import { env } from "../../settings";
 import {
   AppBskyFeedGetAuthorFeed,
   AppBskyFeedGetFeed,
@@ -101,7 +101,7 @@ export const hydrateFeed = async (
 
   const loadFeed = async () => {
     const { data } = await _rpc.get(nsid, { params: params });
-    //if (settings.viewBlockedPosts && func === postCard)
+    //if (env.viewBlockedPosts && func === postCard)
     //  await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
     if (!params.cursor) output.replaceChildren();
     data[dataLocation].forEach((item: Object) =>
@@ -141,14 +141,14 @@ export const hydratePostFeed = async (
 ): Promise<OnscrollFunction> => {
   const dataLocation = dataLocations[nsid] ?? "feed";
   const hideNonFollowingRepliesOnTimeline =
-    settings.showNonFollowingRepliesOnTimeline ||
+    env.showNonFollowingRepliesOnTimeline ||
     nsid !== "app.bsky.feed.getTimeline";
 
   const loadFeed = async () => {
     const { data } = await _rpc.get(nsid, {
       params: params,
     });
-    if (settings.viewBlockedPosts)
+    if (env.viewBlockedPosts)
       await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
     const rearrangedFeed: Map<string, boolean> = new Map();
     const posts: { [key: string]: RecursivePost } = {};

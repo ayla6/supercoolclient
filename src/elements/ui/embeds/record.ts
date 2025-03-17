@@ -2,7 +2,7 @@ import { AppBskyEmbedRecord, AppBskyFeedDefs } from "@atcute/client/lexicons";
 import { postCard } from "../post_card";
 import { elem } from "../../utils/elem";
 import { getPathFromUri } from "../../utils/link_processing";
-import { settings } from "../../../settings";
+import { env } from "../../../settings";
 import { rpcPublic } from "../../../login";
 
 export const loadEmbedRecord = (
@@ -51,7 +51,7 @@ export const loadEmbedRecord = (
       });
       if (
         record.$type === "app.bsky.embed.record#viewBlocked" &&
-        settings.viewBlockedPosts
+        env.viewBlockedPosts
       ) {
         setTimeout(async () => {
           let post = (

@@ -15,6 +15,7 @@ import replySvg from "../../svg/reply.svg?raw";
 import quoteSvg from "../../svg/quote.svg?raw";
 import { postCard } from "./post_card";
 import { updateNotificationIcon } from "./navbar";
+import { env } from "../../settings";
 
 const notificationIcons = {
   like: favSvg,
@@ -38,11 +39,14 @@ const loadNotifications = async (params: {
   useCache: boolean;
 }) => {
   const fragment = document.createDocumentFragment();
-  const data = (
-    await rpc.get("app.bsky.notification.listNotifications", {
-      params,
-    })
-  ).data;
+  const data =
+    params.useCache && !params.cursor && env.latestNotifications
+      ? env.latestNotifications
+      : (
+          await rpc.get("app.bsky.notification.listNotifications", {
+            params,
+          })
+        ).data;
 
   const listPosts = [];
 

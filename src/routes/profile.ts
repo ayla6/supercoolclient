@@ -18,7 +18,7 @@ import { RouteOutput } from "../types";
 import { confirmDialog } from "../elements/ui/dialog";
 import { editProfileDialog } from "../elements/ui/edit_profile";
 import { createSearchBar } from "../elements/ui/search_bar";
-import { settings } from "../settings";
+import { env } from "../settings";
 
 const mediaNavButton = (lastMedia: AppBskyFeedGetAuthorFeed.Output) => {
   const images = elem("div", { className: "images" });
@@ -58,7 +58,7 @@ export const profileRoute = async (
     profile.viewer?.blocking ||
     profile.viewer?.blockingByList?.listItemCount > 0;
 
-  const _rpc = settings.viewBlockedPosts && blockingInAnyWay ? rpcPublic : rpc;
+  const _rpc = env.viewBlockedPosts && blockingInAnyWay ? rpcPublic : rpc;
 
   let ogFediLink: HTMLAnchorElement;
   const did = profile.did;
@@ -85,7 +85,7 @@ export const profileRoute = async (
   if (profile.did !== atId) profileRedirect(did);
 
   const { data: lastMedia } =
-    !settings.viewBlockedPosts && blockingInAnyWay
+    !env.viewBlockedPosts && blockingInAnyWay
       ? { data: { feed: [] } }
       : await _rpc.get("app.bsky.feed.getAuthorFeed", {
           params: {
@@ -377,14 +377,14 @@ export const profileRoute = async (
     _rpc,
   );
 
-  if (!settings.viewBlockedPosts && blockingInAnyWay) {
+  if (!env.viewBlockedPosts && blockingInAnyWay) {
     Array.from(sideBar.querySelector(".side-nav").children).forEach((child) =>
       child.classList.add("disabled"),
     );
   }
 
   const onscrollFunction =
-    !settings.viewBlockedPosts && blockingInAnyWay
+    !env.viewBlockedPosts && blockingInAnyWay
       ? undefined
       : await stateManager.loadFeed({
           feed: "posts",
