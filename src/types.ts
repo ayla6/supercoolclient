@@ -72,6 +72,7 @@ export type CacheEntry = {
   bodyStyle?: string;
   scrollToElement?: HTMLElement;
   stateManager?: StateManager;
+  search?: string;
 };
 
 export type PageCache = Map<string, CacheEntry>;

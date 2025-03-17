@@ -1,7 +1,7 @@
 import { elem } from "./elements/utils/elem";
 import { postCard } from "./elements/ui/post_card";
 import { profileCard, statProfile } from "./elements/ui/profile_card";
-import { PageCache, RouteOutput, StateManager } from "./types";
+import { PageCache, RouteOutput } from "./types";
 import { homeRoute } from "./routes/home";
 import { notificationsRoute } from "./routes/notifications";
 import { postRoute } from "./routes/post";
@@ -10,6 +10,7 @@ import { createStatsRoute } from "./routes/stats";
 import { searchRoute } from "./routes/search";
 import { settingsRoute } from "./routes/settings";
 import { settings } from "./settings";
+import { sessionData } from "./login";
 
 export const cache: PageCache = new Map();
 const CACHE_DURATION = 5 * 60 * 1000;
@@ -97,8 +98,10 @@ export const updatePage = async (useCache: boolean) => {
   const cachePage = cache.get(currentPath);
 
   if (
-    (useCache && cachePage && Date.now() < cachePage.expirationDate) ||
-    (currentPath === "/" && cachePage)
+    cachePage &&
+    ((useCache && Date.now() < cachePage.expirationDate) ||
+      currentPath === "/" ||
+      currentPath === `/${sessionData.did}`)
   ) {
     document.body.appendChild(cachePage.container);
     document.title = cachePage.title;
@@ -142,6 +145,7 @@ export const updatePage = async (useCache: boolean) => {
         bodyStyle: document.body.getAttribute("style"),
         scrollToElement: scrollToElement,
         stateManager,
+        search: window.location.search,
       });
     }
   }
