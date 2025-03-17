@@ -84,7 +84,7 @@ export const createFeedManager = (
 
     const currentFeedState = feedState[feed.feed];
     const headerEnd =
-      document.querySelector(".profile-header").clientHeight + 10;
+      document.querySelector(".profile-header")?.clientHeight + 10;
 
     if (feed.feed !== loadedFeed) {
       sideBar.querySelector(".active")?.classList.remove("active");
@@ -98,12 +98,13 @@ export const createFeedManager = (
       if (loadedFeed) feedState[loadedFeed].scroll = window.scrollY;
     }
 
-    const topScroll =
-      currentFeedState?.scroll >= headerEnd
+    const topScroll = profile
+      ? currentFeedState?.scroll >= headerEnd
         ? currentFeedState?.scroll
         : scrollY >= headerEnd
           ? headerEnd
-          : scrollY;
+          : scrollY
+      : (currentFeedState?.scroll ?? 0);
     let oldContent = contentHolder.querySelector("#content") as HTMLDivElement;
     if (feed.feed === loadedFeed || !currentFeedState) {
       if (!currentFeedState) oldContent.style.opacity = "0";
