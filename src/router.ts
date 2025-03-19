@@ -1,7 +1,7 @@
 import { elem } from "./elements/utils/elem";
 import { postCard } from "./elements/ui/post_card";
 import { profileCard, statProfile } from "./elements/ui/profile_card";
-import { PageCache, RouteOutput } from "./types";
+import { PageCache, Route, RouteOutput } from "./types";
 env;
 import { homeRoute } from "./routes/home";
 import { notificationsRoute } from "./routes/notifications";
@@ -22,11 +22,6 @@ export let beingLoadedSplitPath: string[] = [];
 
 const navbar = document.getElementById("navbar");
 
-type Route = (
-  currentSplitPath: string[],
-  previousSplitPath: string[],
-  container: HTMLDivElement,
-) => RouteOutput;
 const routesBase: { [key: string]: Route } = {
   "": homeRoute,
   notifications: notificationsRoute,
@@ -50,14 +45,11 @@ const routesBase: { [key: string]: Route } = {
     postCard,
   ),
 };
-type computedRoutes = [{ key: string[]; route: Route }];
-const routes: computedRoutes = (() => {
-  const computedRoutes = [];
-  for (const route of Object.keys(routesBase)) {
-    computedRoutes.push({ key: route.split("/"), route: routesBase[route] });
-  }
-  return computedRoutes as computedRoutes;
-})();
+type computedRoutes = { key: string[]; route: Route }[];
+const routes: computedRoutes = Object.keys(routesBase).map((route) => ({
+  key: route.split("/"),
+  route: routesBase[route],
+}));
 
 const matchRoute = (path: string[]) => {
   for (const route of routes) {

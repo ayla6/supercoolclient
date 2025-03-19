@@ -1,6 +1,12 @@
 export type OnscrollFunction = ((this: GlobalEventHandlers, ev: Event) => any) &
   ((this: Window, ev: Event) => any);
 
+export type Route = (
+  currentSplitPath: string[],
+  previousSplitPath: string[],
+  container: HTMLDivElement,
+) => RouteOutput;
+
 export type RouteOutput = Promise<{
   onscrollFunction?: OnscrollFunction;
   title?: string;

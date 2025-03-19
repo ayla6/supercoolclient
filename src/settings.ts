@@ -36,6 +36,8 @@ export const env: {
     notifications: AppBskyNotificationListNotifications.Notification[];
     cursor: string;
   };
+  contentLabels: any;
+  feeds: any;
 } = {
   languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
   viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
@@ -53,6 +55,8 @@ export const env: {
     feedsData: undefined,
   } as StateManager,
   latestNotifications: undefined,
+  contentLabels: undefined,
+  feeds: undefined,
 };
 
 export const updateColors = () => {

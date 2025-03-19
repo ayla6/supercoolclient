@@ -32,7 +32,7 @@ export const createFeedManager = (
       }
     };
   }
-  if (window.location.pathname === `/${sessionData.did}`) {
+  if (sessionData && window.location.pathname === `/${sessionData.did}`) {
     (
       navbar.querySelector(`a[href="/${sessionData.did}"]`) as HTMLLinkElement
     ).onclick = (e) => {

@@ -36,14 +36,12 @@ export const loadEmbedRecord = (
       record.$type === "app.bsky.embed.record#viewDetached" ||
       record.$type === "app.bsky.embed.record#viewNotFound"
     ) {
-      let text: string;
-      if (record.$type === "app.bsky.embed.record#viewBlocked") {
-        text = "Blocked post";
-      } else if (record.$type === "app.bsky.embed.record#viewDetached") {
-        text = "Post detached";
-      } else {
-        text = "Post not found";
-      }
+      const text =
+        record.$type === "app.bsky.embed.record#viewBlocked"
+          ? "Blocked post"
+          : record.$type === "app.bsky.embed.record#viewDetached"
+            ? "Post detached"
+            : "Post not found";
       const simpleCard = elem("a", {
         className: "simple-card",
         href: getPathFromUri(record.uri),
