@@ -140,7 +140,7 @@ export const hydratePostFeed = async (
   _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
   const dataLocation = dataLocations[nsid] ?? "feed";
-  const hideNonFollowingRepliesOnTimeline =
+  const showNonFollowingRepliesOnTimeline =
     env.showNonFollowingRepliesOnTimeline ||
     nsid !== "app.bsky.feed.getTimeline";
 
@@ -179,7 +179,7 @@ export const hydratePostFeed = async (
           posts[parentUri].reply = posts[postUri];
         } else {
           if (
-            hideNonFollowingRepliesOnTimeline ||
+            showNonFollowingRepliesOnTimeline ||
             postHousing.reply.parent.author?.viewer.following ||
             postHousing.reply.parent.author.did === sessionData.did
           ) {
@@ -198,7 +198,7 @@ export const hydratePostFeed = async (
               }
             }
             posts[parentUri] = {
-              post: postHousing,
+              post: postHousing.reply.parent,
               reply: posts[postUri],
             };
             rearrangedFeed.delete(parentUri);
