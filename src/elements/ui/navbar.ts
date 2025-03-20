@@ -1,4 +1,4 @@
-import { manager, rpc } from "../../login";
+import { manager, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 
 import homeSVG from "../../svg/home.svg?raw";
@@ -6,13 +6,74 @@ import notifSVG from "../../svg/bell.svg?raw";
 import profileSVG from "../../svg/user.svg?raw";
 import postSVG from "../../svg/pencil.svg?raw";
 import searchSVG from "../../svg/search.svg?raw";
+import plusSVG from "../../svg/plus.svg?raw";
+import logoutSVG from "../../svg/logout.svg?raw";
+import settingsSVG from "../../svg/settings.svg?raw";
 import { composerBox } from "./composer";
 import { loginDialog } from "./login_dialog";
 import { env } from "../../settings";
+import { contextMenu } from "./context";
+import { updatePage } from "../../router";
+import { AppBskyActorDefs } from "@atcute/client/lexicons";
+import { confirmDialog } from "./dialog";
 
 function navButton(text: string, link: string, icon: string) {
   return elem("a", { innerHTML: `${icon}<span>${text}</span>`, href: link });
 }
+
+const profileContextMenu = (target: HTMLElement) => {
+  contextMenu(target, [
+    {
+      icon: settingsSVG,
+      text: "Settings",
+      onclick: () => {
+        history.pushState(null, "", "/settings");
+        updatePage(true);
+      },
+    },
+    { text: "divider" },
+    ...env.sessionsProfile.map(
+      (profile: AppBskyActorDefs.ProfileViewDetailed) => {
+        return {
+          icon: profile.avatar,
+          text: profile.handle,
+          onclick: () => {
+            if (profile.did === sessionData.did) {
+              history.pushState(null, "", `/${profile.did}`);
+              updatePage(true);
+            } else {
+              localStorage.setItem("session-chosen", profile.did);
+              window.location.reload();
+            }
+          },
+        };
+      },
+    ),
+    {
+      icon: plusSVG,
+      text: "Add another account",
+      onclick: loginDialog,
+    },
+    {
+      icon: logoutSVG,
+      text: "Sign out",
+      onclick: async () => {
+        const result = await confirmDialog(
+          `Sign out of ${sessionData.handle}?`,
+          "Sign out",
+        );
+        if (result) {
+          localStorage.removeItem("session-chosen");
+          const sessions = JSON.parse(localStorage.getItem("session"));
+          sessions[sessionData.did] = null;
+          localStorage.setItem("session", JSON.stringify(sessions));
+          window.location.reload();
+        }
+      },
+    },
+    ,
+  ]);
+};
 
 export const loadNavbar = () => {
   const navbar = document.getElementById("navbar");
@@ -33,7 +94,27 @@ export const loadNavbar = () => {
           return notifButton;
         })(),
       manager.session &&
-        navButton("Profile", "/" + manager.session.did, profileSVG),
+        elem("a", {
+          id: "profile-button",
+          innerHTML: `<img src="${sessionData.avatar}"><span>Profile</span>`,
+          onmousedown: (e: MouseEvent) => {
+            const target = (e.target as HTMLElement).closest("a");
+            const pressTimer = setTimeout(() => {
+              profileContextMenu(target);
+            }, 500);
+
+            const clearTimer = () => {
+              clearTimeout(pressTimer);
+            };
+
+            target.addEventListener("mouseup", clearTimer, { once: true });
+            target.addEventListener("mouseleave", clearTimer, { once: true });
+          },
+          onclick: (e: MouseEvent) => {
+            history.pushState(null, "", `/${sessionData.did}`);
+            updatePage(true);
+          },
+        }),
       manager.session &&
         elem("button", {
           id: "composer-button",

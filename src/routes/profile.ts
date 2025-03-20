@@ -197,7 +197,7 @@ export const profileRoute = async (
           }),
           profile.viewer?.followedBy
             ? elem("span", { className: "label", textContent: "Follows you" })
-            : undefined,
+            : null,
         ]),
         elem("div", {
           className: "bio",
@@ -259,7 +259,7 @@ export const profileRoute = async (
                   button.classList.add("follow");
                   rpc.call("com.atproto.repo.deleteRecord", {
                     data: {
-                      repo: manager.session.did,
+                      repo: sessionData.did,
                       rkey: rkey,
                       collection: "app.bsky.graph.follow",
                     },
@@ -343,7 +343,7 @@ export const profileRoute = async (
               actor: did,
             },
           }
-        : undefined,
+        : null,
       {
         displayName: "Following",
         feed: "following",

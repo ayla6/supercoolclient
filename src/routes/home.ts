@@ -83,7 +83,7 @@ export const homeRoute = async (
       }),
       elem("a", {
         textContent: "Dev",
-        href: "/did:plc:avlpu4l2j5u3johint7tqrmu",
+        href: "/did:plc:3c6vkaq7xf5kz3va3muptjh5",
       }),
     ]),
   );

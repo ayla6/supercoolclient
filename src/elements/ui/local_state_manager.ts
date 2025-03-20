@@ -32,17 +32,6 @@ export const createFeedManager = (
       }
     };
   }
-  if (sessionData && window.location.pathname === `/${sessionData.did}`) {
-    (
-      navbar.querySelector(`a[href="/${sessionData.did}"]`) as HTMLLinkElement
-    ).onclick = (e) => {
-      if (window.location.pathname === `/${sessionData.did}`) {
-        e.preventDefault();
-        e.stopPropagation();
-        loadFeed(feedsData.get(loadedFeed));
-      }
-    };
-  }
 
   const feedNav = elem("div", { className: "side-nav" });
   for (const feed of _feedsData) {

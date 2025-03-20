@@ -28,14 +28,28 @@ export const login = async (credentials?: {
   password: string;
   serviceEndpoint?: string;
 }) => {
-  const session = localStorage.getItem("session");
-  if (!session && !credentials) return;
+  let sessions =
+    localStorage.getItem("session") &&
+    JSON.parse(localStorage.getItem("session"));
+  if (!sessions && !credentials) return;
 
-  savedSessionData = JSON.parse(session);
+  if (sessions) {
+    if (sessions["accessJwt"]) {
+      env.sessionChosen = sessions.did;
+      localStorage.setItem("session-chosen", sessions.did);
+      sessions = { [sessions.did]: sessions };
+    }
+
+    if (sessions[env.sessionChosen]) {
+      savedSessionData = sessions[env.sessionChosen];
+    }
+  } else {
+    sessions = {};
+  }
 
   let serviceEndpoint = "https://bsky.social";
 
-  if (session && savedSessionData.pdsUri) {
+  if (!credentials && savedSessionData && savedSessionData.pdsUri) {
     serviceEndpoint = savedSessionData.pdsUri;
   } else if (credentials?.serviceEndpoint) {
     serviceEndpoint = credentials.serviceEndpoint;
@@ -67,10 +81,13 @@ export const login = async (credentials?: {
     onSessionUpdate(session) {
       session.pdsUri = serviceEndpoint;
       savedSessionData = session;
-      localStorage.setItem("session", JSON.stringify(session));
+      sessions[session.did] = session;
+      localStorage.setItem("session-chosen", session.did);
+      localStorage.setItem("session", JSON.stringify(sessions));
     },
   });
-  if (session) {
+
+  if (!credentials && savedSessionData) {
     try {
       await manager.resume(savedSessionData);
     } catch {}

@@ -409,10 +409,7 @@ export const composerBox = (
 
   const handleLangRemove = async (lang: string, container: HTMLElement) => {
     if (languages.length > 1) {
-      const confirmed = await confirmDialog(
-        "Are you sure you want to remove this language?",
-        "Remove",
-      );
+      const confirmed = await confirmDialog("Remove this language?", "Remove");
       if (confirmed) {
         languages.splice(languages.indexOf(lang), 1);
         localStorage.setItem("composer-langs", JSON.stringify(languages));

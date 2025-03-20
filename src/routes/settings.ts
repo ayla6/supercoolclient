@@ -3,7 +3,10 @@ import { elem } from "../elements/utils/elem";
 import { rpc, sessionData } from "../login";
 import { ImageFormat, RouteOutput } from "../types";
 import { createTray } from "../elements/ui/tray";
-import { getUriFromSplitPath } from "../elements/utils/link_processing";
+import {
+  getUriFromSplitPath,
+  getUriFromUnresolvedSplitPath,
+} from "../elements/utils/link_processing";
 import { env, updateColors } from "../settings";
 import { stickyHeader } from "../elements/ui/sticky_header";
 
@@ -41,8 +44,10 @@ const saveAgeSettings = async () => {
       const text = item.querySelector("span").textContent;
       return text.startsWith("did:")
         ? text
-        : text.match(/https:\/\/.*\/profile\/?did:.*\/lists\/.*/)
-          ? getUriFromSplitPath(
+        : text.match(/https:\/\/.*\/profile\/.*\/lists\/.*/)
+          ? (text.match(/https:\/\/.*\/profile\/?did:.*\/lists\/.*/)
+              ? getUriFromSplitPath
+              : getUriFromUnresolvedSplitPath)(
               new URL(text).pathname.split("/").slice(2),
               "app.bsky.graph.list",
             )

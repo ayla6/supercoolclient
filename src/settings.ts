@@ -1,6 +1,9 @@
 import { fromRgbaHex, getWCAGTextColor, toRgbaHex } from "@mary/color-fns";
 import { ImageFormat, StateManager } from "./types";
-import { AppBskyNotificationListNotifications } from "@atcute/client/lexicons";
+import {
+  AppBskyActorDefs,
+  AppBskyNotificationListNotifications,
+} from "@atcute/client/lexicons";
 
 const langs = localStorage.getItem("langs");
 const navigatorLangs = window.navigator.languages.map((lang) =>
@@ -21,11 +24,23 @@ export const fillMissingSettings = () => {
     localStorage.setItem("default-thumbnail-format", "webp");
   }
   if (!localStorage.getItem("show-non-following-replies-on-timeline")) {
-    localStorage.setItem("show-non-following-replies-on-timeline", "false");
+    localStorage.setItem("show-non-following-replies-on-timeline", "true");
+  }
+  if (
+    !localStorage.getItem("session-chosen") &&
+    localStorage.getItem("session")
+  ) {
+    const storedSessions = localStorage.getItem("session");
+    if (storedSessions) {
+      const sessions = JSON.parse(storedSessions);
+      localStorage.setItem("session-chosen", Object.keys(sessions)[0]);
+    }
   }
 };
 
 export const env: {
+  sessionsProfile: AppBskyActorDefs.ProfileViewDetailed[];
+  sessionChosen: string;
   languagesToNotTranslate: Set<string>;
   viewBlockedPosts: boolean;
   defaultFullsizeFormat: ImageFormat;
@@ -39,6 +54,8 @@ export const env: {
   contentLabels: any;
   feeds: any;
 } = {
+  sessionsProfile: undefined,
+  sessionChosen: localStorage.getItem("session-chosen"),
   languagesToNotTranslate: new Set(langs ? JSON.parse(langs) : navigatorLangs),
   viewBlockedPosts: localStorage.getItem("view-blocked-posts") === "true",
   defaultFullsizeFormat: localStorage.getItem(

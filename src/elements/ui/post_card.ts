@@ -8,9 +8,10 @@ import {
   getDidFromUri,
   getFediHandle,
   getPathFromUri,
+  getRkey,
   idChoose,
 } from "../utils/link_processing.ts";
-import { manager, rpc, privateKey } from "../../login";
+import { manager, rpc, privateKey, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { encodeQuery, processRichText } from "../utils/text_processing";
 import { formatDate, formatTimeDifference } from "../utils/date";
@@ -20,6 +21,15 @@ import { composerBox } from "./composer.ts";
 import { setPreloaded } from "../utils/preloaded_post.ts";
 import sanitizeHtml from "sanitize-html";
 import { ageDecrypt } from "../utils/encryption.ts";
+import { contextMenu } from "./context.ts";
+
+import dotsSVG from "../../svg/dots.svg?raw";
+import trashSVG from "../../svg/trash.svg?raw";
+import muteSVG from "../../svg/mute.svg?raw";
+import blockSVG from "../../svg/block.svg?raw";
+import { confirmDialog } from "./dialog.ts";
+import { blockUser, deletePost, muteUser } from "../utils/user_actions.ts";
+import { createTray } from "./tray.ts";
 
 const plural = {
   reply: "replies",
@@ -69,13 +79,13 @@ const updateInteraction = async (
     if (active) {
       await rpc.call("com.atproto.repo.createRecord", {
         data: {
+          repo: sessionData.did,
+          collection,
           record: {
             $type: collection,
             createdAt: new Date().toISOString(),
             subject: { cid: post.cid, uri: post.uri },
           },
-          collection,
-          repo: manager.session.did,
         },
       });
     } else {
@@ -615,6 +625,35 @@ export const postCard = (
         interactionButton("repost", post),
         interactionButton("like", post),
         interactionButton("quote", post),
+        elem("button", {
+          className: "interaction context-button",
+          innerHTML: dotsSVG,
+          onclick: (e) => {
+            e.stopPropagation();
+            contextMenu((e.target as HTMLElement).closest("button"), [
+              {
+                icon: trashSVG,
+                text: "Delete",
+                condition: author.did === sessionData.did,
+                important: true,
+                onclick: async () => deletePost(post, postElem),
+              },
+              {
+                icon: muteSVG,
+                text: "Mute",
+                condition: author.viewer && author.did !== sessionData.did,
+                onclick: async () => muteUser(author),
+              },
+              {
+                icon: blockSVG,
+                text: "Block",
+                condition: author.viewer && author.did !== sessionData.did,
+                important: true,
+                onclick: async () => blockUser(author),
+              },
+            ]);
+          },
+        }),
       ]),
     );
 

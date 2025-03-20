@@ -1,0 +1,59 @@
+@use "variables" as *;
+
+.context-menu {
+    $border-radius: 4px;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: $border-radius;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    z-index: 1000;
+    min-width: 160px;
+    font-size: calc($font-size * 0.95);
+    font-weight: 600;
+
+    .divider {
+        border-top: 1px solid $light-grey;
+        margin: 4px 0;
+    }
+
+    .item {
+        padding: 8px 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        .icon svg,
+        .icon img {
+            $size: calc($font-size * 1.25);
+            width: $size;
+            height: $size;
+        }
+
+        .icon img {
+            vertical-align: middle;
+            border-radius: calc($border-radius / 2);
+        }
+
+        .icon svg {
+            vertical-align: bottom;
+        }
+
+        &.important {
+            color: $red;
+        }
+
+        &:hover {
+            background-color: $very-light-grey;
+            &:first-child {
+                border-top-left-radius: $border-radius;
+                border-top-right-radius: $border-radius;
+            }
+            &:last-child {
+                border-bottom-left-radius: $border-radius;
+                border-bottom-right-radius: $border-radius;
+            }
+        }
+    }
+}

@@ -20,6 +20,7 @@
         flex-flow: row;
         gap: 4px;
         align-items: center;
+        cursor: pointer;
     }
     a {
         position: relative;
@@ -30,9 +31,15 @@
         height: 100%;
         max-width: unset;
 
+        $icon-size: 24px;
         svg {
-            $height: 24px;
-            top: ($font-size - $height) * 0.5;
+            top: ($font-size - $icon-size) * 0.5;
+        }
+
+        img {
+            width: $icon-size;
+            height: $icon-size;
+            border-radius: calc($border-radius / 2);
         }
 
         &.active {
@@ -78,7 +85,8 @@
             justify-content: center;
             flex-grow: 1;
         }
-        a svg {
+        a svg,
+        a img {
             transform: scale(1.1);
         }
         #notification-count {

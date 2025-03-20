@@ -6,6 +6,7 @@ import {
   createSwipeAction,
   pullToRefresh,
 } from "./elements/utils/swipe_manager";
+import { AtpSessionData } from "@atcute/client";
 
 document.addEventListener("click", (e) => {
   const anchor =
@@ -64,6 +65,17 @@ if (path.length !== 1 && path.endsWith("/")) {
 updateColors();
 
 fillMissingSettings();
+{
+  const sessions = localStorage.getItem("session");
+  if (sessions) {
+    const parsedSessions = JSON.parse(sessions);
+    env.sessionsProfile = (
+      await rpc.get("app.bsky.actor.getProfiles", {
+        params: { actors: Object.keys(parsedSessions) },
+      })
+    ).data.profiles;
+  }
+}
 await login();
 loadNavbar();
 updatePage(false);

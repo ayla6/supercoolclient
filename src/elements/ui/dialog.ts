@@ -31,12 +31,25 @@ export const popupBox = (
   };
 };
 
-export const confirmDialog = async (prompt: string, confirm: string) => {
+export const confirmDialog = async (
+  prompt: string,
+  confirm: string,
+  additionalText?: string,
+) => {
   return await new Promise<boolean>((resolve) => {
     const content = elem("div", { className: "popup" }, null, [
-      elem("span", {
-        textContent: prompt,
-      }),
+      elem("div", { className: "prompt-area" }, undefined, [
+        elem("span", {
+          className: "prompt",
+          textContent: prompt,
+        }),
+        additionalText
+          ? elem("span", {
+              className: "additional-text",
+              textContent: additionalText,
+            })
+          : null,
+      ]),
       elem("div", { className: "dialog-options" }, null, [
         elem("button", {
           textContent: "Cancel",

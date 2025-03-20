@@ -59,7 +59,7 @@ export const editProfileDialog = async () => {
           onclick: async () => {
             await rpc.call("com.atproto.repo.putRecord", {
               data: {
-                repo: manager.session.did,
+                repo: sessionData.did,
                 rkey: "self",
                 collection: "app.bsky.actor.profile",
                 record: {

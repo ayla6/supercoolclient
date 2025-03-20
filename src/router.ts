@@ -69,7 +69,7 @@ const matchRoute = (path: string[]) => {
   return null;
 };
 
-export const updatePage = async (useCache: boolean) => {
+export const updatePage = async (useCache: boolean = false) => {
   {
     const container = document.getElementById("container");
     document.body.removeChild(container);
@@ -84,7 +84,10 @@ export const updatePage = async (useCache: boolean) => {
   document.body.removeAttribute("style");
 
   navbar.querySelector(".active")?.classList.remove("active");
-  navbar.querySelector(`a[href="${currentPath}"]`)?.classList.add("active");
+  (currentSplitPath[0] === sessionData.did
+    ? navbar.querySelector("#profile-button")
+    : navbar.querySelector(`a[href="${currentPath}"]`)
+  )?.classList.add("active");
 
   window.scrollTo({ top: 0 });
 

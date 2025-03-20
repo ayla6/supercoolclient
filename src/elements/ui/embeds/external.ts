@@ -40,7 +40,7 @@ export const loadEmbedExternal = (embed: AppBskyEmbedExternal.View) => {
               textContent: embed.external.description,
               className: "description",
             })
-          : undefined,
+          : null,
         elem("span", {
           textContent: host,
           className: "small",

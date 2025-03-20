@@ -7,7 +7,7 @@ export const stickyHeader = (title: string, returnButton: boolean = true) => {
           className: "return-button",
           onclick: () => history.back(),
         })
-      : undefined,
+      : null,
     elem("span", { textContent: title }),
   ]);
 };

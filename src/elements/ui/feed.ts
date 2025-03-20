@@ -176,6 +176,7 @@ export const hydratePostFeed = async (
             true,
           );
           rearrangedFeed.set(parentUri, true);
+          posts[postUri].post = postHousing.post;
           posts[parentUri].reply = posts[postUri];
         } else {
           if (
@@ -183,22 +184,25 @@ export const hydratePostFeed = async (
             postHousing.reply.parent.author?.viewer.following ||
             postHousing.reply.parent.author.did === sessionData.did
           ) {
-            const reply = (
-              postHousing.reply.parent.record as AppBskyFeedPost.Record
-            )?.reply;
-            const record = {
-              post: postHousing.reply.parent,
-            } as AppBskyFeedDefs.FeedViewPost;
-            if (reply) {
-              record.reply = reply as any;
-              if (record.reply.parent) {
-                record.reply.parent.$type = "app.bsky.feed.defs#postView";
-                (record.reply.parent as any).author =
-                  postHousing.reply.grandparentAuthor;
-              }
+            let reply: AppBskyFeedDefs.PostView | AppBskyFeedDefs.FeedViewPost =
+              postHousing.reply.parent;
+            if ((reply.record as AppBskyFeedPost.Record).reply?.parent) {
+              reply = {
+                post: postHousing.reply.parent,
+                reply: {
+                  root: postHousing.reply.root,
+                  parent: {
+                    $type: "app.bsky.feed.defs#postView",
+                    author: postHousing.reply.grandparentAuthor,
+                    uri: (reply.record as AppBskyFeedPost.Record).reply.parent
+                      .uri,
+                  } as any,
+                },
+              } as AppBskyFeedDefs.FeedViewPost;
             }
+            posts[postUri].post = postHousing.post;
             posts[parentUri] = {
-              post: postHousing.reply.parent,
+              post: reply,
               reply: posts[postUri],
             };
             rearrangedFeed.delete(parentUri);

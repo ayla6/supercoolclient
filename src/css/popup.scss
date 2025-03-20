@@ -7,7 +7,7 @@
     margin: auto;
     margin-top: 50vh;
     max-width: 600px;
-    padding: 8px;
+    padding: 12px;
     width: max-content;
 
     // Display
@@ -27,7 +27,8 @@
         display: flex;
         flex-flow: row wrap;
         gap: 8px;
-        justify-content: space-evenly;
+        justify-content: right;
+        margin-top: auto;
     }
 
     .confirm-delete {
@@ -49,12 +50,38 @@
         min-width: 300px;
         max-width: 100%;
     }
+
+    .prompt-area {
+        display: flex;
+        flex-flow: column;
+        span {
+            margin-bottom: 0.5em;
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    .prompt {
+        font-size: calc($font-size * 1.25);
+        font-weight: 600;
+    }
+}
+
+@media (min-width: 920px) {
+    .popup {
+        min-width: 200px;
+    }
 }
 
 @media (max-width: 920px) {
     .popup {
         $font-size: 16px;
         font-size: $font-size;
+
+        .prompt {
+            font-size: calc($font-size * 1.25);
+        }
 
         button {
             padding: 8px 24px;

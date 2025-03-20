@@ -1,3 +1,4 @@
+import { rpc } from "../../login";
 import { env } from "../../settings";
 
 export const idChoose = ({ handle, did }: { did: string; handle: string }) =>
@@ -17,6 +18,12 @@ export const getUriFromSplitPath = (
   [did, , postId]: string[],
   type: string = "app.bsky.feed.post",
 ) => `at://${did}/${type}/${postId}`;
+
+export const getUriFromUnresolvedSplitPath = async (
+  [handle, , postId]: string[],
+  type: string = "app.bsky.feed.post",
+) =>
+  `at://${(await rpc.get("com.atproto.identity.resolveHandle", { params: { handle } })).data.did}/${type}/${postId}`;
 
 export const cutOutThePath = (uri: string) => {
   const slashIndex = uri.indexOf("/", 8);
