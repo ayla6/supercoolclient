@@ -416,7 +416,7 @@ export const postCard = (
     const replyTo = postHousing.reply.parent;
     const did = getDidFromUri(replyTo.uri);
     const atId =
-      replyTo.$type === "app.bsky.feed.defs#postView"
+      replyTo.$type === "app.bsky.feed.defs#postView" && replyTo.author
         ? idChoose(replyTo.author)
         : did;
     card.appendChild(
