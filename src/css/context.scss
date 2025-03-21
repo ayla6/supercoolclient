@@ -2,6 +2,8 @@
 
 .context-menu {
     $border-radius: 4px;
+    display: flex;
+    flex-direction: column;
     position: absolute;
     background-color: #fff;
     border: 1px solid #ccc;
@@ -9,7 +11,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 0;
     z-index: 1000;
-    min-width: 160px;
+    min-width: 180px;
     font-size: calc($font-size * 0.95);
     font-weight: 600;
 
@@ -24,7 +26,6 @@
         display: flex;
         align-items: center;
         gap: 4px;
-        width: max-content;
         max-width: 50vw;
         user-select: none;
 
