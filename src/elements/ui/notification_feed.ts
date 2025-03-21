@@ -12,6 +12,7 @@ import favSvg from "../../svg/fav.svg?raw";
 import repostSvg from "../../svg/repost.svg?raw";
 import userSvg from "../../svg/user.svg?raw";
 import replySvg from "../../svg/reply.svg?raw";
+import atSvg from "../../svg/at.svg?raw";
 import quoteSvg from "../../svg/quote.svg?raw";
 import { postCard } from "./post_card";
 import { updateNotificationIcon } from "./navbar";
@@ -22,7 +23,8 @@ const notificationIcons = {
   repost: repostSvg,
   follow: userSvg,
   reply: replySvg,
-  mention: quoteSvg,
+  mention: atSvg,
+  quote: quoteSvg,
 };
 
 const notificationMessages = {
@@ -31,6 +33,7 @@ const notificationMessages = {
   follow: " followed you",
   reply: " replied to your post",
   mention: " mentioned you in a post",
+  quote: " quoted you in a post",
 };
 
 const loadNotifications = async (params: {
