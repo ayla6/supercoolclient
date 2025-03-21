@@ -194,8 +194,6 @@ export const settingsRoute = async (
             "select",
             {
               id: "default-fullsize-format",
-              className: "checkbox",
-              value: localStorage.getItem("default-fullsize-format") || "webp",
               onclick: (e) => e.stopPropagation(),
               onchange: (e) => {
                 localStorage.setItem(
@@ -215,7 +213,11 @@ export const settingsRoute = async (
               elem("option", { value: "gif", textContent: "GIF" }),
               elem("option", { value: "bmp", textContent: "BMP" }),
               elem("option", { value: "heic", textContent: "HEIC" }),
-            ],
+            ].map((opt) => {
+              if (opt.value === (env.defaultFullsizeFormat || "avif"))
+                opt.selected = true;
+              return opt;
+            }),
           ),
         ]),
         elem("div", { className: "setting" }, undefined, [
@@ -227,8 +229,6 @@ export const settingsRoute = async (
             "select",
             {
               id: "default-thumbnail-format",
-              className: "checkbox",
-              value: localStorage.getItem("default-thumbnail-format") || "webp",
               onclick: (e) => e.stopPropagation(),
               onchange: (e) => {
                 localStorage.setItem(
@@ -248,9 +248,189 @@ export const settingsRoute = async (
               elem("option", { value: "gif", textContent: "GIF" }),
               elem("option", { value: "bmp", textContent: "BMP" }),
               elem("option", { value: "heic", textContent: "HEIC" }),
-            ],
+            ].map((opt) => {
+              if (opt.value === (env.defaultThumbnailFormat || "webp"))
+                opt.selected = true;
+              return opt;
+            }),
           ),
         ]),
+        ...(() => {
+          const fixDisplay = () => {
+            if (env.translate.type === "libretranslate") {
+              apiKeySetting.removeAttribute("style");
+            } else {
+              apiKeySetting.style.display = "none";
+            }
+
+            if (env.translate.type === "simplytranslate") {
+              simplyTranslateEngineSetting.removeAttribute("style");
+            } else {
+              simplyTranslateEngineSetting.style.display = "none";
+            }
+          };
+
+          const translatorTitle = elem("span", {
+            textContent: "Translation service",
+            className: "small-section-title",
+          });
+
+          const typeLabel = elem("label", {
+            textContent: "Type:",
+            htmlFor: "translator-type",
+          });
+
+          const typeSelect = elem(
+            "select",
+            {
+              id: "translator-type",
+              onclick: (e) => e.stopPropagation(),
+              onchange: (e) => {
+                const type = typeSelect.value as any;
+                localStorage.setItem("translator-type", type);
+                env.translate.type = type;
+
+                fixDisplay();
+
+                const translatorUrl = {
+                  url: "https://translate.google.com/?sl=auto&tl=en&text=",
+                  libretranslate: "https://libretranslate.com/translate/",
+                  simplytranslate: "https://simplytranslate.org/api/translate",
+                }[type];
+
+                const urlInput = document.getElementById(
+                  "translator-url",
+                ) as HTMLInputElement;
+                urlInput.value = translatorUrl;
+                localStorage.setItem("translator-url", translatorUrl);
+                env.translate.url = translatorUrl;
+              },
+            },
+            undefined,
+            [
+              elem("option", { value: "url", textContent: "URL" }),
+              elem("option", {
+                value: "libretranslate",
+                textContent: "LibreTranslate",
+              }),
+              elem("option", {
+                value: "simplytranslate",
+                textContent: "SimplyTranslate",
+              }),
+            ].map((opt) => {
+              if (opt.value === (env.translate.type || "url"))
+                opt.selected = true;
+              return opt;
+            }),
+          );
+
+          const typeSetting = elem("div", { className: "setting" }, undefined, [
+            typeLabel,
+            typeSelect,
+          ]);
+
+          const urlLabel = elem("label", {
+            textContent: "URL:",
+            htmlFor: "translator-url",
+          });
+
+          const urlInputElem = elem("input", {
+            type: "text",
+            id: "translator-url",
+            className: "text-input",
+            value: env.translate.url,
+            onchange: (e) => {
+              const url = (urlInputElem as HTMLInputElement).value;
+              localStorage.setItem("translator-url", url);
+              env.translate.url = url;
+            },
+          });
+
+          const urlSetting = elem("div", { className: "setting" }, undefined, [
+            urlLabel,
+            urlInputElem,
+          ]);
+
+          const apiKeyLabel = elem("label", {
+            textContent: "API Key:",
+            htmlFor: "translator-api-key",
+          });
+
+          const apiKeyInputElem = elem("input", {
+            type: "text",
+            id: "translator-api-key",
+            className: "text-input",
+            value: env.translate.apiKey,
+            onchange: (e) => {
+              const apiKey = (apiKeyInputElem as HTMLInputElement).value;
+              localStorage.setItem("translator-api-key", apiKey);
+              env.translate.apiKey = apiKey;
+            },
+          });
+
+          const apiKeySetting = elem(
+            "div",
+            { className: "setting" },
+            undefined,
+            [apiKeyLabel, apiKeyInputElem],
+          );
+
+          const simplyTranslateEngineLabel = elem("label", {
+            textContent: "SimplyTranslate Engine:",
+            htmlFor: "simplytranslate-engine",
+          });
+
+          const simplyTranslateEngineSelect = elem(
+            "select",
+            {
+              id: "simplytranslate-engine",
+              onclick: (e) => e.stopPropagation(),
+              onchange: (e) => {
+                const engine = simplyTranslateEngineSelect.value;
+                localStorage.setItem("simplytranslate-engine", engine);
+                env.translate.simplyTranslateEngine = engine as any;
+              },
+            },
+            undefined,
+            [
+              elem("option", {
+                value: "google",
+                textContent: "Google Translate",
+              }),
+              elem("option", {
+                value: "iciba",
+                textContent: "iCIBA",
+              }),
+              elem("option", {
+                value: "reverso",
+                textContent: "Reverso",
+              }),
+            ].map((opt) => {
+              if (
+                opt.value === (env.translate.simplyTranslateEngine || "google")
+              )
+                opt.selected = true;
+              return opt;
+            }),
+          );
+
+          const simplyTranslateEngineSetting = elem(
+            "div",
+            { className: "setting" },
+            undefined,
+            [simplyTranslateEngineLabel, simplyTranslateEngineSelect],
+          );
+
+          fixDisplay();
+
+          return [
+            translatorTitle,
+            typeSetting,
+            urlSetting,
+            apiKeySetting,
+            simplyTranslateEngineSetting,
+          ];
+        })(),
       ]),
     ),
     elem(

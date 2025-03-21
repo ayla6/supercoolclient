@@ -53,6 +53,12 @@ export const env: {
   };
   contentLabels: any;
   feeds: any;
+  translate: {
+    type: "url" | "libretranslate" | "simplytranslate";
+    url: string;
+    apiKey: string;
+    simplyTranslateEngine: "google" | "iciba" | "reverso";
+  };
 } = {
   sessionsProfile: undefined,
   sessionChosen: localStorage.getItem("session-chosen"),
@@ -74,6 +80,15 @@ export const env: {
   latestNotifications: undefined,
   contentLabels: undefined,
   feeds: undefined,
+  translate: {
+    type: (localStorage.getItem("translator-type") as any) ?? "simplytranslate",
+    url:
+      localStorage.getItem("translator-url") ??
+      "https://simplytranslate.org/api/translate",
+    apiKey: localStorage.getItem("translator-api-key") ?? "",
+    simplyTranslateEngine:
+      (localStorage.getItem("simplytranslate-engine") as any) ?? "google",
+  },
 };
 
 export const updateColors = () => {

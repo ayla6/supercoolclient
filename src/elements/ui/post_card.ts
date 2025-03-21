@@ -30,6 +30,7 @@ import blockSVG from "../../svg/block.svg?raw";
 import { confirmDialog } from "./dialog.ts";
 import { blockUser, deletePost, muteUser } from "../utils/user_actions.ts";
 import { createTray } from "./tray.ts";
+import { translate } from "../utils/translate.ts";
 
 const plural = {
   reply: "replies",
@@ -472,26 +473,24 @@ export const postCard = (
       labelArea.style.display = "none";
     }
   }
+  let textContent: HTMLDivElement;
   if (record.text) {
     if (notBridgyPost && notLongText) {
-      content.appendChild(
-        elem(
-          "div",
-          { className: "text-content" },
-          processRichText(record.text, record.facets),
-        ),
+      textContent = elem(
+        "div",
+        { className: "text-content" },
+        processRichText(record.text, record.facets),
       );
     } else {
       const saferText = sanitizeHtml(
         notLongText ? record["bridgyOriginalText"] : record["longText"],
       ).replaceAll("https://bsky.brid.gy/r/https://bsky.app/profile/", "/");
-      content.appendChild(
-        elem("div", {
-          className: "text-content",
-          innerHTML: saferText,
-        }),
-      );
+      textContent = elem("div", {
+        className: "text-content",
+        innerHTML: saferText,
+      });
     }
+    content.appendChild(textContent);
   }
   if (post.embed) {
     const embeds = handleEmbed(post.embed as any);
@@ -586,11 +585,40 @@ export const postCard = (
     record.langs?.[0] &&
     !env.languagesToNotTranslate.has(record.langs[0])
   ) {
-    translateButton = elem("a", {
-      className: "small-link",
-      textContent: "Translate",
-      href: "https://translate.google.com/?sl=auto&tl=en&text=" + record.text,
-    });
+    translateButton =
+      env.translate.type === "url"
+        ? elem("a", {
+            className: "small-link",
+            textContent: "Translate",
+            href: env.translate.url + record.text,
+            target: "_blank",
+          })
+        : elem("a", {
+            className: "small-link",
+            textContent: "Translate",
+            onclick: async (e) => {
+              const result = await translate(textContent.textContent);
+              if (result) {
+                textContent.after(
+                  elem("div", { className: "translated-area" }, undefined, [
+                    elem("div", {
+                      className: "translated-with",
+                      textContent:
+                        "Translated with " +
+                        (result.via
+                          ? `${result.engine} via ${result.via}`
+                          : result.engine),
+                    }),
+                    elem("div", {
+                      className: "text-content",
+                      textContent: result.text,
+                    }),
+                  ]),
+                );
+                (e.target as HTMLAnchorElement).classList.add("disabled");
+              }
+            },
+          });
     if (!cfg.isFullView) card.appendChild(translateButton);
   }
 

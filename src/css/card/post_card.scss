@@ -36,7 +36,7 @@
 .post-content {
     display: flex;
     flex-flow: column;
-    gap: 8px;
+    gap: 4px;
 }
 
 .text-content {
@@ -155,6 +155,16 @@
     .post-content > .text-content {
         font-family: $serif;
         font-size: 18px;
+    }
+
+    .post-content > .translated-area {
+        > .translated-with {
+            font-size: 12px;
+        }
+        > .text-content {
+            font-family: $serif;
+            font-size: 16px;
+        }
     }
 
     .interaction {
