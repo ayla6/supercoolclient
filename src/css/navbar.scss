@@ -23,6 +23,7 @@
         cursor: pointer;
     }
     a {
+        user-select: none;
         position: relative;
         max-width: fit-content;
         padding: 0 12px;
@@ -40,6 +41,7 @@
             width: $icon-size;
             height: $icon-size;
             border-radius: calc($border-radius / 2);
+            pointer-events: none;
         }
 
         &.active {

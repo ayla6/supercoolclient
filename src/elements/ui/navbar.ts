@@ -99,9 +99,15 @@ export const loadNavbar = () => {
           innerHTML: `<img src="${sessionData.avatar}"><span>Profile</span>`,
           onmousedown: (e: MouseEvent) => {
             const target = (e.target as HTMLElement).closest("a");
-            const pressTimer = setTimeout(() => {
+            let pressTimer: number;
+
+            const showContextMenu = () => {
               profileContextMenu(target);
-            }, 500);
+            };
+
+            const startTimer = () => {
+              pressTimer = setTimeout(showContextMenu, 500);
+            };
 
             const clearTimer = () => {
               clearTimeout(pressTimer);
@@ -109,6 +115,29 @@ export const loadNavbar = () => {
 
             target.addEventListener("mouseup", clearTimer, { once: true });
             target.addEventListener("mouseleave", clearTimer, { once: true });
+
+            startTimer();
+          },
+          ontouchstart: (e: TouchEvent) => {
+            const target = (e.target as HTMLElement).closest("a");
+            let pressTimer: number;
+
+            const showContextMenu = () => {
+              profileContextMenu(target);
+            };
+
+            const startTimer = () => {
+              pressTimer = setTimeout(showContextMenu, 500);
+            };
+
+            const clearTimer = () => {
+              clearTimeout(pressTimer);
+            };
+
+            target.addEventListener("touchend", clearTimer, { once: true });
+            target.addEventListener("touchcancel", clearTimer, { once: true });
+
+            startTimer();
           },
           onclick: (e: MouseEvent) => {
             history.pushState(null, "", `/${sessionData.did}`);
