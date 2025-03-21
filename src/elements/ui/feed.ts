@@ -176,7 +176,6 @@ export const hydratePostFeed = async (
             true,
           );
           rearrangedFeed.set(parentUri, true);
-          posts[postUri].post = postHousing.post;
           posts[parentUri].reply = posts[postUri];
         } else {
           if (
@@ -200,7 +199,6 @@ export const hydratePostFeed = async (
                 },
               } as AppBskyFeedDefs.FeedViewPost;
             }
-            posts[postUri].post = postHousing.post;
             posts[parentUri] = {
               post: reply,
               reply: posts[postUri],
@@ -225,7 +223,10 @@ export const hydratePostFeed = async (
       );
       let currentPost = posts[postUri];
       while (currentPost.reply) {
-        const replyPost = currentPost.reply.post;
+        const replyPost =
+          "post" in currentPost.reply.post
+            ? currentPost.reply.post.post
+            : currentPost.reply.post;
         output.appendChild(
           postCard(replyPost, {
             hasReplies: Boolean(currentPost.reply.reply),
