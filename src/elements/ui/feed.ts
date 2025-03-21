@@ -53,8 +53,10 @@ const loadBlockedPosts = async (
     if (
       (embedType === "app.bsky.embed.record#view" ||
         embedType === "app.bsky.embed.recordWithMedia#view") &&
-      (post.embed as AppBskyEmbedRecord.View).record.$type ===
-        "app.bsky.embed.record#viewBlocked"
+      ((post.embed as AppBskyEmbedRecord.View).record.$type ===
+        "app.bsky.embed.record#viewBlocked" ||
+        (post.embed as AppBskyEmbedRecord.View).record.$type ===
+          "app.bsky.embed.record#viewDetached")
     ) {
       postsToLoad.add((post.embed as AppBskyEmbedRecord.View).record.uri);
       postsWithBlockedEmbeds.push(post);
@@ -75,10 +77,14 @@ const loadBlockedPosts = async (
     }
   }
   for (const post of postsWithBlockedEmbeds) {
-    post.embed["isLoadedBlockedPost"] = true;
-    (post.embed as AppBskyEmbedRecord.View).record = loadedPosts[
-      (post.embed as AppBskyEmbedRecord.View).record.uri
-    ] as any;
+    const embed = post.embed as AppBskyEmbedRecord.View;
+    const blockedPost = loadedPosts[embed.record.uri] as any;
+    if (!blockedPost) continue;
+    post.embed["isLoadedBlockedPost"] =
+      embed.record.$type === "app.bsky.embed.record#viewBlocked";
+    post.embed["isLoadedDetachedPost"] =
+      embed.record.$type === "app.bsky.embed.record#viewDetached";
+    (post.embed as AppBskyEmbedRecord.View).record = blockedPost;
   }
 };
 

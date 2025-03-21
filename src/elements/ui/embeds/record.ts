@@ -8,7 +8,8 @@ import { rpcPublic } from "../../../login";
 export const loadEmbedRecord = (
   embed:
     | AppBskyEmbedRecord.View
-    | { isLoadedBlockedPost: true; record: AppBskyFeedDefs.PostView },
+    | { isLoadedBlockedPost: true; record: AppBskyFeedDefs.PostView }
+    | { isLoadedDetachedPost: true; record: AppBskyFeedDefs.PostView },
 ) => {
   const record = embed.record;
   if ("$type" in record) {
@@ -48,8 +49,9 @@ export const loadEmbedRecord = (
         textContent: text,
       });
       if (
-        record.$type === "app.bsky.embed.record#viewBlocked" &&
-        env.viewBlockedPosts
+        env.viewBlockedPosts &&
+        (record.$type === "app.bsky.embed.record#viewBlocked" ||
+          record.$type === "app.bsky.embed.record#viewDetached")
       ) {
         setTimeout(async () => {
           let post = (
@@ -57,17 +59,29 @@ export const loadEmbedRecord = (
               params: { uris: [record.uri] },
             })
           ).data.posts[0];
+          if (!post) return;
           simpleCard.replaceWith(
-            postCard(post, { isEmbed: true, someBlocking: true }),
+            postCard(post, {
+              isEmbed: true,
+              someBlocking:
+                record.$type === "app.bsky.embed.record#viewBlocked",
+              detachedPost:
+                record.$type === "app.bsky.embed.record#viewDetached",
+            }),
           );
         }, 0);
       }
       return simpleCard;
     }
-  } else if ("isLoadedBlockedPost" in embed) {
+  } else if (
+    "isLoadedBlockedPost" in embed ||
+    "isLoadedDetachedPost" in embed
+  ) {
     return postCard(record as AppBskyFeedDefs.PostView, {
       isEmbed: true,
-      someBlocking: true,
+      someBlocking: "isLoadedBlockedPost" in embed && embed.isLoadedBlockedPost,
+      detachedPost:
+        "isLoadedDetachedPost" in embed && embed.isLoadedDetachedPost,
     });
   }
 };
