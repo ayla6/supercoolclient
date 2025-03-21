@@ -11,6 +11,16 @@ export const unsignedHomeRoute = async (
 
   const feedsData = [
     {
+      displayName: "Top moots + Skibidi",
+      feed: "at://did:plc:avlpu4l2j5u3johint7tqrmu/app.bsky.feed.generator/aaamhmkkerjsk",
+      nsid: "app.bsky.feed.getFeed" as feedNSID,
+      params: {
+        feed: "at://did:plc:avlpu4l2j5u3johint7tqrmu/app.bsky.feed.generator/aaamhmkkerjsk",
+      },
+    },
+  ];
+  /*[
+    {
       displayName: "Discover",
       feed: "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.generator/whats-hot",
       nsid: "app.bsky.feed.getFeed" as feedNSID,
@@ -18,7 +28,7 @@ export const unsignedHomeRoute = async (
         feed: "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.generator/whats-hot",
       },
     },
-  ];
+    ];*/
 
   container.append(
     sideBar,
