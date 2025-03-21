@@ -615,7 +615,7 @@ export const postCard = (
                     }),
                   ]),
                 );
-                (e.target as HTMLAnchorElement).classList.add("disabled");
+                (e.target as HTMLAnchorElement).remove();
               }
             },
           });
