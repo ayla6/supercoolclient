@@ -294,7 +294,7 @@ export const settingsRoute = async (
 
                 const translatorUrl = {
                   url: "https://translate.google.com/?sl=auto&tl=en&text=",
-                  libretranslate: "https://libretranslate.com/translate/",
+                  libretranslate: "https://translate.disroot.org/",
                   simplytranslate: "https://simplytranslate.org/api/translate",
                 }[type];
 

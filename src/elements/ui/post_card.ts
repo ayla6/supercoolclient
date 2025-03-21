@@ -31,6 +31,7 @@ import { confirmDialog } from "./dialog.ts";
 import { blockUser, deletePost, muteUser } from "../utils/user_actions.ts";
 import { createTray } from "./tray.ts";
 import { translate } from "../utils/translate.ts";
+import { language_codes } from "../utils/language_codes.ts";
 
 const plural = {
   reply: "replies",
@@ -599,12 +600,21 @@ export const postCard = (
             onclick: async (e) => {
               const result = await translate(textContent.textContent);
               if (result) {
+                const source_two_digits = result.source.slice(0, 2);
+                const source =
+                  result.source &&
+                  (language_codes.find(
+                    (language) => language.code === source_two_digits,
+                  ).name ??
+                    result.source);
                 textContent.after(
                   elem("div", { className: "translated-area" }, undefined, [
                     elem("div", {
                       className: "translated-with",
                       textContent:
-                        "Translated with " +
+                        "Translated " +
+                        (result.source ? `from ${source}` : "") +
+                        " with " +
                         (result.via
                           ? `${result.engine} via ${result.via}`
                           : result.engine),

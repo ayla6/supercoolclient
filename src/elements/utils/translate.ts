@@ -29,6 +29,7 @@ export const translate = async (text: string) => {
       return;
     }
     return {
+      source: json.detectedLanguage?.language,
       engine: "LibreTranslate",
       text: json.translatedText,
     };
@@ -49,6 +50,7 @@ export const translate = async (text: string) => {
       return;
     }
     return {
+      source: json.source_language,
       engine: { google: "Google Translate", reverso: "Reverso", icib: "iCIB" }[
         engine
       ],
