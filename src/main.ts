@@ -66,12 +66,13 @@ updateColors();
 
 fillMissingSettings();
 {
-  const sessions = localStorage.getItem("session");
-  if (sessions) {
-    const parsedSessions = JSON.parse(sessions);
+  const sessions =
+    localStorage.getItem("session") &&
+    JSON.parse(localStorage.getItem("session"));
+  if (sessions && !sessions["accessJwt"]) {
     env.sessionsProfile = (
       await rpc.get("app.bsky.actor.getProfiles", {
-        params: { actors: Object.keys(parsedSessions) },
+        params: { actors: Object.keys(sessions) },
       })
     ).data.profiles;
   }

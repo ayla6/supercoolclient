@@ -108,16 +108,17 @@ export const login = async (credentials?: {
     sessionData &&
     (await rpc.get("app.bsky.actor.getPreferences", {})).data.preferences;
 
-  env.contentLabels = preferences
-    .filter((e) => {
-      return e.$type === "app.bsky.actor.defs#contentLabelPref";
-    })
-    .reduce((acc, label) => {
-      if (label.label && label.visibility) {
-        acc[label.label] = label.visibility;
-      }
-      return acc;
-    }, {});
+  if (preferences)
+    env.contentLabels = preferences
+      .filter((e) => {
+        return e.$type === "app.bsky.actor.defs#contentLabelPref";
+      })
+      .reduce((acc, label) => {
+        if (label.label && label.visibility) {
+          acc[label.label] = label.visibility;
+        }
+        return acc;
+      }, {});
 
   env.feeds = preferences?.find((e) => {
     return e.$type === "app.bsky.actor.defs#savedFeedsPrefV2";

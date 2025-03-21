@@ -84,7 +84,7 @@ export const updatePage = async (useCache: boolean = false) => {
   document.body.removeAttribute("style");
 
   navbar.querySelector(".active")?.classList.remove("active");
-  (currentSplitPath[0] === sessionData.did
+  (currentSplitPath[0] === sessionData?.did
     ? navbar.querySelector("#profile-button")
     : navbar.querySelector(`a[href="${currentPath}"]`)
   )?.classList.add("active");
