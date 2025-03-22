@@ -41,6 +41,10 @@
         &.accent-card {
             @include accent-card;
         }
+
+        /*&:hover:not(:has(.embeds:hover)) {
+            background-color: $lighter-grey;
+        }*/
     }
 
     &.clickable .card {
