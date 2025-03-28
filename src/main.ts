@@ -6,7 +6,6 @@ import {
   createSwipeAction,
   pullToRefresh,
 } from "./elements/utils/swipe_manager";
-import { AtpSessionData } from "@atcute/client";
 
 document.addEventListener("click", (e) => {
   const anchor =

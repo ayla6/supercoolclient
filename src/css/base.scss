@@ -132,9 +132,9 @@ button {
         height: 27px;
         padding: 0;
     }
-}
-button.active {
-    background-color: var(--accent-color);
+    &.active {
+        background-color: var(--accent-color);
+    }
 }
 
 .card-holder .avatar-holder,

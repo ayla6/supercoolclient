@@ -10,6 +10,7 @@ import {
 import { elem } from "../utils/elem";
 import { hydrateFeed } from "./feed";
 import { pullToRefresh } from "../utils/swipe_manager";
+import { cache } from "../../router";
 
 export const createFeedManager = (
   contentHolder: HTMLElement,
@@ -69,7 +70,7 @@ export const createFeedManager = (
     let onscrollFunc: OnscrollFunction;
     window.onscroll = null;
 
-    const currentFeedState = feedState[feed.feed];
+    let currentFeedState = feedState[feed.feed];
     const headerEnd =
       document.querySelector(".profile-header")?.clientHeight + 10;
 
@@ -109,10 +110,16 @@ export const createFeedManager = (
       feedState[feed.feed] = { content, onscrollFunc, scroll: scrollTop };
       if (!currentFeedState) oldContent.removeAttribute("style");
       window.onscroll = onscrollFunc;
+      currentFeedState = feedState[feed.feed];
+    } else {
+      window.onscroll = currentFeedState.onscrollFunc;
     }
+    if (cache.get(window.location.pathname))
+      cache.get(window.location.pathname).onscroll =
+        currentFeedState.onscrollFunc;
     window.scrollTo({ top: scrollTop });
 
-    const content = feedState[feed.feed].content;
+    const content = currentFeedState.content;
     contentHolder.replaceChild(content, oldContent);
     oldContent.remove();
     loadedFeed = feed.feed;
