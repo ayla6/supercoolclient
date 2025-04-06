@@ -16,6 +16,8 @@ import { beingLoadedSplitPath, profileRedirect } from "../router";
 import { RouteOutput } from "../types";
 import { preloadedPost, setPreloaded } from "../elements/utils/preloaded_post";
 import { env } from "../settings";
+import { tryCatch } from "../elements/utils/trycatch";
+import { createTray } from "../elements/ui/tray";
 
 const MAX_PARENT_HEIGHT = 81;
 
@@ -379,9 +381,30 @@ export const postRoute = async (
     container.append(stickyHeader("Post"), loadingContent);
   }
 
-  let { data: postThread } = await rpc.get("app.bsky.feed.getPostThread", {
-    params: { uri, parentHeight: MAX_PARENT_HEIGHT },
-  });
+  let postThread: AppBskyFeedGetPostThread.Output;
+
+  let { data, error } = await tryCatch(
+    rpc.get("app.bsky.feed.getPostThread", {
+      params: { uri, parentHeight: MAX_PARENT_HEIGHT },
+    }),
+  );
+
+  if (error) {
+    if (error.message.startsWith("NotFound")) {
+      postThread = {
+        thread: {
+          $type: "app.bsky.feed.defs#notFoundPost",
+          notFound: true,
+          uri,
+        },
+      };
+    } else {
+      createTray(error.message);
+    }
+  } else {
+    postThread = data.data;
+  }
+
   if (
     env.viewBlockedPosts &&
     postThread.thread.$type === "app.bsky.feed.defs#blockedPost"
@@ -412,6 +435,8 @@ export const postRoute = async (
         })
       ).data.posts[0];
     }
+  } else if (postThread.thread.$type === "app.bsky.feed.defs#notFoundPost") {
+    title = `Not Found — SuperCoolClient`;
   }
 
   if (currentSplitPath !== beingLoadedSplitPath) return;

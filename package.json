@@ -12,24 +12,24 @@
   "license": "ISC",
   "devDependencies": {
     "jsr": "^0.13.4",
-    "sass-embedded": "^1.86.0",
-    "vite": "^5.4.14",
+    "sass-embedded": "^1.86.3",
+    "vite": "^5.4.17",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-raw": "^1.0.3"
   },
   "dependencies": {
     "@atcute/bluemoji": "^1.0.4",
-    "@atcute/bluesky": "^1.0.14",
+    "@atcute/bluesky": "^1.0.15",
     "@atcute/bluesky-richtext-builder": "^1.0.2",
     "@atcute/bluesky-richtext-parser": "^1.0.7",
     "@atcute/bluesky-richtext-segmenter": "^1.0.5",
     "@atcute/bluesky-threading": "^3.0.1",
-    "@atcute/client": "^2.0.8",
+    "@atcute/client": "^2.0.9",
     "@atcute/identity-resolver": "^0.1.2",
     "@mary/color-fns": "npm:@jsr/mary__color-fns@^0.1.1",
-    "@types/sanitize-html": "^2.13.0",
+    "@types/sanitize-html": "^2.15.0",
     "age-encryption": "^0.2.1",
-    "hls.js": "^1.5.20",
+    "hls.js": "^1.6.1",
     "sanitize-html": "^2.15.0"
   }
 }

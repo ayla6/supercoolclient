@@ -59,16 +59,25 @@ export const loadEmbedRecord = (
               params: { uris: [record.uri] },
             })
           ).data.posts[0];
-          if (!post) return;
-          simpleCard.replaceWith(
-            postCard(post, {
-              isEmbed: true,
-              someBlocking:
-                record.$type === "app.bsky.embed.record#viewBlocked",
-              detachedPost:
-                record.$type === "app.bsky.embed.record#viewDetached",
-            }),
-          );
+          if (!post) {
+            simpleCard.replaceWith(
+              elem("a", {
+                className: "simple-card",
+                href: getPathFromUri(record.uri),
+                textContent: "Post not found (and blocked)",
+              }),
+            );
+          } else {
+            simpleCard.replaceWith(
+              postCard(post, {
+                isEmbed: true,
+                someBlocking:
+                  record.$type === "app.bsky.embed.record#viewBlocked",
+                detachedPost:
+                  record.$type === "app.bsky.embed.record#viewDetached",
+              }),
+            );
+          }
         }, 0);
       }
       return simpleCard;
