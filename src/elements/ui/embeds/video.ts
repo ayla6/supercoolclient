@@ -27,6 +27,7 @@ const loadVideo = (embed: AppBskyEmbedVideo.View) => {
   hls.on(Hls.Events.MANIFEST_PARSED, () => {
     videoElem.onloadedmetadata = () => {
       if (videoElem.duration <= 5) videoElem.loop = true;
+      videoElem.play();
     };
   });
   hls.attachMedia(videoElem);

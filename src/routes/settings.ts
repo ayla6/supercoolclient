@@ -1,7 +1,7 @@
 import { AppBskyFeedPost } from "@atcute/client/lexicons";
 import { elem } from "../elements/utils/elem";
 import { rpc, sessionData } from "../login";
-import { ImageFormat, RouteOutput } from "../types";
+import { ImageFormat } from "../types";
 import { createTray } from "../elements/ui/tray";
 import {
   getUriFromSplitPath,
@@ -9,6 +9,7 @@ import {
 } from "../elements/utils/link_processing";
 import { env, updateColors } from "../settings";
 import { stickyHeader } from "../elements/ui/sticky_header";
+import { setTitle } from "../elements/utils/title";
 
 const saveAgeSettings = async () => {
   const publicKey = (document.getElementById("public-key") as HTMLInputElement)
@@ -108,7 +109,10 @@ export const settingsRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
   container: HTMLDivElement,
-): RouteOutput => {
+  useCache: boolean = false,
+) => {
+  setTitle("Settings");
+
   const allowedItem = (id: string) =>
     elem("div", { className: "list-item allowed-item" }, undefined, [
       elem("span", { textContent: id }),
@@ -635,6 +639,4 @@ export const settingsRoute = async (
     ),
   ]);
   container.append(stickyHeader("Settings"), content);
-
-  return { title: "Settings" };
 };

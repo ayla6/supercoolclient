@@ -1,5 +1,6 @@
 import { updatePage } from "../../router";
 import { elem } from "../utils/elem";
+import { historyPush } from "../utils/history";
 
 export const createSearchBar = (addToSearch?: string, hideOnMobile = false) => {
   const searchBar = elem("input", {
@@ -14,7 +15,7 @@ export const createSearchBar = (addToSearch?: string, hideOnMobile = false) => {
         "",
         `/search?q=${addToSearch ? addToSearch + " " : ""}${searchBar.value}`,
       );
-      updatePage(false);
+      updatePage();
     }
   });
   return searchBar;

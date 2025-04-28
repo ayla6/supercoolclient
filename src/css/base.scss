@@ -5,6 +5,10 @@ body {
     overscroll-behavior-y: none;
 }
 
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
     font-family:
         roboto flex,
@@ -550,9 +554,9 @@ select {
         overflow-x: scroll;
         display: flex;
         flex-flow: row;
-        margin-right: 8px;
         scrollbar-width: none;
         border-width: 0;
+        align-items: stretch;
         &::-webkit-scrollbar {
             display: none;
         }
@@ -565,12 +569,11 @@ select {
             border-right: 1px solid #e8e8e8;
             border-width: 0;
             border-right-width: 1px;
+            flex-grow: 1;
+            justify-content: center;
             .images {
                 display: none;
             }
-        }
-        &:last-of-type {
-            margin-right: 0;
         }
     }
     .buffer-top {

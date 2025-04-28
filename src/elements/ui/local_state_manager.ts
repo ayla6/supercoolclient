@@ -10,18 +10,21 @@ import {
 import { elem } from "../utils/elem";
 import { hydrateFeed } from "./feed";
 import { pullToRefresh } from "../utils/swipe_manager";
-import { cache } from "../../router";
+import { getCache, setCache } from "../utils/request";
 
 export const createFeedManager = (
   contentHolder: HTMLElement,
   sideBar: HTMLDivElement,
   _feedsData: Feed[],
   profile: boolean = false,
+  useCache: boolean = false,
   _rpc: XRPC = rpc,
 ): StateManager => {
   const atHome = window.location.pathname === "/";
   _feedsData = _feedsData.filter(Boolean);
   const feedsData = new Map<string, Feed>();
+
+  const stringFeedsData = JSON.stringify(_feedsData);
 
   const navbar = document.getElementById("navbar");
   if (atHome) {
@@ -43,6 +46,7 @@ export const createFeedManager = (
         e.preventDefault();
         if (atHome) localStorage.setItem("last-feed", feed.feed);
         loadFeed(feed);
+        setCache(stringFeedsData, feed.feed);
       },
     });
     button.setAttribute("ignore", "");
@@ -51,11 +55,6 @@ export const createFeedManager = (
     feedsData.set(feed.feed, feed);
   }
   sideBar.append(feedNav);
-  if (atHome) {
-    const feed = feedsData.get(
-      localStorage.getItem("last-feed") ?? "following",
-    );
-  }
 
   let loadedFeed: string;
   const feedState: FeedState = Object.create(null);
@@ -105,6 +104,7 @@ export const createFeedManager = (
         feed.nsid,
         clonedParams,
         feed.func,
+        useCache,
         _rpc,
       );
       feedState[feed.feed] = { content, onscrollFunc, scroll: scrollTop };
@@ -114,9 +114,6 @@ export const createFeedManager = (
     } else {
       window.onscroll = currentFeedState.onscrollFunc;
     }
-    if (cache.get(window.location.pathname))
-      cache.get(window.location.pathname).onscroll =
-        currentFeedState.onscrollFunc;
     window.scrollTo({ top: scrollTop });
 
     const content = currentFeedState.content;
@@ -139,5 +136,6 @@ export const createFeedManager = (
     feedsData: _feedsData,
     loadFeed,
     sideBar,
+    cachedFeed: feedsData.get(useCache && getCache(stringFeedsData)),
   };
 };

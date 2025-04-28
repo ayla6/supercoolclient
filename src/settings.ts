@@ -47,10 +47,6 @@ export const env: {
   defaultThumbnailFormat: ImageFormat;
   showNonFollowingRepliesOnTimeline: boolean;
   currentStateManager: StateManager;
-  latestNotifications: {
-    notifications: AppBskyNotificationListNotifications.Notification[];
-    cursor: string;
-  };
   contentLabels: any;
   feeds: any;
   translate: {
@@ -77,7 +73,6 @@ export const env: {
     loadFeed: undefined,
     feedsData: undefined,
   } as StateManager,
-  latestNotifications: undefined,
   contentLabels: undefined,
   feeds: undefined,
   translate: {

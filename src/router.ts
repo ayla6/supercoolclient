@@ -1,7 +1,7 @@
 import { elem } from "./elements/utils/elem";
 import { postCard } from "./elements/ui/post_card";
 import { profileCard, statProfile } from "./elements/ui/profile_card";
-import { PageCache, Route, RouteOutput } from "./types";
+import { Route } from "./types";
 env;
 import { homeRoute } from "./routes/home";
 import { notificationsRoute } from "./routes/notifications";
@@ -12,9 +12,6 @@ import { searchRoute } from "./routes/search";
 import { settingsRoute } from "./routes/settings";
 import { env } from "./settings";
 import { sessionData } from "./login";
-
-export const cache: PageCache = new Map();
-const CACHE_DURATION = 5 * 60 * 1000;
 
 export let loadedPath: string = "";
 export let loadedSplitPath: string[] = [];
@@ -70,11 +67,7 @@ const matchRoute = (path: string[]) => {
 };
 
 export const updatePage = async (useCache: boolean = false) => {
-  {
-    const container = document.getElementById("container");
-    document.body.removeChild(container);
-    window.onscroll = null;
-  }
+  window.onscroll = null;
 
   const currentPath = window.location.pathname;
   const currentSplitPath = currentPath.slice(1).split("/");
@@ -89,67 +82,19 @@ export const updatePage = async (useCache: boolean = false) => {
     : navbar.querySelector(`a[href="${currentPath}"]`)
   )?.classList.add("active");
 
-  window.scrollTo({ top: 0 });
+  //window.scrollTo({ top: 0 });
 
-  const cachePage = cache.get(currentPath);
-
-  if (
-    cachePage &&
-    ((useCache && Date.now() < cachePage.expirationDate) ||
-      currentPath === "/" ||
-      currentPath === `/${sessionData.did}` ||
-      currentPath === "/notifications")
-  ) {
-    document.body.appendChild(cachePage.container);
-    document.title = cachePage.title;
-    window.onscroll = cachePage.onscroll;
-    env.currentStateManager = cachePage.stateManager;
-    document.body.setAttribute("style", cachePage.bodyStyle);
-  } else {
-    let container: HTMLDivElement;
-    container = elem("div", { id: "container" });
-    document.body.appendChild(container);
-
-    const route = matchRoute(currentSplitPath);
-    const {
-      onscrollFunction,
-      title,
-      scrollToElement,
-      bodyStyle,
-      stateManager,
-    } = await route(currentSplitPath, loadedSplitPath, container);
-    if (document.body.contains(container)) {
-      if (title) document.title = title + " — SuperCoolClient";
-      if (bodyStyle) document.body.setAttribute("style", bodyStyle);
-      if (scrollToElement) scrollToElement.scrollIntoView();
-      if (onscrollFunction) window.onscroll = onscrollFunction;
-      if (stateManager) env.currentStateManager = stateManager;
-      else
-        env.currentStateManager = {
-          feedsData: undefined,
-          loadFeed: undefined,
-          sideBar: undefined,
-        };
-
-      const expiration =
-        currentPath !== "/" ? Date.now() + CACHE_DURATION : Infinity;
-      cache.delete(currentPath);
-      cache.set(currentPath, {
-        expirationDate: expiration,
-        container: container,
-        title: document.title,
-        onscroll: onscrollFunction,
-        bodyStyle: document.body.getAttribute("style"),
-        scrollToElement: scrollToElement,
-        stateManager,
-        search: window.location.search,
-      });
-    }
-  }
+  const container = elem("div", { id: "container" });
+  const route = matchRoute(currentSplitPath);
 
   loadedSplitPath = currentSplitPath;
   loadedPath = currentPath;
   if (window.location.search) loadedSplitPath.push(window.location.search);
+
+  route(currentSplitPath, loadedSplitPath, container, useCache);
+
+  document.body.removeChild(document.getElementById("container"));
+  document.body.appendChild(container);
 };
 
 export const profileRedirect = (did: string) => {
@@ -160,17 +105,4 @@ export const profileRedirect = (did: string) => {
     "",
     "/" + did + (indexOfSlash === -1 ? "" : path.slice(indexOfSlash)),
   );
-};
-
-export const cleanCache = () => {
-  console.time("Time to clean cache");
-  const now = Date.now();
-  const currentPath = window.location.pathname;
-  for (const [path, entry] of cache.entries()) {
-    if (entry.expirationDate < now && path !== currentPath) {
-      cache.delete(path);
-      console.log("deleted " + path);
-    } else if (entry[0] < Infinity) break;
-  }
-  console.timeEnd("Time to clean cache");
 };

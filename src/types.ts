@@ -5,23 +5,8 @@ export type Route = (
   currentSplitPath: string[],
   previousSplitPath: string[],
   container: HTMLDivElement,
-) => RouteOutput;
-
-export type RouteOutput = Promise<{
-  onscrollFunction?: OnscrollFunction;
-  title?: string;
-  scrollToElement?: HTMLElement;
-  bodyStyle?: string;
-  stateManager?: StateManager;
-}>;
-
-export type RouteOutputNotPromise = {
-  onscrollFunction?: OnscrollFunction;
-  title?: string;
-  scrollToElement?: HTMLElement;
-  bodyStyle?: string;
-  stateManager?: StateManager;
-};
+  useCache: boolean,
+) => Promise<void>;
 
 export type FeedState = {
   [key: string]: {
@@ -67,18 +52,7 @@ export interface StateManager {
   feedsData: Feed[];
   loadFeed: Function;
   sideBar: HTMLDivElement;
+  cachedFeed?: Object;
 }
 
-export type CacheEntry = {
-  expirationDate: number;
-  container: HTMLDivElement;
-  title?: string;
-  feed?: string;
-  onscroll?: OnscrollFunction;
-  bodyStyle?: string;
-  scrollToElement?: HTMLElement;
-  stateManager?: StateManager;
-  search?: string;
-};
-
-export type PageCache = Map<string, CacheEntry>;
+export type XRPCCache = Map<string, { value: any; expiresAt: number }>;

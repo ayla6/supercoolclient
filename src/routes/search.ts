@@ -2,15 +2,13 @@ import { createFeedManager } from "../elements/ui/local_state_manager";
 import { profileCard } from "../elements/ui/profile_card";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";
-import { RouteOutput, RouteOutputNotPromise } from "../types";
 
 export const searchRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
   container: HTMLDivElement,
-): RouteOutput => {
-  const returnObjects: RouteOutputNotPromise = { title: "Search" };
-
+  useCache: boolean = false,
+) => {
   const urlParams = new URLSearchParams(window.location.search);
   const searchQuery = urlParams.get("q") ?? "";
 
@@ -23,6 +21,18 @@ export const searchRoute = async (
     sideBar,
     elem("div", { id: "content-holder" }, elem("div", { id: "content" })),
   );
+
+  (
+    document
+      .getElementById("navbar")
+      .querySelector(`a[href="/search"]`) as HTMLLinkElement
+  ).onclick = (e) => {
+    if (window.location.pathname === "/search") {
+      e.preventDefault();
+      e.stopPropagation();
+      searchBar.focus();
+    }
+  };
 
   if (searchQuery) {
     searchBar.value = searchQuery;
@@ -60,29 +70,15 @@ export const searchRoute = async (
       ],
     );
 
-    returnObjects.onscrollFunction = await stateManager.loadFeed({
-      feed: "top",
-      nsid: "app.bsky.feed.searchPosts",
-      params: {
-        q: searchQuery,
-        sort: "top",
+    window.onscroll = await stateManager.loadFeed(
+      stateManager.cachedFeed ?? {
+        feed: "top",
+        nsid: "app.bsky.feed.searchPosts",
+        params: {
+          q: searchQuery,
+          sort: "top",
+        },
       },
-    });
-
-    returnObjects.stateManager = stateManager;
+    );
   }
-
-  (
-    document
-      .getElementById("navbar")
-      .querySelector(`a[href="/search"]`) as HTMLLinkElement
-  ).onclick = (e) => {
-    if (window.location.pathname === "/search") {
-      e.preventDefault();
-      e.stopPropagation();
-      searchBar.focus();
-    }
-  };
-
-  return returnObjects;
 };

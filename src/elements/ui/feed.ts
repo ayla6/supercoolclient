@@ -12,6 +12,13 @@ import {
   AppBskyEmbedRecord,
   AppBskyFeedPost,
 } from "@atcute/client/lexicons";
+import {
+  cache,
+  getCache,
+  getCacheId,
+  request,
+  setCache,
+} from "../utils/request";
 
 type RecursivePost = {
   post:
@@ -90,10 +97,11 @@ const loadBlockedPosts = async (
 
 let feedBeingLoaded = false;
 export const hydrateFeed = async (
-  output: HTMLElement,
+  output: HTMLDivElement,
   nsid: feedNSID,
   params: { [key: string]: any },
   func: (item: any) => HTMLDivElement = postCard,
+  useCache: boolean = false,
   _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
   if (
@@ -102,24 +110,41 @@ export const hydrateFeed = async (
     nsid === "app.bsky.feed.searchPosts" ||
     nsid === "app.bsky.feed.getTimeline"
   )
-    return hydratePostFeed(output, nsid, params, _rpc);
+    return hydratePostFeed(output, nsid, params, useCache, _rpc);
+
+  const outputId = "output_" + nsid + JSON.stringify(params);
+
+  let usingCached = false;
+  const cachedVersion: HTMLDivElement = getCache(outputId);
+  if (useCache && cachedVersion?.children.length) {
+    output.replaceChildren(...cachedVersion.children);
+    usingCached = true;
+  }
+
   const dataLocation = dataLocations[nsid] ?? "feed";
 
-  const loadFeed = async () => {
-    const { data } = await _rpc.get(nsid, { params: params });
-    //if (env.viewBlockedPosts && func === postCard)
-    //  await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
-    if (!params.cursor) output.replaceChildren();
-    data[dataLocation].forEach((item: Object) =>
-      output.appendChild(func(item)),
-    );
+  const loadFeed = async (notFirstLoad: boolean = true) => {
+    const { data } = await request(nsid, { params }, useCache, _rpc);
+    if (notFirstLoad || !usingCached) {
+      //if (env.viewBlockedPosts && func === postCard)
+      //  await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
+      if (!params.cursor) output.replaceChildren();
+      data[dataLocation].forEach((item: Object) =>
+        output.appendChild(func(item)),
+      );
+    }
     return data;
   };
 
-  const data = await loadFeed();
+  let data = await loadFeed(false);
+  params.cursor = data.cursor;
+
+  while (cache.has(getCacheId(nsid, { params })) && params.cursor) {
+    data = await loadFeed(false);
+    params.cursor = data.cursor;
+  }
 
   if (data.cursor === undefined) return;
-  params.cursor = data.cursor;
   return async () => {
     if (feedBeingLoaded) return;
 
@@ -140,114 +165,132 @@ export const hydrateFeed = async (
 };
 
 export const hydratePostFeed = async (
-  output: HTMLElement,
+  output: HTMLDivElement,
   nsid: feedNSID,
   params: { [key: string]: any },
+  useCache: boolean = false,
   _rpc: XRPC = rpc,
 ): Promise<OnscrollFunction> => {
+  const outputId = "output_" + nsid + JSON.stringify(params);
+
+  let usingCached = false;
+  const cachedVersion: HTMLDivElement = getCache(outputId);
+  if (useCache && cachedVersion?.children.length) {
+    output.replaceChildren(...cachedVersion.children);
+    usingCached = true;
+  }
+
   const dataLocation = dataLocations[nsid] ?? "feed";
   const showNonFollowingRepliesOnTimeline =
     env.showNonFollowingRepliesOnTimeline ||
     nsid !== "app.bsky.feed.getTimeline";
 
-  const loadFeed = async () => {
-    const { data } = await _rpc.get(nsid, {
-      params: params,
-    });
-    if (env.viewBlockedPosts)
-      await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
-    const rearrangedFeed: Map<string, boolean> = new Map();
-    const posts: { [key: string]: RecursivePost } = {};
-    for (const postHousing of data[
-      dataLocation
-    ] as AppBskyFeedDefs.FeedViewPost[]) {
-      const post = "post" in postHousing ? postHousing.post : postHousing;
-      const postUri = post.uri;
-      if (posts[postUri]) posts[postUri].post = postHousing;
-      else posts[postUri] = { post: postHousing };
-      rearrangedFeed.set(postUri, true);
-      if (
-        !postHousing.reason &&
-        postHousing.reply &&
-        postHousing.reply.parent &&
-        postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
-      ) {
-        const parentUri = postHousing.reply.parent.uri;
-        if (posts[parentUri]?.reply) {
-          const toBeChangedPost = posts[parentUri].reply.post;
-          rearrangedFeed.set(
-            "post" in toBeChangedPost
-              ? toBeChangedPost.post.uri
-              : toBeChangedPost.uri,
-            true,
-          );
-          rearrangedFeed.set(parentUri, true);
-          posts[parentUri].reply = posts[postUri];
-        } else {
-          if (
-            showNonFollowingRepliesOnTimeline ||
-            postHousing.reply.parent.author?.viewer.following ||
-            postHousing.reply.parent.author.did === sessionData.did
-          ) {
-            let reply: AppBskyFeedDefs.PostView | AppBskyFeedDefs.FeedViewPost =
-              postHousing.reply.parent;
-            if ((reply.record as AppBskyFeedPost.Record).reply?.parent) {
-              reply = {
-                post: postHousing.reply.parent,
-                reply: {
-                  root: postHousing.reply.root,
-                  parent: {
-                    $type: "app.bsky.feed.defs#postView",
-                    author: postHousing.reply.grandparentAuthor,
-                    uri: (reply.record as AppBskyFeedPost.Record).reply.parent
-                      .uri,
-                  } as any,
-                },
-              } as AppBskyFeedDefs.FeedViewPost;
-            }
-            posts[parentUri] = {
-              post: reply,
-              reply: posts[postUri],
-            };
-            rearrangedFeed.delete(parentUri);
+  const loadFeed = async (notFirstLoad: boolean = true) => {
+    const { data } = await request(nsid, { params }, useCache, _rpc);
+    if (notFirstLoad || !usingCached) {
+      if (env.viewBlockedPosts)
+        await loadBlockedPosts(data as loadBlockedPostsTypes, nsid);
+      const rearrangedFeed: Map<string, boolean> = new Map();
+      const posts: { [key: string]: RecursivePost } = {};
+      for (const postHousing of data[
+        dataLocation
+      ] as AppBskyFeedDefs.FeedViewPost[]) {
+        const post = "post" in postHousing ? postHousing.post : postHousing;
+        const postUri = post.uri;
+        if (posts[postUri]) posts[postUri].post = postHousing;
+        else posts[postUri] = { post: postHousing };
+        rearrangedFeed.set(postUri, true);
+        if (
+          !postHousing.reason &&
+          postHousing.reply &&
+          postHousing.reply.parent &&
+          postHousing.reply.parent.$type === "app.bsky.feed.defs#postView"
+        ) {
+          const parentUri = postHousing.reply.parent.uri;
+          if (posts[parentUri]?.reply) {
+            const toBeChangedPost = posts[parentUri].reply.post;
+            rearrangedFeed.set(
+              "post" in toBeChangedPost
+                ? toBeChangedPost.post.uri
+                : toBeChangedPost.uri,
+              true,
+            );
             rearrangedFeed.set(parentUri, true);
+            posts[parentUri].reply = posts[postUri];
+          } else {
+            if (
+              showNonFollowingRepliesOnTimeline ||
+              postHousing.reply.parent.author?.viewer.following ||
+              postHousing.reply.parent.author.did === sessionData.did
+            ) {
+              let reply:
+                | AppBskyFeedDefs.PostView
+                | AppBskyFeedDefs.FeedViewPost = postHousing.reply.parent;
+              if ((reply.record as AppBskyFeedPost.Record).reply?.parent) {
+                reply = {
+                  post: postHousing.reply.parent,
+                  reply: {
+                    root: postHousing.reply.root,
+                    parent: {
+                      $type: "app.bsky.feed.defs#postView",
+                      author: postHousing.reply.grandparentAuthor,
+                      uri: (reply.record as AppBskyFeedPost.Record).reply.parent
+                        .uri,
+                    } as any,
+                  },
+                } as AppBskyFeedDefs.FeedViewPost;
+              }
+              posts[parentUri] = {
+                post: reply,
+                reply: posts[postUri],
+              };
+              rearrangedFeed.delete(parentUri);
+              rearrangedFeed.set(parentUri, true);
+            }
           }
+          rearrangedFeed.set(postUri, false);
         }
-        rearrangedFeed.set(postUri, false);
       }
-    }
-    if (!params.cursor) output.replaceChildren();
-    for (const postUri of rearrangedFeed.keys()) {
-      if (!rearrangedFeed.get(postUri)) continue;
-      const post = posts[postUri].post;
-      output.appendChild(
-        postCard(post, {
-          hasReplies: Boolean(
-            posts["post" in post ? post.post.uri : post.uri].reply,
-          ),
-        }),
-      );
-      let currentPost = posts[postUri];
-      while (currentPost.reply) {
-        const replyPost =
-          "post" in currentPost.reply.post
-            ? currentPost.reply.post.post
-            : currentPost.reply.post;
+      if (!params.cursor) output.replaceChildren();
+      for (const postUri of rearrangedFeed.keys()) {
+        if (!rearrangedFeed.get(postUri)) continue;
+        const post = posts[postUri].post;
         output.appendChild(
-          postCard(replyPost, {
-            hasReplies: Boolean(currentPost.reply.reply),
+          postCard(post, {
+            hasReplies: Boolean(
+              posts["post" in post ? post.post.uri : post.uri].reply,
+            ),
           }),
         );
-        currentPost = currentPost.reply;
+        let currentPost = posts[postUri];
+        while (currentPost.reply) {
+          const replyPost =
+            "post" in currentPost.reply.post
+              ? currentPost.reply.post.post
+              : currentPost.reply.post;
+          output.appendChild(
+            postCard(replyPost, {
+              hasReplies: Boolean(currentPost.reply.reply),
+            }),
+          );
+          currentPost = currentPost.reply;
+        }
       }
     }
     return data;
   };
 
-  const data = await loadFeed();
+  let data = await loadFeed(false);
+  params.cursor = data.cursor;
+
+  while (cache.has(getCacheId(nsid, { params })) && params.cursor) {
+    data = await loadFeed(false);
+    params.cursor = data.cursor;
+  }
+
+  setCache(outputId, output);
 
   if (data.cursor === undefined) return;
-  params.cursor = data.cursor;
   return async () => {
     if (feedBeingLoaded) return;
 

@@ -13,11 +13,12 @@ import {
 } from "../elements/utils/link_processing";
 import { rpc, rpcPublic } from "../login";
 import { beingLoadedSplitPath, profileRedirect } from "../router";
-import { RouteOutput } from "../types";
 import { preloadedPost, setPreloaded } from "../elements/utils/preloaded_post";
 import { env } from "../settings";
 import { tryCatch } from "../elements/utils/trycatch";
 import { createTray } from "../elements/ui/tray";
+import { setTitle } from "../elements/utils/title";
+import { request } from "../elements/utils/request";
 
 const MAX_PARENT_HEIGHT = 81;
 
@@ -63,6 +64,7 @@ const getString = (isLastChild: boolean) => {
 const loadThread = (
   postThread: AppBskyFeedGetPostThread.Output,
   rootPost: AppBskyFeedDefs.PostView,
+  useCache: boolean,
 ): [HTMLDivElement, HTMLDivElement] => {
   let mainPost: HTMLDivElement;
   const content = elem("div", { id: "content" });
@@ -177,12 +179,16 @@ const loadThread = (
               ) {
                 blockedPost = true;
                 const hopefullyNextThread = (
-                  await rpc.get("app.bsky.feed.getPostThread", {
-                    params: {
-                      depth: 0,
-                      uri: currentThread.parent.uri,
+                  await request(
+                    "app.bsky.feed.getPostThread",
+                    {
+                      params: {
+                        depth: 0,
+                        uri: currentThread.parent.uri,
+                      },
                     },
-                  })
+                    useCache,
+                  )
                 ).data.thread;
                 if (
                   hopefullyNextThread.$type ===
@@ -194,12 +200,17 @@ const loadThread = (
                 ) {
                   blockedByPost = true;
                   const hopefullyNextThread = (
-                    await rpcPublic.get("app.bsky.feed.getPostThread", {
-                      params: {
-                        depth: 0,
-                        uri: currentThread.parent.uri,
+                    await request(
+                      "app.bsky.feed.getPostThread",
+                      {
+                        params: {
+                          depth: 0,
+                          uri: currentThread.parent.uri,
+                        },
                       },
-                    })
+                      useCache,
+                      rpcPublic,
+                    )
                   ).data.thread;
                   if (
                     hopefullyNextThread.$type ===
@@ -370,7 +381,8 @@ export const postRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
   container: HTMLDivElement,
-): RouteOutput => {
+  useCache: boolean = false,
+) => {
   const atId = currentSplitPath[0];
   const uri = getUriFromSplitPath(currentSplitPath);
   let title: string;
@@ -384,9 +396,13 @@ export const postRoute = async (
   let postThread: AppBskyFeedGetPostThread.Output;
 
   let { data, error } = await tryCatch(
-    rpc.get("app.bsky.feed.getPostThread", {
-      params: { uri, parentHeight: MAX_PARENT_HEIGHT },
-    }),
+    request(
+      "app.bsky.feed.getPostThread",
+      {
+        params: { uri, parentHeight: MAX_PARENT_HEIGHT },
+      },
+      useCache,
+    ),
   );
 
   if (error) {
@@ -410,33 +426,43 @@ export const postRoute = async (
     postThread.thread.$type === "app.bsky.feed.defs#blockedPost"
   ) {
     postThread = (
-      await rpcPublic.get("app.bsky.feed.getPostThread", {
-        params: { uri, parentHeight: 1000 },
-      })
+      await request(
+        "app.bsky.feed.getPostThread",
+        {
+          params: { uri, parentHeight: 1000 },
+        },
+        useCache,
+      )
     ).data;
   }
 
   let rootPost: AppBskyFeedDefs.PostView;
   if (postThread.thread.$type === "app.bsky.feed.defs#threadViewPost") {
     const post = postThread.thread.post;
-    title = `${post.author.handle}: “${(post.record as AppBskyFeedPost.Record).text}” — SuperCoolClient`;
+    setTitle(
+      `${post.author.handle}: “${(post.record as AppBskyFeedPost.Record).text}”`,
+    );
 
     if (preloadedPost) Object.assign(preloadedPost, post);
     setPreloaded(null);
     if (postThread.thread.parent) {
       rootPost = (
-        await rpc.get("app.bsky.feed.getPosts", {
-          params: {
-            uris: [
-              (postThread.thread.post.record as AppBskyFeedPost.Record).reply
-                .root.uri,
-            ],
+        await request(
+          "app.bsky.feed.getPosts",
+          {
+            params: {
+              uris: [
+                (postThread.thread.post.record as AppBskyFeedPost.Record).reply
+                  .root.uri,
+              ],
+            },
           },
-        })
+          useCache,
+        )
       ).data.posts[0];
     }
   } else if (postThread.thread.$type === "app.bsky.feed.defs#notFoundPost") {
-    title = `Not Found — SuperCoolClient`;
+    setTitle(`Not Found`);
   }
 
   if (currentSplitPath !== beingLoadedSplitPath) return;
@@ -447,8 +473,6 @@ export const postRoute = async (
   )
     profileRedirect(postThread.thread.post.author.did);
 
-  const [content, mainPost] = loadThread(postThread, rootPost);
+  const [content, mainPost] = loadThread(postThread, rootPost, useCache);
   container.replaceChildren(stickyHeader("Post"), content);
-
-  return { title, scrollToElement: mainPost };
 };

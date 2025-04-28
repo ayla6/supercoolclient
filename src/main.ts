@@ -1,11 +1,12 @@
 import { fillMissingSettings, env, updateColors } from "./settings";
 import { loadNavbar } from "./elements/ui/navbar";
 import { login, rpc, sessionData } from "./login";
-import { cleanCache, updatePage } from "./router";
+import { updatePage } from "./router";
 import {
   createSwipeAction,
   pullToRefresh,
 } from "./elements/utils/swipe_manager";
+import { cleanCache } from "./elements/utils/request";
 
 document.addEventListener("click", (e) => {
   const anchor =
@@ -33,7 +34,7 @@ document.addEventListener("click", (e) => {
   e.preventDefault();
 
   history.pushState(null, "", url);
-  updatePage(false);
+  updatePage(anchor.hasAttribute("use-cache"));
 });
 document.addEventListener("mousedown", (e) => {
   const anchor =
@@ -64,7 +65,7 @@ if (path.length !== 1 && path.endsWith("/")) {
 updateColors();
 
 fillMissingSettings();
-{
+(async () => {
   const sessions =
     localStorage.getItem("session") &&
     JSON.parse(localStorage.getItem("session"));
@@ -75,10 +76,10 @@ fillMissingSettings();
       })
     ).data.profiles;
   }
-}
+})();
 await login();
 loadNavbar();
-updatePage(false);
+updatePage();
 
 createSwipeAction(document.body, (pos) => {
   const csm = env.currentStateManager;

@@ -16,9 +16,15 @@ import { contextMenu } from "./context";
 import { updatePage } from "../../router";
 import { AppBskyActorDefs } from "@atcute/client/lexicons";
 import { confirmDialog } from "./dialog";
+import { request } from "../utils/request";
 
 function navButton(text: string, link: string, icon: string) {
-  return elem("a", { innerHTML: `${icon}<span>${text}</span>`, href: link });
+  const button = elem("a", {
+    innerHTML: `${icon}<span>${text}</span>`,
+    href: link,
+  });
+  button.setAttribute("use-cache", "");
+  return button;
 }
 
 const profileContextMenu = (target: HTMLElement) => {
@@ -77,7 +83,7 @@ const profileContextMenu = (target: HTMLElement) => {
 
 export const loadNavbar = () => {
   const navbar = document.getElementById("navbar");
-  navbar.append(
+  navbar.replaceChildren(
     ...[
       navButton("Home", "/", homeSVG),
       navButton("Search", "/search", searchSVG),
@@ -165,11 +171,9 @@ export const updateNotificationIcon = async (toZero: boolean = false) => {
         })
       ).data.count;
   if (unreadCount) {
-    env.latestNotifications = (
-      await rpc.get("app.bsky.notification.listNotifications", {
-        params: { limit: 50 },
-      })
-    ).data as any;
+    request("app.bsky.notification.listNotifications", {
+      params: { limit: 50 },
+    });
   }
   const notificationCount = document.getElementById("notification-count");
   if (unreadCount !== 0) {

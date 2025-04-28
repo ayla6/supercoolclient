@@ -3,15 +3,16 @@ import { createFeedManager } from "../elements/ui/local_state_manager";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { elem } from "../elements/utils/elem";
 import { manager, rpc } from "../login";
-import { RouteOutput } from "../types";
 import { unsignedHomeRoute } from "./unsigned_home";
 import { env } from "../settings";
+import { request } from "../elements/utils/request";
 
 export const homeRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
   container: HTMLDivElement,
-): RouteOutput => {
+  useCache: boolean = true,
+) => {
   if (!manager.session) {
     return unsignedHomeRoute(undefined, undefined, container);
   }
@@ -24,17 +25,22 @@ export const homeRoute = async (
 
   const { data: feedGens } = await (async () => {
     try {
-      return await rpc.get("app.bsky.feed.getFeedGenerators", {
-        params: {
-          feeds: (() => {
-            let pinned = [];
-            for (const feed of env.feeds.slice(1)) {
-              if (feed.pinned) pinned.push(feed.value);
-            }
-            return pinned;
-          })(),
+      return await request(
+        "app.bsky.feed.getFeedGenerators",
+        {
+          params: {
+            feeds: (() => {
+              let pinned = [];
+              for (const feed of env.feeds.slice(1)) {
+                if (feed.pinned) pinned.push(feed.value);
+              }
+              return pinned;
+            })(),
+          },
         },
-      });
+        useCache,
+        rpc,
+      );
     } catch (err) {
       return {
         data: {
@@ -69,6 +75,8 @@ export const homeRoute = async (
     document.getElementById("content-holder"),
     sideBar,
     feedsData,
+    false,
+    useCache,
   );
 
   sideBar.append(
@@ -96,7 +104,7 @@ export const homeRoute = async (
   }
 
   const feedToLoad = feedsData.find((f) => f.feed === uri);
-  const onscrollFunction = await stateManager.loadFeed(feedToLoad);
-
-  return { onscrollFunction, stateManager };
+  window.onscroll = await stateManager.loadFeed(
+    stateManager.cachedFeed ?? feedToLoad,
+  );
 };

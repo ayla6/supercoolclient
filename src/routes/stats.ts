@@ -2,7 +2,8 @@ import { hydrateFeed } from "../elements/ui/feed";
 import { stickyHeader } from "../elements/ui/sticky_header";
 import { elem } from "../elements/utils/elem";
 import { getUriFromSplitPath } from "../elements/utils/link_processing";
-import { feedNSID, RouteOutput } from "../types";
+import { setTitle } from "../elements/utils/title";
+import { feedNSID } from "../types";
 
 export const createStatsRoute = (
   title: string,
@@ -13,19 +14,22 @@ export const createStatsRoute = (
     currentSplitPath: string[],
     previousSplitPath: string[],
     container: HTMLDivElement,
-  ): RouteOutput => {
+    useCache: boolean = false,
+  ) => {
     const content = elem("div", { id: "content" });
 
     container.appendChild(stickyHeader(title));
     const uri = getUriFromSplitPath(currentSplitPath);
-    const onscrollFunction = await hydrateFeed(
+
+    setTitle(title);
+
+    window.onscroll = await hydrateFeed(
       content,
       nsid,
       { uri: uri },
       func,
+      useCache,
     );
     container.appendChild(content);
-
-    return { onscrollFunction, title };
   };
 };

@@ -14,11 +14,12 @@ import {
 import { processText } from "../elements/utils/text_processing";
 import { manager, rpc, rpcPublic, sessionData } from "../login";
 import { beingLoadedSplitPath, profileRedirect, updatePage } from "../router";
-import { RouteOutput } from "../types";
 import { confirmDialog } from "../elements/ui/dialog";
 import { editProfileDialog } from "../elements/ui/edit_profile";
 import { createSearchBar } from "../elements/ui/search_bar";
 import { env } from "../settings";
+import { request } from "../elements/utils/request";
+import { setTitle } from "../elements/utils/title";
 
 const mediaNavButton = (lastMedia: AppBskyFeedGetAuthorFeed.Output) => {
   const images = elem("div", { className: "images" });
@@ -46,12 +47,21 @@ export const profileRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
   container: HTMLDivElement,
-): RouteOutput => {
+  useCache: boolean = false,
+) => {
   const atId = currentSplitPath[0];
 
-  const { data: profile } = await rpc.get("app.bsky.actor.getProfile", {
-    params: { actor: atId },
-  });
+  setTitle(atId);
+
+  const { data: profile } = await request(
+    "app.bsky.actor.getProfile",
+    {
+      params: { actor: atId },
+    },
+    useCache,
+  );
+
+  setTitle(profile.handle);
 
   const blockingInAnyWay =
     profile.viewer?.blockedBy ||
@@ -87,13 +97,18 @@ export const profileRoute = async (
   const { data: lastMedia } =
     !env.viewBlockedPosts && blockingInAnyWay
       ? { data: { feed: [] } }
-      : await _rpc.get("app.bsky.feed.getAuthorFeed", {
-          params: {
-            actor: did,
-            filter: "posts_with_media",
-            limit: 4,
+      : await request(
+          "app.bsky.feed.getAuthorFeed",
+          {
+            params: {
+              actor: did,
+              filter: "posts_with_media",
+              limit: 4,
+            },
           },
-        });
+          useCache,
+          _rpc,
+        );
 
   if (currentSplitPath !== beingLoadedSplitPath) return;
 
@@ -219,9 +234,13 @@ export const profileRoute = async (
                 if (!(await editProfileDialog())) return;
                 Object.assign(
                   sessionData,
-                  await rpc.get("app.bsky.actor.getProfile", {
-                    params: { actor: manager.session.did },
-                  }),
+                  await request(
+                    "app.bsky.actor.getProfile",
+                    {
+                      params: { actor: manager.session.did },
+                    },
+                    false,
+                  ),
                 );
                 await profileRoute(
                   currentSplitPath,
@@ -374,6 +393,7 @@ export const profileRoute = async (
       },
     ],
     true,
+    useCache,
     _rpc,
   );
 
@@ -383,16 +403,17 @@ export const profileRoute = async (
     );
   }
 
-  const onscrollFunction =
+  window.onscroll =
     !env.viewBlockedPosts && blockingInAnyWay
       ? undefined
-      : await stateManager.loadFeed({
-          feed: "posts",
-          nsid: "app.bsky.feed.getAuthorFeed",
-          params: {
-            actor: did,
-            filter: "posts_and_author_threads",
+      : await stateManager.loadFeed(
+          stateManager.cachedFeed ?? {
+            feed: "posts",
+            nsid: "app.bsky.feed.getAuthorFeed",
+            params: {
+              actor: did,
+              filter: "posts_and_author_threads",
+            },
           },
-        });
-  return { onscrollFunction, title: profile.handle, bodyStyle, stateManager };
+        );
 };

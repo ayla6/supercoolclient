@@ -17,6 +17,7 @@ import quoteSvg from "../../svg/quote.svg?raw";
 import { postCard } from "./post_card";
 import { updateNotificationIcon } from "./navbar";
 import { env } from "../../settings";
+import { request } from "../utils/request";
 
 const notificationIcons = {
   like: favSvg,
@@ -31,25 +32,28 @@ const notificationMessages = {
   like: " liked your post",
   repost: " reposted your post",
   follow: " followed you",
-  reply: " replied to your post",
+  reply: " replied to",
   mention: " mentioned you in a post",
   quote: " quoted you in a post",
 };
 
-const loadNotifications = async (params: {
-  limit: number;
-  cursor: string;
-  useCache: boolean;
-}) => {
+const loadNotifications = async (
+  params: {
+    limit: number;
+    cursor: string;
+  },
+  useCache: boolean = false,
+) => {
   const fragment = document.createDocumentFragment();
-  const data =
-    params.useCache && !params.cursor && env.latestNotifications
-      ? env.latestNotifications
-      : (
-          await rpc.get("app.bsky.notification.listNotifications", {
-            params,
-          })
-        ).data;
+  const data = (
+    await request(
+      "app.bsky.notification.listNotifications",
+      {
+        params,
+      },
+      useCache,
+    )
+  ).data;
 
   const listPosts = [];
 
@@ -71,9 +75,13 @@ const loadNotifications = async (params: {
       chunks.push(listPosts.slice(i, i + 25));
     }
     for (const chunk of chunks) {
-      const response = await rpc.get("app.bsky.feed.getPosts", {
-        params: { uris: chunk },
-      });
+      const response = await request(
+        "app.bsky.feed.getPosts",
+        {
+          params: { uris: chunk },
+        },
+        useCache,
+      );
       postsMentioned.posts.push(...response.data.posts);
     }
   }
@@ -165,8 +173,9 @@ const loadNotifications = async (params: {
         getDidFromUri(
           (notification.record as AppBskyFeedPost.Record).reply.parent.uri,
         ) === sessionData.did
-      )
+      ) {
         notification.reason = "reply";
+      }
       return postCard(
         postsMentioned.posts.find((post) => post.uri === notification.uri),
         {
@@ -193,8 +202,8 @@ export const hydrateNotificationFeed = async (
     data: { seenAt: new Date().toISOString() },
   });
   updateNotificationIcon(true);
-  const params = { limit: 50, cursor: undefined, useCache };
-  const data = await loadNotifications(params);
+  const params = { limit: 50, cursor: undefined };
+  const data = await loadNotifications(params, useCache);
 
   output.replaceChildren();
   output.append(data.fragment);
@@ -211,7 +220,7 @@ export const hydrateNotificationFeed = async (
 
     try {
       feedBeingLoaded = true;
-      const data = await loadNotifications(params);
+      const data = await loadNotifications(params, useCache);
       output.append(data.fragment);
       params.cursor = data.cursor;
       if (params.cursor === undefined) window.onscroll = null;

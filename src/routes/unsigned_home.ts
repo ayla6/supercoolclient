@@ -1,12 +1,13 @@
 import { createFeedManager } from "../elements/ui/local_state_manager";
 import { elem } from "../elements/utils/elem";
-import { feedNSID, RouteOutput } from "../types";
+import { feedNSID } from "../types";
 
 export const unsignedHomeRoute = async (
   currentSplitPath: string[],
   previousSplitPath: string[],
   container: HTMLDivElement,
-): RouteOutput => {
+  useCache: boolean = false,
+) => {
   const sideBar = elem("div", { id: "side-bar", className: "sticky" });
 
   const feedsData = [
@@ -42,7 +43,7 @@ export const unsignedHomeRoute = async (
     true,
   );
 
-  const onscrollFunction = await stateManager.loadFeed(feedsData[0]);
-
-  return { onscrollFunction, stateManager };
+  window.onscroll = await stateManager.loadFeed(
+    stateManager.cachedFeed ?? feedsData[0],
+  );
 };
