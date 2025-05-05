@@ -12,7 +12,11 @@ import {
   getUriFromSplitPath,
 } from "../elements/utils/link_processing";
 import { rpc, rpcPublic } from "../login";
-import { beingLoadedSplitPath, profileRedirect } from "../router";
+import {
+  beingLoadedSplitPath,
+  profileRedirect,
+  removeSlashProfile,
+} from "../router";
 import { preloadedPost, setPreloaded } from "../elements/utils/preloaded_post";
 import { env } from "../settings";
 import { tryCatch } from "../elements/utils/trycatch";
@@ -383,6 +387,11 @@ export const postRoute = async (
   container: HTMLDivElement,
   useCache: boolean = false,
 ) => {
+  if (currentSplitPath[0] === "profile") {
+    currentSplitPath.shift();
+    removeSlashProfile();
+  }
+
   const atId = currentSplitPath[0];
   const uri = getUriFromSplitPath(currentSplitPath);
   let title: string;

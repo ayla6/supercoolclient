@@ -123,6 +123,31 @@ export const settingsRoute = async (
       }),
     ]);
 
+  const createToggleSetting = (
+    labelText: string,
+    id: string,
+    envProperty: keyof typeof env,
+  ) => {
+    return elem("div", { className: "setting toggle" }, undefined, [
+      elem("label", {
+        textContent: labelText,
+        htmlFor: id,
+      }),
+      elem("input", {
+        type: "checkbox",
+        id: id,
+        className: "checkbox",
+        checked: localStorage.getItem(id) === "true",
+        onclick: (e) => e.stopPropagation(),
+        onchange: (e) => {
+          const isChecked = (e.target as HTMLInputElement).checked;
+          localStorage.setItem(id, isChecked ? "true" : "false");
+          (env[envProperty] as boolean) = isChecked;
+        },
+      }),
+    ]);
+  };
+
   const content = elem("div", { id: "content" }, undefined, [
     elem(
       "div",
@@ -141,74 +166,24 @@ export const settingsRoute = async (
       { className: "card-holder" },
       elem("div", { className: "card" }, undefined, [
         elem("span", {
-          textContent: "I don't really know",
+          textContent: "General", // Changed "I don't really know" to "General"
           className: "small-section-title",
         }),
-        elem("div", { className: "setting toggle" }, undefined, [
-          elem("label", {
-            textContent: "Load blocked posts:",
-            htmlFor: "view-blocked-posts",
-          }),
-          elem("input", {
-            type: "checkbox",
-            id: "view-blocked-posts",
-            className: "checkbox",
-            checked: localStorage.getItem("view-blocked-posts") === "true",
-            onclick: (e) => e.stopPropagation(),
-            onchange: (e) => {
-              localStorage.setItem(
-                "view-blocked-posts",
-                (e.target as HTMLInputElement).checked ? "true" : "false",
-              );
-              env.viewBlockedPosts = (e.target as HTMLInputElement).checked;
-            },
-          }),
-        ]),
-        elem("div", { className: "setting toggle" }, undefined, [
-          elem("label", {
-            textContent:
-              "Show replies to people you're not following on the timeline:",
-            htmlFor: "show-non-following-replies-on-timeline",
-          }),
-          elem("input", {
-            type: "checkbox",
-            id: "show-non-following-replies-on-timeline",
-            className: "checkbox",
-            checked:
-              localStorage.getItem("show-non-following-replies-on-timeline") ===
-              "true",
-            onclick: (e) => e.stopPropagation(),
-            onchange: (e) => {
-              localStorage.setItem(
-                "show-non-following-replies-on-timeline",
-                (e.target as HTMLInputElement).checked ? "true" : "false",
-              );
-              env.showNonFollowingRepliesOnTimeline = (
-                e.target as HTMLInputElement
-              ).checked;
-            },
-          }),
-        ]),
-        elem("div", { className: "setting toggle" }, undefined, [
-          elem("label", {
-            textContent: "Limited mode:",
-            htmlFor: "limited-mode",
-          }),
-          elem("input", {
-            type: "checkbox",
-            id: "limited-mode",
-            className: "checkbox",
-            checked: localStorage.getItem("limited-mode") === "true",
-            onclick: (e) => e.stopPropagation(),
-            onchange: (e) => {
-              localStorage.setItem(
-                "limited-mode",
-                (e.target as HTMLInputElement).checked ? "true" : "false",
-              );
-              env.limitedMode = (e.target as HTMLInputElement).checked;
-            },
-          }),
-        ]),
+        createToggleSetting(
+          "Load blocked posts:",
+          "view-blocked-posts",
+          "viewBlockedPosts",
+        ),
+        createToggleSetting(
+          "Show replies to people you're not following on the timeline:",
+          "show-non-following-replies-on-timeline",
+          "showNonFollowingRepliesOnTimeline",
+        ),
+        createToggleSetting("Limited mode:", "limited-mode", "limitedMode"),
+        elem("p", {
+          textContent:
+            "Limited mode locks out to the following feed, only updates the feed every hour, and some other stuff, maybe.",
+        }),
         elem("div", { className: "setting" }, undefined, [
           elem("label", {
             textContent: "Default fullsize CDN image format:",

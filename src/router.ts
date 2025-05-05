@@ -24,7 +24,9 @@ const routesBase: { [key: string]: Route } = {
   notifications: notificationsRoute,
   search: searchRoute,
   settings: settingsRoute,
+  "profile/:": profileRoute,
   ":": profileRoute,
+  "profile/:/post/:": postRoute,
   ":/post/:": postRoute,
   ":/post/:/likes": createStatsRoute(
     "Likes",
@@ -77,7 +79,7 @@ export const updatePage = async (useCache: boolean = false) => {
   document.body.removeAttribute("style");
 
   navbar.querySelector(".active")?.classList.remove("active");
-  (currentSplitPath[0] === sessionData?.did
+  (currentSplitPath[0] === sessionData?.did && !currentSplitPath[1]
     ? navbar.querySelector("#profile-button")
     : navbar.querySelector(`a[href="${currentPath}"]`)
   )?.classList.add("active");
@@ -105,4 +107,12 @@ export const profileRedirect = (did: string) => {
     "",
     "/" + did + (indexOfSlash === -1 ? "" : path.slice(indexOfSlash)),
   );
+};
+
+export const removeSlashProfile = () => {
+  const path = window.location.pathname;
+  if (path.startsWith("/profile/")) {
+    const newPath = "/" + path.substring("/profile/".length);
+    history.replaceState(null, "", newPath);
+  }
 };

@@ -13,7 +13,12 @@ import {
 } from "../elements/utils/link_processing";
 import { processText } from "../elements/utils/text_processing";
 import { manager, rpc, rpcPublic, sessionData } from "../login";
-import { beingLoadedSplitPath, profileRedirect, updatePage } from "../router";
+import {
+  beingLoadedSplitPath,
+  profileRedirect,
+  removeSlashProfile,
+  updatePage,
+} from "../router";
 import { confirmDialog } from "../elements/ui/dialog";
 import { editProfileDialog } from "../elements/ui/edit_profile";
 import { createSearchBar } from "../elements/ui/search_bar";
@@ -49,6 +54,11 @@ export const profileRoute = async (
   container: HTMLDivElement,
   useCache: boolean = false,
 ) => {
+  if (currentSplitPath[0] === "profile") {
+    currentSplitPath.shift();
+    removeSlashProfile();
+  }
+
   const atId = currentSplitPath[0];
 
   setTitle(atId);
