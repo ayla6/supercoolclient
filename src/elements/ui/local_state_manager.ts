@@ -59,12 +59,15 @@ export const createFeedManager = (
   let loadedFeed: string;
   const feedState: FeedState = Object.create(null);
 
-  const loadFeed = async (feed: {
-    feed: string;
-    nsid: feedNSID;
-    params: { [key: string]: any };
-    func?: (item: any) => HTMLDivElement;
-  }): Promise<OnscrollFunction> => {
+  const loadFeed = async (
+    feed: {
+      feed: string;
+      nsid: feedNSID;
+      params: { [key: string]: any };
+      func?: (item: any) => HTMLDivElement;
+    },
+    useCache = false,
+  ): Promise<OnscrollFunction> => {
     const clonedParams = Object.assign({}, feed.params);
     let onscrollFunc: OnscrollFunction;
     window.onscroll = null;

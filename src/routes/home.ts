@@ -53,7 +53,7 @@ export const homeRoute = async (
   const feedsData = [];
   for (const feedGen of [
     { uri: "following", displayName: "Following" },
-    ...feedGens.feeds,
+    ...(env.limitedMode ? [] : feedGens.feeds),
   ]) {
     feedsData.push({
       displayName: feedGen.displayName,
@@ -62,7 +62,16 @@ export const homeRoute = async (
         feedGen.uri !== "following"
           ? "app.bsky.feed.getFeed"
           : "app.bsky.feed.getTimeline",
-      params: { feed: feedGen.uri },
+      params: {
+        feed: feedGen.uri,
+        cursor: env.limitedMode
+          ? (() => {
+              const now = new Date();
+              now.setMinutes(0, 0, 0);
+              return now.toISOString();
+            })()
+          : undefined,
+      },
     });
   }
 
@@ -106,5 +115,6 @@ export const homeRoute = async (
   const feedToLoad = feedsData.find((f) => f.feed === uri);
   window.onscroll = await stateManager.loadFeed(
     stateManager.cachedFeed ?? feedToLoad,
+    useCache,
   );
 };

@@ -138,8 +138,12 @@ export const composerBox = (
     return input;
   };
 
+  let posting = false;
   // Post creation
   const createPost = async () => {
+    if (posting) {
+      return;
+    }
     let error = false;
     // prettier-ignore
     if (!textboxes.every((textbox, index) => textbox.innerText?.trim() || images[index]?.length)) {
@@ -183,61 +187,73 @@ export const composerBox = (
     }
 
     //if (video) embed = await uploadVideo(video);
-    if (!ageEncrypted) {
-      await publishThread(rpc, {
-        reply,
-        author: manager.session.did,
-        languages: [language],
-        posts: textboxes.map((textbox, i) => ({
-          content: texts[i],
-          embed: {
-            record:
-              i === 0 && quote
-                ? { type: "quote", uri: quote.uri, cid: quote.cid }
+    try {
+      posting = true;
+      postButton.disabled = true;
+      postButton.classList.add("disabled");
+
+      if (!ageEncrypted) {
+        await publishThread(rpc, {
+          reply,
+          author: manager.session.did,
+          languages: [language],
+          posts: textboxes.map((textbox, i) => ({
+            content: texts[i],
+            embed: {
+              record:
+                i === 0 && quote
+                  ? { type: "quote", uri: quote.uri, cid: quote.cid }
+                  : undefined,
+              media: media?.[i],
+            },
+          })),
+        });
+      } else {
+        await rpc.call("com.atproto.repo.createRecord", {
+          data: {
+            repo: sessionData.did,
+            collection: "app.bsky.feed.post",
+            record: {
+              $type: "app.bsky.feed.post",
+              reply: reply
+                ? {
+                    root: (reply.record as AppBskyFeedPost.Record).reply
+                      ? {
+                          cid: (reply.record as AppBskyFeedPost.Record).reply
+                            .root.cid,
+                          uri: (reply.record as AppBskyFeedPost.Record).reply
+                            .root.uri,
+                        }
+                      : {
+                          cid: reply.cid,
+                          uri: reply.uri,
+                        },
+                    parent: {
+                      cid: reply.cid,
+                      uri: reply.uri,
+                    },
+                  }
                 : undefined,
-            media: media?.[i],
+              createdAt: new Date().toISOString(),
+              text: "AGE ENCRYPTED POST",
+              "dev.pages.supercoolclient.secret": await ageEncrypt(
+                JSON.stringify(texts[0]),
+              ),
+            } as AppBskyFeedPost.Record,
           },
-        })),
-      });
-    } else {
-      await rpc.call("com.atproto.repo.createRecord", {
-        data: {
-          repo: sessionData.did,
-          collection: "app.bsky.feed.post",
-          record: {
-            $type: "app.bsky.feed.post",
-            reply: reply
-              ? {
-                  root: (reply.record as AppBskyFeedPost.Record).reply
-                    ? {
-                        cid: (reply.record as AppBskyFeedPost.Record).reply.root
-                          .cid,
-                        uri: (reply.record as AppBskyFeedPost.Record).reply.root
-                          .uri,
-                      }
-                    : {
-                        cid: reply.cid,
-                        uri: reply.uri,
-                      },
-                  parent: {
-                    cid: reply.cid,
-                    uri: reply.uri,
-                  },
-                }
-              : undefined,
-            createdAt: new Date().toISOString(),
-            text: "AGE ENCRYPTED POST",
-            "dev.pages.supercoolclient.secret": await ageEncrypt(
-              JSON.stringify(texts[0]),
-            ),
-          } as AppBskyFeedPost.Record,
-        },
-      });
+        });
+      }
+
+      createTray("Your post was published!");
+
+      cleanup(true);
+    } catch (e) {
+      posting = false;
+      postButton.disabled = false;
+      postButton.classList.remove("disabled");
+
+      createTray(e);
     }
-
-    createTray("Your post was published!");
-
-    cleanup(true);
   };
 
   // Cleanup function

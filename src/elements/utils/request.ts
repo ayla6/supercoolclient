@@ -40,8 +40,9 @@ export const request = async (
   if (
     entry &&
     (useCache || entry.expiresAt - CACHE_DURATION + GRACE_PERIOD > Date.now())
-  )
+  ) {
     data = entry.value;
+  }
   if (!data || entry.expiresAt < Date.now()) {
     data = await _rpc.get(nsid, params);
     cache.set(id, {

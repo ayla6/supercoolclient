@@ -10,6 +10,7 @@ import {
   getPathFromUri,
   getRkey,
   idChoose,
+  nicerHandle,
 } from "../utils/link_processing.ts";
 import { manager, rpc, privateKey, sessionData } from "../../login";
 import { elem } from "../utils/elem";
@@ -337,7 +338,7 @@ export const postCard = (
         elem("div", { className: "handle-area" }, undefined, [
           elem("span", {
             className: "handle",
-            textContent: atId + (cfg.isDecryptedPost ? "🔓" : ""),
+            textContent: nicerHandle(atId) + (cfg.isDecryptedPost ? "🔓" : ""),
           }),
           elem("span", { textContent: post.author.displayName }),
         ]),
@@ -360,13 +361,13 @@ export const postCard = (
           elem("a", {
             className: "handle",
             href: "/" + repostedBy.did,
-            textContent: idChoose(repostedBy),
+            textContent: nicerHandle(idChoose(repostedBy)),
           }),
           document.createTextNode(" reposted "),
           elem("a", {
             className: "handle",
             href: authorHref,
-            textContent: atId,
+            textContent: nicerHandle(atId),
           }),
           cfg.isDecryptedPost && elem("span", { textContent: "🔓" }),
         ]),
@@ -376,7 +377,7 @@ export const postCard = (
         elem("a", {
           className: "handle",
           href: authorHref,
-          textContent: atId,
+          textContent: nicerHandle(atId),
         }),
         cfg.text && elem("span", { textContent: cfg.text }),
         cfg.isDecryptedPost && elem("span", { textContent: "🔓" }),

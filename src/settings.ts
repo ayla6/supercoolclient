@@ -55,6 +55,7 @@ export const env: {
     apiKey: string;
     simplyTranslateEngine: "google" | "iciba" | "reverso";
   };
+  limitedMode: boolean;
 } = {
   sessionsProfile: undefined,
   sessionChosen: localStorage.getItem("session-chosen"),
@@ -84,6 +85,7 @@ export const env: {
     simplyTranslateEngine:
       (localStorage.getItem("simplytranslate-engine") as any) ?? "google",
   },
+  limitedMode: localStorage.getItem("limited-mode") === "true",
 };
 
 export const updateColors = () => {

@@ -111,3 +111,8 @@ export const toShortUrl = (href: string): string => {
 
   return href;
 };
+
+export const nicerHandle = (handle: string) =>
+  handle.length > 40
+    ? handle.slice(0, 40).toLowerCase() + "…"
+    : handle.toLowerCase();

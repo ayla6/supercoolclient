@@ -6,7 +6,12 @@ import { rpc, sessionData } from "../../login";
 import { OnscrollFunction } from "../../types";
 import { formatTimeDifference } from "../utils/date";
 import { elem } from "../utils/elem";
-import { getDidFromUri, getPathFromUri } from "../utils/link_processing";
+import {
+  getDidFromUri,
+  getPathFromUri,
+  idChoose,
+  nicerHandle,
+} from "../utils/link_processing";
 
 import favSvg from "../../svg/fav.svg?raw";
 import repostSvg from "../../svg/repost.svg?raw";
@@ -114,7 +119,7 @@ const loadNotifications = async (
         elem("a", {
           className: "handle",
           href: `/${notification.author.did}`,
-          textContent: notification.author.handle,
+          textContent: nicerHandle(idChoose(notification.author)),
           onclick: (e) => e.stopPropagation(),
         }),
         document.createTextNode(notificationMessages[notification.reason]),

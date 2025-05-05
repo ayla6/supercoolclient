@@ -189,6 +189,26 @@ export const settingsRoute = async (
             },
           }),
         ]),
+        elem("div", { className: "setting toggle" }, undefined, [
+          elem("label", {
+            textContent: "Limited mode:",
+            htmlFor: "limited-mode",
+          }),
+          elem("input", {
+            type: "checkbox",
+            id: "limited-mode",
+            className: "checkbox",
+            checked: localStorage.getItem("limited-mode") === "true",
+            onclick: (e) => e.stopPropagation(),
+            onchange: (e) => {
+              localStorage.setItem(
+                "limited-mode",
+                (e.target as HTMLInputElement).checked ? "true" : "false",
+              );
+              env.limitedMode = (e.target as HTMLInputElement).checked;
+            },
+          }),
+        ]),
         elem("div", { className: "setting" }, undefined, [
           elem("label", {
             textContent: "Default fullsize CDN image format:",
