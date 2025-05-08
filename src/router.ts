@@ -84,7 +84,7 @@ export const updatePage = async (useCache: boolean = false) => {
     : navbar.querySelector(`a[href="${currentPath}"]`)
   )?.classList.add("active");
 
-  //window.scrollTo({ top: 0 });
+  if (!useCache) window.scrollTo({ top: 0 });
 
   const container = elem("div", { id: "container" });
   const route = matchRoute(currentSplitPath);
