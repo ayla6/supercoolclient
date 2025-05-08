@@ -8,7 +8,6 @@ import {
   getDidFromUri,
   getFediHandle,
   getPathFromUri,
-  getRkey,
   idChoose,
   nicerHandle,
 } from "../utils/link_processing.ts";
@@ -28,9 +27,7 @@ import dotsSVG from "../../svg/dots.svg?raw";
 import trashSVG from "../../svg/trash.svg?raw";
 import muteSVG from "../../svg/mute.svg?raw";
 import blockSVG from "../../svg/block.svg?raw";
-import { confirmDialog } from "./dialog.ts";
 import { blockUser, deletePost, muteUser } from "../utils/user_actions.ts";
-import { createTray } from "./tray.ts";
 import { translate } from "../utils/translate.ts";
 import { language_codes } from "../utils/language_codes.ts";
 

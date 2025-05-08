@@ -1,4 +1,4 @@
-import { XRPC } from "@atcute/client";
+import { RPCOptions, XRPC, XRPCResponse } from "@atcute/client";
 import { XRPCCache } from "../../types";
 import { Queries } from "@atcute/client/lexicons";
 import { rpc } from "../../login";
@@ -27,13 +27,19 @@ export const getCache = (key: string) => {
   return entry.value;
 };
 
-export const request = async (
-  nsid: keyof Queries,
-  params: any,
+type OutputOf<T> = T extends {
+  output: any;
+}
+  ? T["output"]
+  : never;
+
+export const request = async <K extends keyof Queries>(
+  nsid: K,
+  params: RPCOptions<Queries[K]>,
   useCache: boolean = false,
   _rpc: XRPC = rpc,
   duration: number = useCache ? Infinity : CACHE_DURATION,
-) => {
+): Promise<XRPCResponse<OutputOf<Queries[K]>>> => {
   const id = getCacheId(nsid, params);
   let data: any;
   const entry = cache.get(id);

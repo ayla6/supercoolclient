@@ -12,6 +12,7 @@ import { searchRoute } from "./routes/search";
 import { settingsRoute } from "./routes/settings";
 import { env } from "./settings";
 import { sessionData } from "./login";
+import { getCache, setCache } from "./elements/utils/request";
 
 export let loadedPath: string = "";
 export let loadedSplitPath: string[] = [];
@@ -69,6 +70,8 @@ const matchRoute = (path: string[]) => {
 };
 
 export const updatePage = async (useCache: boolean = false) => {
+  setCache("scroll_" + loadedPath, window.scrollY);
+
   window.onscroll = null;
 
   const currentPath = window.location.pathname;
@@ -93,10 +96,12 @@ export const updatePage = async (useCache: boolean = false) => {
   loadedPath = currentPath;
   if (window.location.search) loadedSplitPath.push(window.location.search);
 
-  route(currentSplitPath, loadedSplitPath, container, useCache);
-
   document.body.removeChild(document.getElementById("container"));
   document.body.appendChild(container);
+
+  await route(currentSplitPath, loadedSplitPath, container, useCache);
+
+  if (useCache) window.scrollTo({ top: getCache("scroll_" + currentPath) });
 };
 
 export const profileRedirect = (did: string) => {

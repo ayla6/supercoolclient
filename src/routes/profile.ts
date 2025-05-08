@@ -1,4 +1,5 @@
 import {
+  AppBskyActorDefs,
   AppBskyFeedGetAuthorFeed,
   AppBskyGraphFollow,
 } from "@atcute/client/lexicons";
@@ -135,42 +136,46 @@ export const profileRoute = async (
       return undefined;
     }
 
-    // Create the base known followers container
     const knownFollowersSpan = elem("span", { className: "known-followers" });
     knownFollowersSpan.appendChild(document.createTextNode("Followed by "));
 
-    // Get up to 3 followers to display
     const displayedFollowers = profile.viewer.knownFollowers.followers.slice(
       0,
       3,
     );
 
-    // Create elements for each displayed follower
-    displayedFollowers.forEach((follower, index) => {
-      // Create follower link with avatar
-      const followerLink = elem("span", { className: "follower-link" }, null, [
-        elem("img", {
-          className: "mini-avatar",
-          src: changeImageFormat(follower.avatar),
-        }),
-        elem("a", {
-          href: `/${follower.did}`,
-          textContent: follower.handle ?? follower.displayName ?? follower.did,
-        }),
-      ]);
-      knownFollowersSpan.appendChild(followerLink);
-
-      // Add appropriate separator
-      const isLast = index === profile.viewer.knownFollowers.count - 1;
-      const isSecondToLast = index === profile.viewer.knownFollowers.count - 2;
-
-      if (!isLast) {
-        const separator = document.createTextNode(
-          isSecondToLast ? " and " : ", ",
+    displayedFollowers.forEach(
+      (follower: AppBskyActorDefs.ProfileViewBasic, index: number) => {
+        const followerLink = elem(
+          "span",
+          { className: "follower-link" },
+          null,
+          [
+            elem("img", {
+              className: "mini-avatar",
+              src: changeImageFormat(follower.avatar),
+            }),
+            elem("a", {
+              href: `/${follower.did}`,
+              textContent:
+                follower.handle ?? follower.displayName ?? follower.did,
+            }),
+          ],
         );
-        knownFollowersSpan.appendChild(separator);
-      }
-    });
+        knownFollowersSpan.appendChild(followerLink);
+
+        const isLast = index === profile.viewer.knownFollowers.count - 1;
+        const isSecondToLast =
+          index === profile.viewer.knownFollowers.count - 2;
+
+        if (!isLast) {
+          const separator = document.createTextNode(
+            isSecondToLast ? " and " : ", ",
+          );
+          knownFollowersSpan.appendChild(separator);
+        }
+      },
+    );
 
     // Add "and X others" if there are more followers
     if (profile.viewer.knownFollowers.count > 3) {
@@ -425,5 +430,6 @@ export const profileRoute = async (
               filter: "posts_and_author_threads",
             },
           },
+          useCache,
         );
 };
