@@ -11,6 +11,7 @@ import {
   changeImageFormat,
   getFediHandle,
   getRkey,
+  nicerHandle,
 } from "../elements/utils/link_processing";
 import { processText } from "../elements/utils/text_processing";
 import { manager, rpc, rpcPublic, sessionData } from "../login";
@@ -158,7 +159,9 @@ export const profileRoute = async (
             elem("a", {
               href: `/${follower.did}`,
               textContent:
-                follower.handle ?? follower.displayName ?? follower.did,
+                nicerHandle(follower.handle) ??
+                follower.displayName ??
+                follower.did,
             }),
           ],
         );

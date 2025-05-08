@@ -424,7 +424,7 @@ export const postCard = (
         "span",
         { className: "small reply-to", textContent: "Reply to " },
         elem("a", {
-          textContent: atId,
+          textContent: nicerHandle(atId),
           href: "/" + did,
         }),
       ),

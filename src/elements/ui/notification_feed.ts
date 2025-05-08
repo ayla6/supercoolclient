@@ -21,7 +21,6 @@ import atSvg from "../../svg/at.svg?raw";
 import quoteSvg from "../../svg/quote.svg?raw";
 import { postCard } from "./post_card";
 import { updateNotificationIcon } from "./navbar";
-import { env } from "../../settings";
 import { request } from "../utils/request";
 
 const notificationIcons = {
@@ -37,9 +36,10 @@ const notificationMessages = {
   like: " liked your post",
   repost: " reposted your post",
   follow: " followed you",
-  reply: " replied to",
+  reply: " replied to ",
   mention: " mentioned you in a post",
   quote: " quoted you in a post",
+  thread: " continued a thread",
 };
 
 const loadNotifications = async (
@@ -172,20 +172,33 @@ const loadNotifications = async (
         card,
       ]);
     } else {
+      const record = notification.record as AppBskyFeedPost.Record;
+      const replyTo =
+        record.reply?.parent.uri && getDidFromUri(record.reply.parent.uri);
+      let replyToPretty = replyTo;
+
+      if (replyTo === sessionData.did) replyToPretty = "you";
+
       if (
         notification.reason === "mention" &&
-        (notification.record as AppBskyFeedPost.Record).reply?.parent.uri &&
-        getDidFromUri(
-          (notification.record as AppBskyFeedPost.Record).reply.parent.uri,
-        ) === sessionData.did
+        record.reply?.parent.uri &&
+        replyTo === sessionData.did
       ) {
         notification.reason = "reply";
       }
+
+      if (replyTo === notification.author.did) {
+        replyToPretty = "";
+        notification.reason = "thread";
+      }
+
       return postCard(
         postsMentioned.posts.find((post) => post.uri === notification.uri),
         {
           icon: notificationIcons[notification.reason],
-          text: notificationMessages[notification.reason],
+          text:
+            notificationMessages[notification.reason] +
+            (replyTo ? replyToPretty : ""),
         },
       );
     }
