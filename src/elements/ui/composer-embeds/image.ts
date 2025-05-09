@@ -154,15 +154,19 @@ export const uploadImages = async (input: ImageWithURL[]) => {
         return;
       }
 
-      // Handle JPEG metadata stripping
-      console.log("Processing JPEG file...");
+      // Handle metadata stripping (JPEG, AVIF, WebP)
+      console.log("Processing image file for metadata stripping...");
       const reader = new FileReader();
       reader.onload = () => {
         const buffer = reader.result as ArrayBuffer;
         const result = buffer.slice(0);
         const view = new DataView(result);
 
-        if (file.type === "image/jpeg") {
+        if (
+          file.type === "image/jpeg" ||
+          file.type === "image/avif" ||
+          file.type === "image/webp"
+        ) {
           let offset = 2;
           while (offset < result.byteLength) {
             const marker = view.getUint16(offset);
@@ -196,6 +200,7 @@ export const uploadImages = async (input: ImageWithURL[]) => {
     images.images.push({
       aspectRatio,
       blob: blob,
+      alt: altText,
     });
   }
   return images;

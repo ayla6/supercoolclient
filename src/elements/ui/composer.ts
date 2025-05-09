@@ -2,7 +2,12 @@ import { AppBskyFeedDefs, AppBskyFeedPost } from "@atcute/client/lexicons";
 import { manager, privateKey, rpc, sessionData } from "../../login";
 import { elem } from "../utils/elem";
 import { postCard } from "./post_card";
-import { confirmDialog, doubleTextDialog, selectDialog } from "./dialog";
+import {
+  confirmDialog,
+  doubleTextDialog,
+  popupBox,
+  selectDialog,
+} from "./dialog";
 import { uploadImages } from "./composer-embeds/image";
 import { uploadVideo } from "./composer-embeds/video";
 import { changeImageFormat, isUrl, toShortUrl } from "../utils/link_processing";
@@ -98,7 +103,50 @@ export const composerBox = (
     images[selectedTextAreaIndex].forEach((image, index) => {
       imagePreview.appendChild(
         elem("div", { className: "image" }, null, [
-          elem("img", { src: image.objectURL }),
+          elem("img", {
+            src: image.objectURL,
+            onclick: async () => {
+              const altTextBox = elem("div", {
+                className: "text-box",
+                role: "textbox",
+                contentEditable: "true",
+                translate: false,
+                ariaPlaceholder: "describe the image here please",
+                innerText: image.altText ?? "",
+              });
+              await new Promise<boolean>((resolve) => {
+                const content = elem("div", { className: "popup" }, null, [
+                  elem("span", {
+                    className: "section-title",
+                    textContent: "Add alt text",
+                  }),
+                  elem("div", { className: "settings-holder" }, undefined, [
+                    elem("div", { className: "setting" }, undefined, [
+                      altTextBox,
+                    ]),
+                  ]),
+                  elem("div", { className: "dialog-options" }, null, [
+                    elem("button", {
+                      textContent: "Cancel",
+                      onclick: () => {
+                        resolve(false);
+                        dialog.cleanup();
+                      },
+                    }),
+                    elem("button", {
+                      textContent: "Save",
+                      onclick: async () => {
+                        image.altText = altTextBox.innerText;
+                        resolve(true);
+                        dialog.cleanup();
+                      },
+                    }),
+                  ]),
+                ]);
+                const dialog = popupBox(content, () => resolve(false));
+              });
+            },
+          }),
           elem("button", {
             textContent: "×",
             className: "close-button",
